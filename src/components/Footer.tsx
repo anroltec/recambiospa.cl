@@ -22,9 +22,9 @@ export default function Footer() {
               Importación y Distribución de Soluciones para Transporte.
             </p>
             <div className="space-y-2 text-sm text-gray-400">
-              <a href="https://wa.me/56964849088" className="flex items-center gap-2 hover:text-white transition-colors">
+              <a href="https://wa.me/" className="flex items-center gap-2 hover:text-white transition-colors">
                 <Phone size={14} className="text-primary-light" />
-                +56 9 6484 9088
+                +569 xxxx xxxx
               </a>
               <p className="flex items-center gap-2">
                 <Mail size={14} className="text-primary-light" />

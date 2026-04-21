@@ -65,9 +65,9 @@ export default function Header() {
       <div className="bg-dark text-white text-xs">
         <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
           <div className="flex items-center gap-5">
-            <a href="https://wa.me/56964849088" className="flex items-center gap-1.5 hover:text-primary-light transition-colors">
+            <a href="https://wa.me/" className="flex items-center gap-1.5 hover:text-primary-light transition-colors">
               <Phone size={12} />
-              <span>+56 9 6484 9088</span>
+              <span>+569 xxxx xxxx</span>
             </a>
             <span className="hidden sm:flex items-center gap-1.5 text-white/70">
               <Truck size={12} />
