@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" fill="#FAFAFA"/>
+  <circle cx="200" cy="190" r="75" fill="#111" stroke="#333" stroke-width="3"/>
+  <circle cx="200" cy="190" r="65" fill="#1a1a1a"/>
+  <path d="M140 210 A65 65 0 0 1 260 210" fill="none" stroke="#444" stroke-width="2"/>
+  <text x="148" y="208" font-family="Arial, sans-serif" font-size="10" fill="#888">E</text>
+  <text x="248" y="208" font-family="Arial, sans-serif" font-size="10" fill="#888">F</text>
+  <line x1="200" y1="190" x2="170" y2="205" stroke="#ff3300" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="200" cy="190" r="6" fill="#cc0000"/>
+  <path d="M230 145 L245 135 L245 165 Z" fill="#666"/>
+  <text x="200" y="345" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#666">Indicador Combustible</text>
+</svg>

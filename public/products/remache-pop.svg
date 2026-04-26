@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" fill="#FAFAFA"/>
+  <circle cx="200" cy="150" r="12" fill="#c0c0c0" stroke="#999" stroke-width="2"/>
+  <circle cx="200" cy="150" r="5" fill="#888"/>
+  <rect x="196" y="162" width="8" height="130" rx="2" fill="#c0c0c0" stroke="#999" stroke-width="1"/>
+  <rect x="194" y="285" width="12" height="8" rx="1" fill="#999"/>
+  <text x="200" y="345" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#666">Remache Pop</text>
+</svg>

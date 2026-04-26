@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" fill="#FAFAFA"/>
+  <ellipse cx="200" cy="190" rx="70" ry="45" fill="#e8e8e8" stroke="#ccc" stroke-width="2"/>
+  <ellipse cx="200" cy="190" rx="55" ry="32" fill="#fff" stroke="#ddd" stroke-width="1"/>
+  <circle cx="185" cy="185" r="5" fill="#ffffcc" opacity="0.9"/>
+  <circle cx="200" cy="185" r="5" fill="#ffffcc" opacity="0.9"/>
+  <circle cx="215" cy="185" r="5" fill="#ffffcc" opacity="0.9"/>
+  <circle cx="192" cy="198" r="5" fill="#ffffcc" opacity="0.8"/>
+  <circle cx="208" cy="198" r="5" fill="#ffffcc" opacity="0.8"/>
+  <text x="200" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#666">LED Cortesía</text>
+</svg>

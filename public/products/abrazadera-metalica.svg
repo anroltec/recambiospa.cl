@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" fill="#FAFAFA"/>
+  <circle cx="200" cy="190" r="65" fill="none" stroke="#c0c0c0" stroke-width="14"/>
+  <circle cx="200" cy="190" r="65" fill="none" stroke="#d0d0d0" stroke-width="10"/>
+  <rect x="250" y="175" width="35" height="30" rx="3" fill="#aaa" stroke="#999" stroke-width="1"/>
+  <rect x="256" y="182" width="8" height="16" rx="2" fill="#888"/>
+  <rect x="270" y="185" width="10" height="10" rx="1" fill="#999"/>
+  <text x="200" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#666">Abrazadera Metálica</text>
+</svg>

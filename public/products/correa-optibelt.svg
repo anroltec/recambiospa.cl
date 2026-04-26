@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" fill="#FAFAFA"/>
+  <ellipse cx="200" cy="190" rx="90" ry="90" fill="none" stroke="#1a1a1a" stroke-width="20"/>
+  <ellipse cx="200" cy="190" rx="90" ry="90" fill="none" stroke="#333" stroke-width="16"/>
+  <ellipse cx="200" cy="190" rx="90" ry="90" fill="none" stroke="#2a2a2a" stroke-width="12"/>
+  <text x="200" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#666">Correa Optibelt</text>
+</svg>

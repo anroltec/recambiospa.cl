@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" fill="#FAFAFA"/>
+  <ellipse cx="200" cy="190" rx="100" ry="50" fill="#1a1a1a" stroke="#333" stroke-width="3"/>
+  <ellipse cx="200" cy="190" rx="85" ry="40" fill="#cc8800"/>
+  <ellipse cx="200" cy="190" rx="75" ry="33" fill="#e6a200" opacity="0.9"/>
+  <circle cx="170" cy="190" r="8" fill="#ffbb33" opacity="0.7"/>
+  <circle cx="200" cy="190" r="8" fill="#ffbb33" opacity="0.8"/>
+  <circle cx="230" cy="190" r="8" fill="#ffbb33" opacity="0.7"/>
+  <text x="200" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#666">LED Lateral Ovalado</text>
+</svg>

@@ -74,10 +74,9 @@ export default function Header() {
               Envíos a todo Chile
             </span>
           </div>
-          <Link href="/cuenta" className="flex items-center gap-1.5 hover:text-primary-light transition-colors">
-            <User size={12} />
-            <span>Mi Cuenta</span>
-          </Link>
+          <span className="hidden sm:flex items-center gap-1.5 text-white/70">
+            Lun - Vie: 9:00 - 18:00
+          </span>
         </div>
       </div>
 
@@ -89,9 +88,9 @@ export default function Header() {
             <Image
               src="/logo.svg"
               alt="Recambio SPA"
-              width={200}
-              height={67}
-              className="h-12 w-auto"
+              width={240}
+              height={80}
+              className="h-16 w-auto"
               priority
             />
           </Link>
@@ -118,6 +117,9 @@ export default function Header() {
             >
               <Search size={22} />
             </button>
+            <Link href="/cuenta" className="text-dark hover:text-primary transition-colors">
+              <User size={24} />
+            </Link>
             <Link href="/carrito" className="relative text-dark hover:text-primary transition-colors">
               <ShoppingCart size={24} />
               <span className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
@@ -152,8 +154,8 @@ export default function Header() {
 
       {/* Navigation bar - feram style */}
       <nav className="bg-primary-dark hidden md:block">
-        <div className="max-w-7xl mx-auto px-4">
-          <ul className="flex items-center">
+        <div className="w-full">
+          <ul className="flex items-center justify-center divide-x divide-white/20">
             {navLinks.map((link) => (
               <li
                 key={link.label}
@@ -163,10 +165,10 @@ export default function Header() {
               >
                 <Link
                   href={link.href}
-                  className="flex items-center gap-1 px-4 py-3 text-sm text-white/90 hover:text-white hover:bg-white/10 transition-colors"
+                  className="flex items-center gap-1.5 px-8 py-3.5 text-sm font-semibold uppercase tracking-wide text-white/90 hover:text-white hover:bg-white/10 transition-colors"
                 >
                   {link.label}
-                  {link.dropdown && <ChevronDown size={13} />}
+                  {link.dropdown && <ChevronDown size={14} />}
                 </Link>
                 {link.dropdown && openDropdown === link.dropdown && (
                   <div className="absolute top-full left-0 bg-white shadow-xl min-w-[240px] py-1 z-50 border-t-2 border-primary">

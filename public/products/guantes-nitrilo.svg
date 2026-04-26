@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" fill="#FAFAFA"/>
+  <path d="M160 280 L155 180 L150 140 C148 120 158 110 168 115 L170 140 L170 110 C170 90 185 85 188 100 L190 130 L190 95 C190 75 205 72 208 90 L210 130 L210 100 C210 82 225 80 225 100 L225 140 L230 120 C235 105 248 108 245 125 L235 180 L240 280 Z" fill="#3366cc" stroke="#2255aa" stroke-width="2"/>
+  <text x="200" y="345" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#666">Guantes Nitrilo</text>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" fill="#FAFAFA"/>
+  <rect x="130" y="160" width="140" height="60" rx="8" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
+  <rect x="145" y="172" width="110" height="36" rx="4" fill="#ddd"/>
+  <rect x="155" y="180" width="90" height="20" rx="2" fill="#fff" opacity="0.9"/>
+  <circle cx="165" cy="190" r="4" fill="#ffee88" opacity="0.9"/>
+  <circle cx="185" cy="190" r="4" fill="#ffee88" opacity="0.9"/>
+  <circle cx="205" cy="190" r="4" fill="#ffee88" opacity="0.9"/>
+  <circle cx="225" cy="190" r="4" fill="#ffee88" opacity="0.9"/>
+  <rect x="155" y="225" width="20" height="30" rx="2" fill="#666"/>
+  <rect x="225" y="225" width="20" height="30" rx="2" fill="#666"/>
+  <text x="200" y="350" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#666">LED Placa Patente</text>
+</svg>

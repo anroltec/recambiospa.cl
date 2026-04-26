@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <rect width="400" height="400" fill="#FAFAFA"/>
+  <circle cx="200" cy="180" r="80" fill="#222" stroke="#444" stroke-width="3"/>
+  <circle cx="200" cy="180" r="65" fill="#333"/>
+  <circle cx="200" cy="180" r="40" fill="#444"/>
+  <circle cx="200" cy="180" r="20" fill="#555"/>
+  <circle cx="200" cy="180" r="8" fill="#333"/>
+  <rect x="190" y="265" width="20" height="50" rx="4" fill="#666"/>
+  <rect x="185" y="315" width="30" height="15" rx="3" fill="#888"/>
+  <text x="200" y="370" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#666">Bocina 24V</text>
+</svg>
