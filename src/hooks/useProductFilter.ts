@@ -11,8 +11,14 @@ const DEFAULT_FILTERS: ProductFilters = {
   sortBy: "name-asc",
 };
 
-export function useProductFilter(products: Product[]) {
-  const [filters, setFilters] = useState<ProductFilters>(DEFAULT_FILTERS);
+export function useProductFilter(
+  products: Product[],
+  initial?: Partial<ProductFilters>
+) {
+  const [filters, setFilters] = useState<ProductFilters>({
+    ...DEFAULT_FILTERS,
+    ...initial,
+  });
 
   const filtered = useMemo(() => {
     const result = filterProducts(products, filters);

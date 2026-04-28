@@ -1,13 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Search, ShoppingCart, User, Menu, X, ChevronDown, Phone, Truck } from "lucide-react";
 import { navLinks, getDropdownItems } from "@/data/navigation";
 import { useMenu } from "@/hooks/useMenu";
 import { useCart } from "@/context/CartContext";
 
 export default function Header() {
+  const router = useRouter();
+  const [searchValue, setSearchValue] = useState("");
   const { totalQuantity } = useCart();
   const {
     mobileOpen,
@@ -21,6 +25,15 @@ export default function Header() {
     toggleMobileDropdown,
     closeMobile,
   } = useMenu();
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    const q = searchValue.trim();
+    if (q) {
+      router.push(`/collections?q=${encodeURIComponent(q)}`);
+      setSearchValue("");
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50">
@@ -50,18 +63,20 @@ export default function Header() {
             <Image src="/logo.svg" alt="Recambio SPA" width={240} height={80} className="h-16 w-auto" priority />
           </Link>
 
-          <div className="hidden md:flex flex-1 max-w-2xl">
+          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl">
             <div className="relative w-full">
               <input
                 type="text"
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
                 placeholder="Buscar productos, marcas, SKU..."
                 className="w-full border border-gray-300 rounded-sm px-4 py-2.5 text-sm text-dark placeholder:text-gray-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               />
-              <button className="absolute right-0 top-0 h-full bg-primary hover:bg-primary-dark text-white px-4 transition-colors">
+              <button type="submit" className="absolute right-0 top-0 h-full bg-primary hover:bg-primary-dark text-white px-4 transition-colors">
                 <Search size={18} />
               </button>
             </div>
-          </div>
+          </form>
 
           <div className="flex items-center gap-4">
             <button className="md:hidden text-dark" onClick={toggleSearch}>
@@ -86,16 +101,21 @@ export default function Header() {
 
         {searchOpen && (
           <div className="md:hidden px-4 pb-3">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Buscar productos..."
-                className="w-full border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:border-primary"
-              />
-              <button className="absolute right-0 top-0 h-full bg-primary text-white px-4">
-                <Search size={16} />
-              </button>
-            </div>
+            <form onSubmit={handleSearch}>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  placeholder="Buscar productos..."
+                  className="w-full border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:border-primary"
+                  autoFocus
+                />
+                <button type="submit" className="absolute right-0 top-0 h-full bg-primary text-white px-4">
+                  <Search size={16} />
+                </button>
+              </div>
+            </form>
           </div>
         )}
       </div>
