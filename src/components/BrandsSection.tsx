@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, BadgeCheck } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { brandLogos } from "@/data/brands";
 
 // Duplicamos 4 veces para que el loop infinito sea perfectamente seamless
@@ -26,12 +26,6 @@ export default function BrandsSection() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <BadgeCheck size={14} className="text-primary" />
-              <p className="text-primary text-[10px] font-bold uppercase tracking-[0.2em]">
-                Distribuidores autorizados
-              </p>
-            </div>
             <h2 className="text-2xl lg:text-3xl font-black text-white uppercase tracking-tight leading-tight">
               Marcas líderes<br />
               <span className="text-primary">del mercado</span>
