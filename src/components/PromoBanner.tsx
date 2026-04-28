@@ -1,27 +1,47 @@
-import { Truck, ShieldCheck, Headphones, Award } from "lucide-react";
+import { Truck, BadgeCheck, Headset, Medal } from "lucide-react";
 
 const features = [
-  { icon: Truck, title: "Env\u00edos a Todo Chile", desc: "Despacho r\u00e1pido y seguro a todas las regiones" },
-  { icon: ShieldCheck, title: "Garant\u00eda de F\u00e1brica", desc: "Productos certificados y originales" },
-  { icon: Headphones, title: "Asesor\u00eda T\u00e9cnica", desc: "Equipo especializado en transporte" },
-  { icon: Award, title: "Distribuidor Oficial", desc: "Braslux, Loctite, Moura, Wurth" },
+  {
+    icon: Truck,
+    title: "Envíos a Todo Chile",
+    desc: "Despacho rápido y seguro a todas las regiones",
+  },
+  {
+    icon: BadgeCheck,
+    title: "Garantía de Fábrica",
+    desc: "Productos certificados y originales",
+  },
+  {
+    icon: Headset,
+    title: "Asesoría Técnica",
+    desc: "Equipo especializado en transporte",
+  },
+  {
+    icon: Medal,
+    title: "Distribuidor Oficial",
+    desc: "Braslux, Loctite, Moura, Wurth",
+  },
 ];
 
 export default function PromoBanner() {
   return (
-    <section className="bg-primary-dark">
-      <div className="max-w-7xl mx-auto px-4 py-5">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+    <section className="bg-primary-dark border-t border-white/5">
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/5">
           {features.map((f) => {
             const Icon = f.icon;
             return (
-              <div key={f.title} className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Icon size={20} className="text-primary" strokeWidth={2} />
+              <div
+                key={f.title}
+                className="flex items-center gap-3 bg-primary-dark px-5 py-4"
+              >
+                {/* Square icon block — contrasts with the rounded circles */}
+                <div className="flex-shrink-0 w-11 h-11 bg-primary/15 border border-primary/30 flex items-center justify-center">
+                  <Icon size={22} className="text-primary" strokeWidth={1.5} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white text-sm leading-tight">{f.title}</h3>
-                  <p className="text-xs text-steel leading-tight mt-0.5">{f.desc}</p>
+                  <p className="font-bold text-white text-sm leading-tight">{f.title}</p>
+                  <p className="text-[11px] text-steel leading-tight mt-0.5">{f.desc}</p>
                 </div>
               </div>
             );
