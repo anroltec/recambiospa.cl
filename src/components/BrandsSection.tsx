@@ -3,10 +3,13 @@ import Image from "next/image";
 import { ArrowRight, BadgeCheck } from "lucide-react";
 import { brandLogos } from "@/data/brands";
 
+// Duplicamos 4 veces para que el loop infinito sea perfectamente seamless
+const track = [...brandLogos, ...brandLogos, ...brandLogos, ...brandLogos];
+
 export default function BrandsSection() {
   return (
     <section className="bg-primary-dark py-16 lg:py-20 relative overflow-hidden">
-      {/* Subtle dot pattern */}
+      {/* Dot pattern */}
       <div
         className="absolute inset-0 opacity-[0.035]"
         style={{
@@ -41,40 +44,42 @@ export default function BrandsSection() {
             Ver todas las marcas <ArrowRight size={13} />
           </Link>
         </div>
+      </div>
 
-        {/* Brand logos */}
-        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-px bg-white/[0.07]">
-          {brandLogos.map((brand) => (
+      {/* Marquee — full width, sin contenedor */}
+      <div className="relative w-full overflow-hidden">
+        {/* Fade izquierda */}
+        <div className="absolute left-0 top-0 bottom-0 w-24 z-10 bg-gradient-to-r from-primary-dark to-transparent pointer-events-none" />
+        {/* Fade derecha */}
+        <div className="absolute right-0 top-0 bottom-0 w-24 z-10 bg-gradient-to-l from-primary-dark to-transparent pointer-events-none" />
+
+        <div className="flex" style={{ animation: "marquee 28s linear infinite" }}>
+          {track.map((brand, i) => (
             <Link
-              key={brand.name}
+              key={`${brand.name}-${i}`}
               href={brand.href}
-              className="group relative bg-primary-dark hover:bg-white/[0.07] transition-colors aspect-[5/3] flex items-center justify-center p-5"
+              className="group flex-shrink-0 flex items-center justify-center px-10 py-6 border-r border-white/[0.07] hover:bg-white/[0.05] transition-colors"
+              style={{ minWidth: "180px" }}
             >
               <Image
                 src={brand.logo}
                 alt={brand.name}
-                width={150}
-                height={70}
-                className="object-contain max-h-12 w-auto filter grayscale brightness-50 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-300"
+                width={140}
+                height={60}
+                className="object-contain h-10 w-auto filter grayscale brightness-50 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-300"
               />
             </Link>
           ))}
         </div>
-
-        {/* Trust bar */}
-        <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            "Importación directa desde fabricantes",
-            "Garantía de fábrica en todos los productos",
-            "Documentación y certificaciones disponibles",
-          ].map((item) => (
-            <div key={item} className="flex items-center gap-3 bg-white/[0.04] border border-white/10 px-4 py-3">
-              <BadgeCheck size={13} className="text-primary flex-shrink-0" />
-              <span className="text-[11px] text-white/60">{item}</span>
-            </div>
-          ))}
-        </div>
       </div>
+
+      {/* Keyframe inyectado inline */}
+      <style>{`
+        @keyframes marquee {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
     </section>
   );
 }
