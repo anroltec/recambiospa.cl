@@ -14,6 +14,7 @@ import {
   Phone,
   Truck,
 } from "lucide-react";
+import { useCart } from "@/context/CartContext";
 
 const catalogCategories = [
   { name: "AMARRAS", href: "/collections/amarras" },
@@ -56,6 +57,7 @@ function getDropdownItems(key: string) {
 
 export default function Header() {
   const router = useRouter();
+  const { totalQuantity } = useCart();
   const headerRef = useRef<HTMLElement>(null);
   const [headerHeight, setHeaderHeight] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -148,9 +150,14 @@ export default function Header() {
             </Link>
             <Link href="/carrito" className="relative text-dark hover:text-primary transition-colors" aria-label="Carrito de compras">
               <ShoppingCart size={24} />
-              <span className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold" aria-hidden="true">
-                0
-              </span>
+              {totalQuantity > 0 && (
+                <span
+                  className="absolute -top-1.5 -right-1.5 min-w-4 h-4 px-1 bg-primary text-white text-[10px] rounded-full flex items-center justify-center font-bold"
+                  aria-hidden="true"
+                >
+                  {totalQuantity > 99 ? "99+" : totalQuantity}
+                </span>
+              )}
             </Link>
             <button
               className="md:hidden text-dark"

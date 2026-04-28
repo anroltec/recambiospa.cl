@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { categories, brands } from "@/data/products";
 import { brandLogos } from "@/data/brands";
-import CatalogView from "@/components/catalog/CatalogView";
+import CatalogListing from "@/components/catalog/CatalogListing";
 
 interface Props {
   params: Promise<{ category: string }>;
@@ -44,17 +44,9 @@ export default async function CategoryPage({ params }: Props) {
   return (
     <Suspense>
       {resolved.type === "category" ? (
-        <CatalogView
-          initialCategory={resolved.value}
-          title={resolved.label}
-          breadcrumb={{ label: resolved.label }}
-        />
+        <CatalogListing initialCategory={resolved.value} />
       ) : (
-        <CatalogView
-          initialBrand={resolved.value}
-          title={`Marca: ${resolved.label}`}
-          breadcrumb={{ label: resolved.label }}
-        />
+        <CatalogListing initialBrand={resolved.value} />
       )}
     </Suspense>
   );
