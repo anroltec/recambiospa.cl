@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Phone, Mail, MapPin } from "lucide-react";
+import { PhoneCall, Mail, MapPin } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -27,15 +27,15 @@ export default function Footer() {
               </p>
               <div className="space-y-2 text-sm text-steel">
                 <a href="https://wa.me/" className="flex items-center gap-2 hover:text-white transition-colors">
-                  <Phone size={14} className="text-primary" />
+                  <PhoneCall size={14} className="text-primary" strokeWidth={1.5} />
                   +569 xxxx xxxx
                 </a>
                 <p className="flex items-center gap-2">
-                  <Mail size={14} className="text-primary" />
+                  <Mail size={14} className="text-primary" strokeWidth={1.5} />
                   ventas@recambiospa.cl
                 </p>
                 <p className="flex items-start gap-2">
-                  <MapPin size={14} className="text-primary mt-0.5" />
+                  <MapPin size={14} className="text-primary mt-0.5" strokeWidth={1.5} />
                   Santiago, Chile
                 </p>
               </div>

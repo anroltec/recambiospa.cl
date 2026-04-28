@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import CatalogView from "@/components/catalog/CatalogView";
+import CatalogListing from "@/components/catalog/CatalogListing";
 
 export const metadata: Metadata = {
   title: "Catálogo de Productos | Recambio SPA",
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function CollectionsPage() {
   return (
     <Suspense>
-      <CatalogView />
+      <CatalogListing />
     </Suspense>
   );
 }

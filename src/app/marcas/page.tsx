@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
+import PageHero from "@/components/ui/PageHero";
 
 export const metadata: Metadata = {
   title: "Marcas - Braslux, Loctite, Teroson, Moura, Wurth y Más",
@@ -7,8 +9,6 @@ export const metadata: Metadata = {
     "Distribuimos las mejores marcas de repuestos y accesorios: Braslux, Henkel, Loctite, Moura, Teroson, Wurth, Danval, Optibelt. Calidad garantizada en Chile.",
   alternates: { canonical: "/marcas" },
 };
-import Image from "next/image";
-import { ChevronRight } from "lucide-react";
 
 const allBrands = [
   { name: "Braslux", slug: "braslux", logo: "/brands/braslux.png", description: "L\u00edder en iluminaci\u00f3n LED para veh\u00edculos pesados y livianos." },
@@ -25,20 +25,14 @@ const allBrands = [
 export default function MarcasPage() {
   return (
     <div className="bg-light min-h-screen">
-      {/* Header */}
-      <div className="bg-primary-dark">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center gap-2 text-sm text-white/60 mb-2">
-            <Link href="/" className="hover:text-white transition-colors">Inicio</Link>
-            <ChevronRight size={14} />
-            <span className="text-white">Marcas</span>
-          </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-white">Nuestras Marcas</h1>
-          <p className="text-white/60 text-sm mt-1">
-            Trabajamos con las mejores marcas del mercado
-          </p>
-        </div>
-      </div>
+      <PageHero
+        breadcrumbs={[
+          { label: "Inicio", href: "/" },
+          { label: "Marcas" },
+        ]}
+        title="Nuestras Marcas"
+        description="Trabajamos con las mejores marcas del mercado."
+      />
 
       <div className="max-w-7xl mx-auto px-4 py-10">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">

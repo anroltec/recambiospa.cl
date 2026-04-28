@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Phone } from "lucide-react";
+import Link from "next/link";
+import { Phone, ShoppingCart, Check, Minus, Plus } from "lucide-react";
 import type { Product } from "@/types/product";
 import { formatPrice } from "@/lib/format";
+import { useCart } from "@/context/CartContext";
 import Modal from "@/components/ui/Modal";
 import Badge from "@/components/ui/Badge";
+import Button from "@/components/ui/Button";
 
 interface ProductModalProps {
   product: Product;
@@ -15,6 +18,20 @@ interface ProductModalProps {
 
 export default function ProductModal({ product, onClose }: ProductModalProps) {
   const [selectedImage, setSelectedImage] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [justAdded, setJustAdded] = useState(false);
+  const { addItem, isInCart } = useCart();
+  const inCart = isInCart(product.code);
+
+  function adjustQuantity(delta: number) {
+    setQuantity((current) => Math.max(1, current + delta));
+  }
+
+  function handleAddToCart() {
+    addItem(product, quantity);
+    setJustAdded(true);
+    window.setTimeout(() => setJustAdded(false), 2000);
+  }
 
   return (
     <Modal onClose={onClose}>
@@ -70,6 +87,60 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
             <p className="text-sm text-gray-600 leading-relaxed mb-5">{product.description}</p>
           )}
 
+          {product.inStock && product.price !== null ? (
+            <div className="mb-5 space-y-3">
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-dark">Cantidad:</span>
+                <div className="flex items-center border border-gray-300">
+                  <button
+                    onClick={() => adjustQuantity(-1)}
+                    disabled={quantity <= 1}
+                    className="px-3 py-2 text-dark hover:bg-light disabled:opacity-30 transition-colors"
+                    aria-label="Reducir cantidad"
+                  >
+                    <Minus size={14} />
+                  </button>
+                  <span className="w-10 text-center text-sm font-bold text-dark">{quantity}</span>
+                  <button
+                    onClick={() => adjustQuantity(1)}
+                    className="px-3 py-2 text-dark hover:bg-light transition-colors"
+                    aria-label="Aumentar cantidad"
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
+              </div>
+
+              <Button
+                onClick={handleAddToCart}
+                fullWidth
+                variant={justAdded ? "outline" : "primary"}
+                className={justAdded ? "border-green-600 text-green-700" : ""}
+              >
+                {justAdded ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Check size={16} /> Agregado al carrito
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    <ShoppingCart size={16} />
+                    {inCart ? "Agregar más" : "Agregar al carrito"}
+                  </span>
+                )}
+              </Button>
+            </div>
+          ) : (
+            <a
+              href="https://wa.me/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1da851] text-white font-bold py-3 transition-colors mb-5"
+            >
+              <Phone size={18} />
+              Consultar por WhatsApp
+            </a>
+          )}
+
           {Object.keys(product.specs).length > 0 && (
             <div className="mb-5">
               <h3 className="text-xs font-bold uppercase tracking-wider text-dark mb-2">Especificaciones</h3>
@@ -86,15 +157,13 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
             </div>
           )}
 
-          <a
-            href="https://wa.me/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1da851] text-white font-bold py-3 transition-colors"
+          <Link
+            href={`/producto/${product.code}`}
+            onClick={onClose}
+            className="flex items-center justify-center gap-2 w-full border border-gray-300 hover:border-primary hover:text-primary text-dark font-bold py-3 transition-colors"
           >
-            <Phone size={18} />
-            Consultar por WhatsApp
-          </a>
+            Ver ficha completa
+          </Link>
         </div>
       </div>
     </Modal>
