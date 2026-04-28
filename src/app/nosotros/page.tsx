@@ -305,30 +305,44 @@ export default function NosotrosPage() {
       </section>
 
       {/* ── MARCAS ──────────────────────────────────────── */}
-      <section className="bg-light py-16 border-y border-gray-200">
-        <Container>
-          <p className="text-center text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-10">
-            Marcas que distribuimos
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-8">
-            {brandLogos.map((brand) => (
+      <section className="bg-light py-16 border-y border-gray-200 overflow-hidden">
+        <p className="text-center text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-10">
+          Marcas que distribuimos
+        </p>
+
+        {/* Marquee track */}
+        <div className="relative w-full overflow-hidden">
+          {/* Fades laterales */}
+          <div className="absolute left-0 top-0 bottom-0 w-24 z-10 bg-gradient-to-r from-light to-transparent pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-24 z-10 bg-gradient-to-l from-light to-transparent pointer-events-none" />
+
+          <div className="flex" style={{ animation: "marquee-nosotros 28s linear infinite" }}>
+            {[...brandLogos, ...brandLogos, ...brandLogos, ...brandLogos].map((brand, i) => (
               <Link
-                key={brand.name}
+                key={`${brand.name}-${i}`}
                 href={brand.href}
-                className="relative h-10 w-28 grayscale hover:grayscale-0 opacity-50 hover:opacity-100 transition-all"
+                className="group flex-shrink-0 flex items-center justify-center px-10 py-2"
+                style={{ minWidth: "180px" }}
                 title={brand.name}
               >
                 <Image
                   src={brand.logo}
                   alt={brand.name}
-                  fill
-                  className="object-contain"
-                  sizes="112px"
+                  width={140}
+                  height={60}
+                  className="object-contain h-10 w-auto grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
                 />
               </Link>
             ))}
           </div>
-        </Container>
+        </div>
+
+        <style>{`
+          @keyframes marquee-nosotros {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+        `}</style>
       </section>
 
       {/* ── CTA ─────────────────────────────────────────── */}
