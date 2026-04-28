@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ChevronRight, Truck, Trophy, Zap, HardHat } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Nosotros - Importación y Distribución de Soluciones para Transporte",
@@ -7,82 +8,121 @@ export const metadata: Metadata = {
     "Conoce Recambio SpA: importación y distribución de repuestos y accesorios para vehículos livianos y pesados en Chile. Calidad garantizada, envíos a todo el país.",
   alternates: { canonical: "/nosotros" },
 };
-import { ChevronRight, Truck, Shield, Clock, Users } from "lucide-react";
+
+const values = [
+  {
+    icon: Truck,
+    title: "Envíos a todo Chile",
+    desc: "Cobertura nacional con despachos directos a todas las regiones, sin intermediarios.",
+  },
+  {
+    icon: Trophy,
+    title: "Calidad garantizada",
+    desc: "Solo trabajamos con marcas reconocidas y productos con respaldo de fábrica.",
+  },
+  {
+    icon: Zap,
+    title: "Respuesta rápida",
+    desc: "Cotizaciones y consultas respondidas el mismo día hábil.",
+  },
+  {
+    icon: HardHat,
+    title: "Asesoría técnica",
+    desc: "Te ayudamos a identificar el repuesto correcto para cada vehículo.",
+  },
+];
 
 export default function NosotrosPage() {
   return (
-    <div className="bg-light min-h-screen">
-      {/* Header */}
-      <div className="bg-primary-dark">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center gap-2 text-sm text-white/60 mb-2">
-            <Link href="/" className="hover:text-white transition-colors">Inicio</Link>
-            <ChevronRight size={14} />
-            <span className="text-white">Nosotros</span>
+    <div className="min-h-screen bg-light">
+
+      {/* Breadcrumb — barra blanca */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <nav className="flex items-center gap-1.5 text-xs text-gray-400">
+            <Link href="/" className="hover:text-primary transition-colors">Inicio</Link>
+            <ChevronRight size={12} />
+            <span className="text-dark font-medium">Nosotros</span>
+          </nav>
+        </div>
+      </div>
+
+      {/* Hero — oscuro sin grid */}
+      <div className="bg-primary-dark text-white py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <h1 className="text-3xl lg:text-4xl font-black uppercase tracking-tight leading-tight">
+            Importación y distribución<br className="hidden sm:block" /> para el transporte
+          </h1>
+        </div>
+      </div>
+
+      {/* ── STORY + STATS ────────────────────────────── */}
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="grid lg:grid-cols-3 gap-10 lg:gap-16">
+
+          {/* Story — 2/3 */}
+          <div className="lg:col-span-2 space-y-4 text-dark/70 leading-relaxed">
+            <p>
+              En <strong className="text-dark">Recambio SpA</strong> nos especializamos en la
+              importación y distribución de repuestos, accesorios e insumos para vehículos
+              livianos y pesados. Trabajamos con marcas líderes del mercado para ofrecer
+              productos de calidad a precios competitivos.
+            </p>
+            <p>
+              Nuestro equipo tiene amplia experiencia en el rubro automotriz, lo que nos
+              permite asesorar a cada cliente de forma directa y encontrar la solución correcta
+              para cada necesidad.
+            </p>
+            <p>
+              Despachamos a todo Chile asegurando que los productos lleguen en óptimas
+              condiciones y en el menor tiempo posible.
+            </p>
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-white">Nosotros</h1>
-        </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-10">
-        {/* Intro */}
-        <div className="bg-white border border-gray-200 p-8 md:p-12 mb-8">
-          <h2 className="text-2xl font-bold text-dark mb-4">
-            Importaci&oacute;n y Distribuci&oacute;n de Soluciones para Transporte
-          </h2>
-          <p className="text-dark/70 leading-relaxed mb-4">
-            En <strong>Recambio SpA</strong>{" "}nos especializamos en la importaci&oacute;n y distribuci&oacute;n de
-            repuestos, accesorios e insumos para veh&iacute;culos livianos y pesados. Trabajamos con las mejores
-            marcas del mercado para ofrecer productos de alta calidad a precios competitivos.
-          </p>
-          <p className="text-dark/70 leading-relaxed mb-4">
-            Nuestro equipo cuenta con amplia experiencia en el rubro automotriz, lo que nos permite
-            asesorar a nuestros clientes de manera personalizada y encontrar la soluci&oacute;n adecuada
-            para cada necesidad.
-          </p>
-          <p className="text-dark/70 leading-relaxed">
-            Realizamos env&iacute;os a todo Chile, asegurando que nuestros productos lleguen en
-            &oacute;ptimas condiciones y en el menor tiempo posible.
-          </p>
-        </div>
-
-        {/* Values */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            {
-              icon: Truck,
-              title: "Env\u00edos a todo Chile",
-              desc: "Cobertura nacional con despachos r\u00e1pidos y seguros para que recibas tus productos donde los necesites.",
-            },
-            {
-              icon: Shield,
-              title: "Calidad Garantizada",
-              desc: "Trabajamos solo con marcas reconocidas y productos certificados que cumplen los m\u00e1s altos est\u00e1ndares.",
-            },
-            {
-              icon: Clock,
-              title: "Atenci\u00f3n R\u00e1pida",
-              desc: "Nuestro equipo responde tus consultas de forma \u00e1gil para que tengas lo que necesitas sin demoras.",
-            },
-            {
-              icon: Users,
-              title: "Asesor\u00eda Especializada",
-              desc: "Te ayudamos a encontrar el producto exacto para tu veh\u00edculo con orientaci\u00f3n t\u00e9cnica profesional.",
-            },
-          ].map((item) => (
-            <div
-              key={item.title}
-              className="bg-white border border-gray-200 p-6 text-center"
-            >
-              <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <item.icon size={28} className="text-primary" />
-              </div>
-              <h3 className="font-bold text-dark mb-2">{item.title}</h3>
-              <p className="text-sm text-dark/60 leading-relaxed">{item.desc}</p>
+          {/* Stats — 1/3 */}
+          <div className="border-l-2 border-primary pl-8 flex flex-col justify-center gap-7">
+            <div>
+              <p className="text-4xl font-black text-primary leading-none">+150</p>
+              <p className="text-[10px] text-dark/40 uppercase tracking-widest mt-1">
+                Referencias en catálogo
+              </p>
             </div>
-          ))}
+            <div>
+              <p className="text-4xl font-black text-primary leading-none">16</p>
+              <p className="text-[10px] text-dark/40 uppercase tracking-widest mt-1">
+                Regiones con despacho
+              </p>
+            </div>
+            <div>
+              <p className="text-4xl font-black text-primary leading-none">7</p>
+              <p className="text-[10px] text-dark/40 uppercase tracking-widest mt-1">
+                Marcas distribuidas
+              </p>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* ── VALUES — filas tipo ficha técnica ────────── */}
+      <div className="border-t border-gray-200 bg-white">
+        {values.map((item, i) => (
+          <div
+            key={item.title}
+            className={`border-b border-gray-100 ${i % 2 === 1 ? "bg-gray-50/60" : ""}`}
+          >
+            <div className="max-w-7xl mx-auto px-4 py-5 grid sm:grid-cols-[auto_1fr] gap-4 sm:gap-8 items-start">
+              <div className="flex items-center gap-3 sm:w-56">
+                <div className="w-9 h-9 bg-primary flex items-center justify-center flex-shrink-0">
+                  <item.icon size={18} className="text-white" strokeWidth={1.5} />
+                </div>
+                <p className="font-bold text-dark text-sm">{item.title}</p>
+              </div>
+              <p className="text-sm text-dark/55 leading-relaxed">{item.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
     </div>
   );
 }

@@ -1,26 +1,22 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import PageHero from "@/components/ui/PageHero";
 
 export const metadata: Metadata = {
   title: "Mi Cuenta",
   robots: { index: false, follow: false },
 };
-import { ChevronRight, User, ShoppingBag, Heart, Settings } from "lucide-react";
+import { User, ShoppingBag, Heart, Settings } from "lucide-react";
 
 export default function CuentaPage() {
   return (
     <div className="bg-light min-h-screen">
-      {/* Header */}
-      <div className="bg-primary-dark">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center gap-2 text-sm text-white/60 mb-2">
-            <Link href="/" className="hover:text-white transition-colors">Inicio</Link>
-            <ChevronRight size={14} />
-            <span className="text-white">Mi Cuenta</span>
-          </div>
-          <h1 className="text-2xl md:text-3xl font-bold text-white">Mi Cuenta</h1>
-        </div>
-      </div>
+      <PageHero
+        breadcrumbs={[
+          { label: "Inicio", href: "/" },
+          { label: "Mi Cuenta" },
+        ]}
+        title="Mi Cuenta"
+      />
 
       <div className="max-w-3xl mx-auto px-4 py-10">
         <div className="bg-white border border-gray-200 p-8 text-center mb-6">
