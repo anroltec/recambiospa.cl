@@ -7,12 +7,7 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import Link from "next/link";
 import Image from "next/image";
-
-const slides = [
-  { image: "/banners/banner1.jpg", href: "/collections/iluminacion", alt: "Iluminación LED Braslux" },
-  { image: "/banners/banner2.jpg", href: "/collections/loctite", alt: "Productos Loctite" },
-  { image: "/banners/banner5.jpg", href: "/collections/teroson", alt: "Selladores Teroson" },
-];
+import { bannerSlides } from "@/data/banners";
 
 export default function HeroBanner() {
   return (
@@ -25,7 +20,7 @@ export default function HeroBanner() {
         loop
         className="w-full"
       >
-        {slides.map((slide, i) => (
+        {bannerSlides.map((slide, i) => (
           <SwiperSlide key={i}>
             <Link href={slide.href} className="block relative w-full aspect-[21/7]">
               <Image

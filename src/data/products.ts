@@ -1,14 +1,7 @@
-export interface Product {
-  code: string;
-  name: string;
-  category: string;
-  brand: string;
-  price: number | null;
-  images: string[];
-  description: string;
-  specs: Record<string, string>;
-  inStock: boolean;
-}
+import type { Product } from "@/types/product";
+export type { Product } from "@/types/product";
+export type { Category } from "@/types/product";
+export { formatPrice } from "@/lib/format";
 
 export const categories = [
   { id: "iluminacion", name: "Iluminación", color: "#F5A623" },
@@ -1910,6 +1903,3 @@ const allProducts = [...excelProducts, ...catalogProducts].map((p) => ({
 
 export const products: Product[] = allProducts;
 
-export function formatPrice(price: number): string {
-  return "$" + price.toLocaleString("es-CL");
-}

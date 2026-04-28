@@ -1,26 +1,16 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-
-const categories = [
-  { name: "AMARRAS", href: "/collections/amarras" },
-  { name: "BATERÍAS", href: "/collections/baterias" },
-  { name: "CALEFACCIÓN", href: "/collections/calefaccion" },
-  { name: "EXTINTORES", href: "/collections/extintores" },
-  { name: "HERRAMIENTAS", href: "/collections/herramientas" },
-  { name: "ILUMINACIÓN", href: "/collections/iluminacion" },
-  { name: "KIT ESPECIALES", href: "/collections/kit-especiales" },
-  { name: "OTROS", href: "/collections/otros" },
-];
+import { catalogCategories } from "@/data/navigation";
+import Container from "@/components/ui/Container";
+import SectionHeader from "@/components/ui/SectionHeader";
 
 export default function CategoryCards() {
   return (
     <section className="py-14 bg-white">
-      <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-2xl font-bold text-dark mb-8 uppercase tracking-wide">
-          Nuestras Categorías
-        </h2>
+      <Container>
+        <SectionHeader title="Nuestras Categorías" />
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {categories.map((cat) => (
+          {catalogCategories.map((cat) => (
             <Link
               key={cat.name}
               href={cat.href}
@@ -33,7 +23,7 @@ export default function CategoryCards() {
             </Link>
           ))}
         </div>
-      </div>
+      </Container>
     </section>
   );
 }
