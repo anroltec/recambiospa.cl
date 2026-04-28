@@ -42,8 +42,6 @@ const navLinks = [
   { label: "Inicio", href: "/" },
   { label: "Nosotros", href: "/nosotros" },
   { label: "Catálogo", href: "/collections", dropdown: "catalog" },
-  { label: "Vehículos livianos", href: "/vehiculos-livianos", dropdown: "light" },
-  { label: "Vehículos pesados", href: "/vehiculos-pesados", dropdown: "heavy" },
   { label: "Marcas", href: "/marcas" },
   { label: "Contacto", href: "/contacto" },
 ];

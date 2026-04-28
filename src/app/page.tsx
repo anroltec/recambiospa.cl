@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import HeroBanner from "@/components/HeroBanner";
 import PromoBanner from "@/components/PromoBanner";
 import CategoryCards from "@/components/CategoryCards";
 import FeaturedProducts from "@/components/FeaturedProducts";
 import BrandsSection from "@/components/BrandsSection";
+import TechnicalServiceSection from "@/components/TechnicalServiceSection";
 
 export const metadata: Metadata = {
   title: "Repuestos y Accesorios para Transporte | Env\u00edos a Todo Chile",
@@ -77,47 +77,7 @@ export default function Home() {
       <CategoryCards />
       <FeaturedProducts />
       <BrandsSection />
-
-      {/* Servicio T&eacute;cnico section */}
-      <section className="py-14 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row overflow-hidden">
-            {/* Left - B&W Image */}
-            <div className="md:w-1/2 relative min-h-[280px] md:min-h-[400px]">
-              <Image
-                src="/banners/banner1.jpg"
-                alt="Servicio t&eacute;cnico Recambio SpA"
-                fill
-                className="object-cover object-[75%_center] grayscale contrast-125 brightness-50"
-                sizes="(max-width: 768px) 100vw, 50vw"
-              />
-            </div>
-
-            {/* Right - Content */}
-            <div className="md:w-1/2 flex items-center px-6 py-10 md:px-12 md:py-14">
-              <div>
-                <h2 className="text-2xl font-bold text-primary-dark uppercase tracking-wide mb-5">
-                  Servicio T&eacute;cnico
-                </h2>
-                <p className="text-sm md:text-base text-dark/70 leading-relaxed mb-8">
-                  En servicio t&eacute;cnico{" "}
-                  <strong>Recambio SpA</strong>{" "}brindamos respaldo y soporte de
-                  excelencia a nuestras l&iacute;neas de productos para que nuestros clientes
-                  puedan trabajar eficientemente. Nuestro personal est&aacute; calificado y en
-                  constante capacitaci&oacute;n para brindar un servicio de asesor&iacute;a,
-                  selecci&oacute;n y soporte de excelencia.
-                </p>
-                <a
-                  href="/contacto"
-                  className="inline-block border-2 border-primary-dark text-primary-dark font-bold px-8 py-3 text-sm uppercase tracking-wider hover:bg-primary-dark hover:text-white transition-colors"
-                >
-                  Saber M&aacute;s
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <TechnicalServiceSection />
 
       {/* SEO content section - visible to crawlers, useful to users */}
       <section className="py-14 bg-white">

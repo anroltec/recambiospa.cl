@@ -1,7 +1,17 @@
 import type { NextConfig } from "next";
 
+const projectRoot = process.cwd();
+
 const nextConfig: NextConfig = {
   compress: true,
+  outputFileTracingRoot: projectRoot,
+  turbopack: {
+    root: projectRoot,
+  },
+  experimental: {
+    preloadEntriesOnStart: false,
+    webpackMemoryOptimizations: true,
+  },
   images: {
     formats: ["image/avif", "image/webp"],
   },

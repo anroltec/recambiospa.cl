@@ -37,7 +37,7 @@ export const brands = [
   "Recambio SpA",
 ];
 
-function detectBrand(name: string): string {
+export function detectBrand(name: string): string {
   const n = name.toUpperCase();
   if (n.includes("BRASLUX")) return "Braslux";
   if (n.includes("LOCTITE") || n.includes("TEROSON")) return "Loctite";
@@ -49,7 +49,7 @@ function detectBrand(name: string): string {
   return "Recambio SpA";
 }
 
-function detectCategory(code: string, name: string): string {
+export function detectCategory(code: string, name: string): string {
   const n = name.toUpperCase();
   if (n.includes("FOCO LED") || n.includes("FARO") || n.includes("LANTERNA") || n.includes("LINTERNA") || n.includes("LUZ") || n.includes("MICA")) return "iluminacion";
   if (n.includes("BATERIA") || n.includes("BATERÍA")) return "baterias";
