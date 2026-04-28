@@ -204,7 +204,8 @@ export default function CatalogView({
       </section>
 
       {/* ── CATEGORY CHIPS ────────────────────────────── */}
-      <div className="bg-primary-dark/90 border-b border-white/10 sticky top-0 z-30">
+      {/* top-44 ≈ 176px clears the sticky header (≈172px on desktop) */}
+      <div className="bg-primary-dark/90 border-b border-white/10 sticky top-44 z-30">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex gap-0.5 overflow-x-auto scrollbar-none">
             {categoryChips.map(({ id, name, count }) => (
@@ -276,7 +277,8 @@ export default function CatalogView({
         <div className="flex gap-6">
           {/* Sidebar desktop */}
           <aside className="hidden lg:block w-60 flex-shrink-0">
-            <div className="sticky top-16">
+            {/* top-[220px] = header(~172px) + chips bar(~44px) + gap */}
+            <div className="sticky top-[220px] max-h-[calc(100vh-220px)] overflow-y-auto">
               <SidebarContent
                 filters={filters}
                 setSearch={setSearch}
