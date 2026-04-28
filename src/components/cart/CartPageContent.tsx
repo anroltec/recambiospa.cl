@@ -222,39 +222,6 @@ export default function CartPageContent() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10 space-y-8">
-      <section className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
-        <div className="bg-white px-6 py-8 shadow-[0_18px_60px_rgba(18,18,18,0.06)] md:px-8">
-          <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-dark">
-            Revisa tu pedido antes de enviarlo
-          </h2>
-          <p className="mt-3 max-w-2xl text-sm text-dark/60 leading-relaxed">
-            Aqui puedes ajustar cantidades, limpiar referencias y preparar una cotizacion mas clara
-            antes de pasar a WhatsApp.
-          </p>
-        </div>
-
-        <div className="bg-primary-dark px-6 py-6 text-white md:px-7">
-          <h3 className="mb-5 text-xl font-black uppercase">Resumen rapido</h3>
-          <div className="grid gap-4 sm:grid-cols-3 xl:grid-cols-1">
-            <div className="pb-4 border-b border-white/10 sm:border-b-0 xl:border-b">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/35 mb-2">Unidades</p>
-              <p className="text-3xl font-black">{totalQuantity}</p>
-              <p className="mt-1 text-xs text-white/45">Cantidad total considerada en el pedido.</p>
-            </div>
-            <div className="pb-4 border-b border-white/10 sm:border-b-0 xl:border-b">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/35 mb-2">Marcas</p>
-              <p className="text-3xl font-black">{uniqueBrands.length}</p>
-              <p className="mt-1 text-xs text-white/45">Referencias agrupadas por proveedor o linea.</p>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-white/35 mb-2">Subtotal neto</p>
-              <p className="text-3xl font-black">{formatPrice(totalPrice)}</p>
-              <p className="mt-1 text-xs text-white/45">Base para estimar IVA y preparar tu cotizacion.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
         <section className="overflow-hidden bg-white shadow-[0_18px_60px_rgba(18,18,18,0.06)]">
           <div className="flex flex-col gap-3 px-6 py-6 md:flex-row md:items-center md:justify-between md:px-8">
