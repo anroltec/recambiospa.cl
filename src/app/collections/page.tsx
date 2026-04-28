@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { Search, ChevronDown, ChevronRight, SlidersHorizontal, X } from "lucide-react";
+import { Search, ChevronDown, ChevronRight, ChevronLeft, SlidersHorizontal, X } from "lucide-react";
 import { products, categories, brands, formatPrice, type Product } from "@/data/products";
 
 type SortOption = "name-asc" | "name-desc" | "price-asc" | "price-desc";
@@ -25,7 +26,7 @@ function ProductModal({ product, onClose }: { product: Product; onClose: () => v
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -34,7 +35,7 @@ function ProductModal({ product, onClose }: { product: Product; onClose: () => v
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center bg-white border border-gray-200 hover:bg-gray-100 transition-colors rounded-full shadow-md"
+          className="absolute top-4 right-4 z-10 w-11 h-11 flex items-center justify-center bg-white border border-gray-200 hover:bg-gray-100 transition-colors rounded-full shadow-md"
           aria-label="Cerrar"
         >
           <X size={20} className="text-dark" />
@@ -92,7 +93,7 @@ function ProductModal({ product, onClose }: { product: Product; onClose: () => v
             </h2>
 
             {/* SKU */}
-            <p className="text-sm text-gray-400 mb-4">
+            <p className="text-sm text-steel mb-4">
               SKU: {product.code}
             </p>
 
@@ -102,7 +103,7 @@ function ProductModal({ product, onClose }: { product: Product; onClose: () => v
                 <p className="text-2xl font-bold text-primary">
                   {formatPrice(product.price)}
                 </p>
-                <p className="text-xs text-gray-400">+ IVA</p>
+                <p className="text-xs text-steel">+ IVA</p>
               </div>
             ) : (
               <p className="text-lg font-semibold text-dark/50 mb-5">
@@ -158,9 +159,22 @@ function ProductModal({ product, onClose }: { product: Product; onClose: () => v
 }
 
 export default function CollectionsPage() {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  return (
+    <Suspense>
+      <CollectionsContent />
+    </Suspense>
+  );
+}
+
+function CollectionsContent() {
+  const searchParams = useSearchParams();
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(
+    searchParams.get("category")
+  );
+  const [selectedBrand, setSelectedBrand] = useState<string | null>(
+    searchParams.get("brand")
+  );
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -168,6 +182,8 @@ export default function CollectionsPage() {
     brands: true,
   });
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PRODUCTS_PER_PAGE = 20;
 
   const filteredProducts = useMemo(() => {
     let result = products;
@@ -226,6 +242,17 @@ export default function CollectionsPage() {
     setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, selectedBrand, searchQuery, sortBy]);
+
+  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
+  const paginatedProducts = useMemo(() => {
+    const start = (currentPage - 1) * PRODUCTS_PER_PAGE;
+    return filteredProducts.slice(start, start + PRODUCTS_PER_PAGE);
+  }, [filteredProducts, currentPage]);
+
   const clearFilters = () => {
     setSelectedCategory(null);
     setSelectedBrand(null);
@@ -250,7 +277,7 @@ export default function CollectionsPage() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full border border-gray-300 rounded-sm px-3 py-2 text-sm pr-8 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
           />
-          <Search size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-steel" />
         </div>
       </div>
 
@@ -278,7 +305,7 @@ export default function CollectionsPage() {
                 <ChevronRight size={12} />
                 Todos los productos
               </span>
-              <span className="text-xs text-gray-400">{products.length}</span>
+              <span className="text-xs text-steel">{products.length}</span>
             </button>
             {categories.map((cat) => (
               <button
@@ -295,7 +322,7 @@ export default function CollectionsPage() {
                   />
                   {cat.name}
                 </span>
-                <span className="text-xs text-gray-400">{categoryCount[cat.id] || 0}</span>
+                <span className="text-xs text-steel">{categoryCount[cat.id] || 0}</span>
               </button>
             ))}
           </div>
@@ -325,7 +352,7 @@ export default function CollectionsPage() {
                 }`}
               >
                 <span>{brand}</span>
-                <span className="text-xs text-gray-400">{brandCount[brand] || 0}</span>
+                <span className="text-xs text-steel">{brandCount[brand] || 0}</span>
               </button>
             ))}
           </div>
@@ -350,7 +377,7 @@ export default function CollectionsPage() {
       {/* Page header */}
       <div className="bg-primary-dark">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center gap-2 text-sm text-white/60 mb-2">
+          <nav className="flex items-center gap-2 text-sm text-white/60 mb-2" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-white transition-colors">
               Inicio
             </Link>
@@ -364,7 +391,7 @@ export default function CollectionsPage() {
                 </span>
               </>
             )}
-          </div>
+          </nav>
           <h1 className="text-2xl md:text-3xl font-bold text-white">
             {selectedCategory
               ? categories.find((c) => c.id === selectedCategory)?.name
@@ -404,7 +431,7 @@ export default function CollectionsPage() {
             {/* Sort bar */}
             <div className="bg-white border border-gray-200 px-4 py-3 mb-4 flex items-center justify-between">
               <span className="text-sm text-dark/60">
-                Mostrando {filteredProducts.length} producto{filteredProducts.length !== 1 ? "s" : ""}
+                Mostrando {Math.min((currentPage - 1) * PRODUCTS_PER_PAGE + 1, filteredProducts.length)}-{Math.min(currentPage * PRODUCTS_PER_PAGE, filteredProducts.length)} de {filteredProducts.length} producto{filteredProducts.length !== 1 ? "s" : ""}
               </span>
               <div className="flex items-center gap-3">
                 <label className="text-sm text-dark/60 hidden sm:block">Ordenar por:</label>
@@ -453,77 +480,130 @@ export default function CollectionsPage() {
 
             {/* Products grid */}
             {filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                {filteredProducts.map((product) => (
-                  <div
-                    key={product.code}
-                    className="bg-white border border-gray-200 group hover:shadow-lg hover:border-primary/30 transition-all duration-200 cursor-pointer"
-                    onClick={() => setSelectedProduct(product)}
-                  >
-                    {/* Product image */}
-                    <div className="relative aspect-square bg-gray-50 overflow-hidden">
-                      <Image
-                        src={product.images[0]}
-                        alt={product.name}
-                        fill
-                        className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                      />
-                      {product.inStock && product.price && (
-                        <span className="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 uppercase">
-                          En stock
-                        </span>
-                      )}
-                      {!product.price && (
-                        <span className="absolute top-2 left-2 bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 uppercase">
-                          Cat&aacute;logo
-                        </span>
-                      )}
-                    </div>
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {paginatedProducts.map((product) => (
+                    <div
+                      key={product.code}
+                      className="bg-white border border-gray-200 group hover:shadow-lg hover:border-primary/30 transition-all duration-200 cursor-pointer"
+                      onClick={() => setSelectedProduct(product)}
+                    >
+                      {/* Product image */}
+                      <div className="relative aspect-square bg-gray-50 overflow-hidden">
+                        <Image
+                          src={product.images[0]}
+                          alt={product.name}
+                          fill
+                          className="object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                        />
+                        {product.inStock && product.price && (
+                          <span className="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold px-1.5 py-0.5 uppercase">
+                            En stock
+                          </span>
+                        )}
+                        {!product.price && (
+                          <span className="absolute top-2 left-2 bg-primary text-white text-xs font-bold px-1.5 py-0.5 uppercase">
+                            Cat&aacute;logo
+                          </span>
+                        )}
+                      </div>
 
-                    {/* Product info */}
-                    <div className="p-3">
-                      <p className="text-[11px] text-primary font-semibold uppercase tracking-wide mb-1">
-                        {product.brand}
-                      </p>
-                      <h3 className="text-sm font-medium text-dark leading-tight line-clamp-2 mb-2 min-h-[2.5rem]">
-                        {product.name}
-                      </h3>
-                      <p className="text-[11px] text-gray-400 mb-2">
-                        SKU: {product.code}
-                      </p>
-                      {product.price ? (
-                        <div>
-                          <p className="text-lg font-bold text-primary">
-                            {formatPrice(product.price)}
-                          </p>
-                          <p className="text-[10px] text-gray-400">+ IVA</p>
-                        </div>
-                      ) : (
-                        <p className="text-sm font-semibold text-dark/50">
-                          Consultar precio
+                      {/* Product info */}
+                      <div className="p-3">
+                        <p className="text-xs text-primary font-semibold uppercase tracking-wide mb-1">
+                          {product.brand}
                         </p>
-                      )}
-                      <button
-                        className="w-full mt-3 bg-primary hover:bg-primary-dark text-white text-sm font-medium py-2 transition-colors"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedProduct(product);
-                        }}
-                      >
-                        {product.price ? "Agregar al carro" : "Cotizar"}
-                      </button>
+                        <h3 className="text-sm font-medium text-dark leading-tight line-clamp-2 mb-2 min-h-[2.5rem]">
+                          {product.name}
+                        </h3>
+                        <p className="text-xs text-steel mb-2">
+                          SKU: {product.code}
+                        </p>
+                        {product.price ? (
+                          <div>
+                            <p className="text-lg font-bold text-primary">
+                              {formatPrice(product.price)}
+                            </p>
+                            <p className="text-xs text-steel">+ IVA</p>
+                          </div>
+                        ) : (
+                          <p className="text-sm font-semibold text-dark/50">
+                            Consultar precio
+                          </p>
+                        )}
+                        <button
+                          className="w-full mt-3 bg-primary hover:bg-primary-dark text-white text-sm font-medium py-2 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedProduct(product);
+                          }}
+                        >
+                          {product.price ? "Agregar al carro" : "Cotizar"}
+                        </button>
+                      </div>
                     </div>
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="mt-6 flex items-center justify-center gap-1">
+                    <button
+                      onClick={() => { setCurrentPage((p) => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                      disabled={currentPage === 1}
+                      className="w-11 h-11 flex items-center justify-center border border-gray-200 bg-white text-dark/60 hover:border-primary hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter((page) => {
+                        if (totalPages <= 7) return true;
+                        if (page === 1 || page === totalPages) return true;
+                        if (Math.abs(page - currentPage) <= 1) return true;
+                        return false;
+                      })
+                      .reduce<(number | "...")[]>((acc, page, idx, arr) => {
+                        if (idx > 0 && page - (arr[idx - 1]) > 1) acc.push("...");
+                        acc.push(page);
+                        return acc;
+                      }, [])
+                      .map((page, idx) =>
+                        page === "..." ? (
+                          <span key={`dots-${idx}`} className="w-11 h-11 flex items-center justify-center text-dark/40 text-sm">
+                            ...
+                          </span>
+                        ) : (
+                          <button
+                            key={page}
+                            onClick={() => { setCurrentPage(page as number); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                            className={`w-11 h-11 flex items-center justify-center border text-sm font-medium transition-colors ${
+                              currentPage === page
+                                ? "bg-primary border-primary text-white"
+                                : "border-gray-200 bg-white text-dark/70 hover:border-primary hover:text-primary"
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        )
+                      )}
+                    <button
+                      onClick={() => { setCurrentPage((p) => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                      disabled={currentPage === totalPages}
+                      className="w-11 h-11 flex items-center justify-center border border-gray-200 bg-white text-dark/60 hover:border-primary hover:text-primary disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronRight size={16} />
+                    </button>
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             ) : (
               <div className="bg-white border border-gray-200 py-16 text-center">
-                <Search size={48} className="mx-auto text-gray-300 mb-4" />
+                <Search size={48} className="mx-auto text-steel/50 mb-4" />
                 <h3 className="text-lg font-semibold text-dark mb-2">
                   No se encontraron productos
                 </h3>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-sm text-steel mb-4">
                   Intenta ajustar los filtros o la b&uacute;squeda
                 </p>
                 <button

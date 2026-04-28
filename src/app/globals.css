@@ -1,19 +1,47 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-primary: #334FB4;
-  --color-primary-dark: #242833;
-  --color-primary-light: #4a65c7;
+  --color-primary: #D4002A;
+  --color-primary-dark: #1C2A3A;
+  --color-primary-light: #E6334D;
   --color-dark: #121212;
   --color-light: #f3f3f3;
-  --color-accent: #334FB4;
+  --color-accent: #D4002A;
+  --color-steel: #8295AA;
   --color-background: #ffffff;
   --color-foreground: #121212;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   background: var(--color-background);
   color: var(--color-foreground);
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Keyboard focus styles */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Skip to content link for screen readers */
+.sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  clip: auto;
+  white-space: normal;
+  overflow: visible;
 }
 
 /* Swiper overrides */
@@ -36,6 +64,17 @@ body {
 .swiper-button-next::after,
 .swiper-button-prev::after {
   font-size: 18px !important;
+}
+
+@keyframes slide-brands {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-1400px); }
+}
+.animate-slide-brands {
+  animation: slide-brands 20s linear infinite;
+}
+.animate-slide-brands:hover {
+  animation-play-state: paused;
 }
 
 @keyframes bounce-slow {

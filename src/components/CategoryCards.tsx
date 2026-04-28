@@ -29,7 +29,7 @@ export default function CategoryCards() {
               <span className="text-sm font-bold text-dark tracking-wide group-hover:text-white transition-colors">
                 {cat.name}
               </span>
-              <ArrowRight size={16} className="text-gray-400 group-hover:text-white transition-colors" />
+              <ArrowRight size={16} className="text-steel group-hover:text-white transition-colors" />
             </Link>
           ))}
         </div>

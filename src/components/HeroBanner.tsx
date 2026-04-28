@@ -9,7 +9,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 const slides = [
-  { image: "/banners/banner1.jpg", href: "/collections/iluminacion", alt: "Iluminación LED Braslux" },
+  { image: "/banners/banner1-new.png", href: "/collections/extintores", alt: "Extintor PQS 6KG y productos de seguridad para transporte" },
   { image: "/banners/banner2.jpg", href: "/collections/loctite", alt: "Productos Loctite" },
   { image: "/banners/banner5.jpg", href: "/collections/teroson", alt: "Selladores Teroson" },
 ];
@@ -27,13 +27,18 @@ export default function HeroBanner() {
       >
         {slides.map((slide, i) => (
           <SwiperSlide key={i}>
-            <Link href={slide.href} className="block relative w-full aspect-[21/7]">
+            <Link
+              href={slide.href}
+              className="block relative w-full aspect-[16/9] sm:aspect-[2/1] lg:aspect-[5/2]"
+              aria-label={slide.alt}
+            >
               <Image
                 src={slide.image}
                 alt={slide.alt}
                 fill
                 className="object-cover"
                 priority={i === 0}
+                sizes="100vw"
               />
             </Link>
           </SwiperSlide>

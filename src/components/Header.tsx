@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -54,13 +55,35 @@ function getDropdownItems(key: string) {
 }
 
 export default function Header() {
+  const router = useRouter();
+  const headerRef = useRef<HTMLElement>(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileDropdown, setMobileDropdown] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const updateHeight = () => {
+      if (headerRef.current) setHeaderHeight(headerRef.current.offsetHeight);
+    };
+    updateHeight();
+    window.addEventListener("resize", updateHeight);
+    return () => window.removeEventListener("resize", updateHeight);
+  }, [searchOpen]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/collections?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+      setSearchOpen(false);
+    }
+  };
 
   return (
-    <header className="sticky top-0 z-50">
+    <header ref={headerRef} className="sticky top-0 z-50">
       {/* Top bar */}
       <div className="bg-dark text-white text-xs">
         <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
@@ -96,39 +119,44 @@ export default function Header() {
           </Link>
 
           {/* Search bar - desktop */}
-          <div className="hidden md:flex flex-1 max-w-2xl">
+          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl">
             <div className="relative w-full">
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar productos, marcas, SKU..."
-                className="w-full border border-gray-300 rounded-sm px-4 py-2.5 text-sm text-dark placeholder:text-gray-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                className="w-full border border-gray-300 rounded-sm px-4 py-2.5 text-sm text-dark placeholder:text-steel focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               />
-              <button className="absolute right-0 top-0 h-full bg-primary hover:bg-primary-dark text-white px-4 transition-colors">
+              <button type="submit" className="absolute right-0 top-0 h-full bg-primary hover:bg-primary-dark text-white px-4 transition-colors">
                 <Search size={18} />
               </button>
             </div>
-          </div>
+          </form>
 
           {/* Right icons */}
           <div className="flex items-center gap-4">
             <button
               className="md:hidden text-dark"
               onClick={() => setSearchOpen(!searchOpen)}
+              aria-label={searchOpen ? "Cerrar b\u00fasqueda" : "Abrir b\u00fasqueda"}
             >
               <Search size={22} />
             </button>
-            <Link href="/cuenta" className="text-dark hover:text-primary transition-colors">
+            <Link href="/cuenta" className="text-dark hover:text-primary transition-colors" aria-label="Mi cuenta">
               <User size={24} />
             </Link>
-            <Link href="/carrito" className="relative text-dark hover:text-primary transition-colors">
+            <Link href="/carrito" className="relative text-dark hover:text-primary transition-colors" aria-label="Carrito de compras">
               <ShoppingCart size={24} />
-              <span className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+              <span className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold" aria-hidden="true">
                 0
               </span>
             </Link>
             <button
               className="md:hidden text-dark"
               onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label={mobileOpen ? "Cerrar men\u00fa" : "Abrir men\u00fa"}
+              aria-expanded={mobileOpen}
             >
               {mobileOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -137,18 +165,20 @@ export default function Header() {
 
         {/* Mobile search */}
         {searchOpen && (
-          <div className="md:hidden px-4 pb-3">
+          <form onSubmit={handleSearch} className="md:hidden px-4 pb-3">
             <div className="relative">
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar productos..."
                 className="w-full border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:border-primary"
               />
-              <button className="absolute right-0 top-0 h-full bg-primary text-white px-4">
+              <button type="submit" className="absolute right-0 top-0 h-full bg-primary text-white px-4">
                 <Search size={16} />
               </button>
             </div>
-          </div>
+          </form>
         )}
       </div>
 
@@ -191,7 +221,7 @@ export default function Header() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden bg-white shadow-xl border-t fixed inset-x-0 top-[105px] bottom-0 overflow-y-auto z-50">
+        <div className="md:hidden bg-white shadow-xl border-t fixed inset-x-0 bottom-0 overflow-y-auto z-40" style={{ top: `${headerHeight}px` }}>
           <nav>
             {navLinks.map((link) => (
               <div key={link.label} className="border-b border-gray-100">
@@ -205,7 +235,7 @@ export default function Header() {
                   </Link>
                   {link.dropdown && (
                     <button
-                      className="px-5 py-3.5 text-gray-400"
+                      className="px-5 py-3.5 text-steel"
                       onClick={() =>
                         setMobileDropdown(
                           mobileDropdown === link.dropdown ? null : link.dropdown!
