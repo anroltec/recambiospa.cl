@@ -170,7 +170,7 @@ export default function HeroBanner() {
                   {/* Divider + desc */}
                   <div className="flex items-start gap-3 mb-8">
                     <div className="w-8 h-0.5 mt-2 flex-shrink-0" style={{ backgroundColor: slide.accent }} />
-                    <p className="text-white/55 text-sm leading-relaxed">
+                    <p className="text-white/85 text-sm leading-relaxed">
                       {slide.desc}
                     </p>
                   </div>
@@ -188,7 +188,7 @@ export default function HeroBanner() {
                       href="https://wa.me/569xxxxxxxx"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 border border-white/20 hover:border-white/50 text-white/60 hover:text-white font-bold px-7 py-4 text-sm uppercase tracking-wider transition-colors"
+                      className="inline-flex items-center gap-2 border border-white/40 hover:border-white/70 text-white/85 hover:text-white font-bold px-7 py-4 text-sm uppercase tracking-wider transition-colors"
                     >
                       Cotizar por WhatsApp
                     </a>
@@ -197,7 +197,7 @@ export default function HeroBanner() {
               </div>
 
               {/* Slide counter */}
-              <div className="absolute bottom-8 right-8 text-white/25 text-xs font-bold tracking-widest">
+              <div className="absolute bottom-8 right-8 text-white/40 text-xs font-bold tracking-widest">
                 {String(i + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}
               </div>
             </div>
@@ -205,35 +205,34 @@ export default function HeroBanner() {
         ))}
       </Swiper>
 
-      {/* Custom navigation arrows */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20">
-        <button
-          onClick={() => swiperRef.current?.slidePrev()}
-          className="w-9 h-9 border border-white/20 hover:border-white/50 flex items-center justify-center text-white/50 hover:text-white transition-all"
-          aria-label="Anterior"
-        >
-          <ArrowLeft size={15} />
-        </button>
+      {/* Arrow — izquierda, centrada verticalmente */}
+      <button
+        onClick={() => swiperRef.current?.slidePrev()}
+        className="absolute left-4 lg:left-6 top-1/2 -translate-y-1/2 z-20 w-11 h-11 border border-white/25 hover:border-white/60 bg-black/20 hover:bg-black/40 flex items-center justify-center text-white/70 hover:text-white transition-all backdrop-blur-sm"
+        aria-label="Anterior"
+      >
+        <ArrowLeft size={17} />
+      </button>
 
-        {/* Dot indicators */}
-        <div className="flex gap-1.5">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => swiperRef.current?.slideTo(i)}
-              className="w-6 h-0.5 bg-white/20 hover:bg-white/60 transition-colors"
-              aria-label={`Ir al slide ${i + 1}`}
-            />
-          ))}
-        </div>
+      {/* Arrow — derecha, centrada verticalmente */}
+      <button
+        onClick={() => swiperRef.current?.slideNext()}
+        className="absolute right-4 lg:right-6 top-1/2 -translate-y-1/2 z-20 w-11 h-11 border border-white/25 hover:border-white/60 bg-black/20 hover:bg-black/40 flex items-center justify-center text-white/70 hover:text-white transition-all backdrop-blur-sm"
+        aria-label="Siguiente"
+      >
+        <ArrowRight size={17} />
+      </button>
 
-        <button
-          onClick={() => swiperRef.current?.slideNext()}
-          className="w-9 h-9 border border-white/20 hover:border-white/50 flex items-center justify-center text-white/50 hover:text-white transition-all"
-          aria-label="Siguiente"
-        >
-          <ArrowRight size={15} />
-        </button>
+      {/* Dots — centrados en la parte inferior */}
+      <div className="absolute bottom-7 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+        {slides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => swiperRef.current?.slideTo(i)}
+            className="w-7 h-0.5 bg-white/25 hover:bg-white/70 transition-colors"
+            aria-label={`Ir al slide ${i + 1}`}
+          />
+        ))}
       </div>
 
       {/* Stats bar at bottom */}
@@ -242,7 +241,7 @@ export default function HeroBanner() {
           <div className="flex items-center gap-8 pb-8">
             <div className="flex items-center gap-2 mr-4">
               <Zap size={11} className="text-primary" />
-              <span className="text-[9px] text-white/25 uppercase tracking-widest font-bold">Stock disponible</span>
+              <span className="text-[9px] text-white/50 uppercase tracking-widest font-bold">Stock disponible</span>
             </div>
             {[
               { value: `${products.length}+`, label: "Productos" },
@@ -251,8 +250,8 @@ export default function HeroBanner() {
               { value: "B2B", label: "Especializado" },
             ].map(({ value, label }) => (
               <div key={label} className="flex items-center gap-2">
-                <span className="text-sm font-black text-white/60">{value}</span>
-                <span className="text-[9px] text-white/25 uppercase tracking-widest">{label}</span>
+                <span className="text-sm font-black text-white/80">{value}</span>
+                <span className="text-[9px] text-white/45 uppercase tracking-widest">{label}</span>
               </div>
             ))}
           </div>
