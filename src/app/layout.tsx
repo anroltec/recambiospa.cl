@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
-import { Assistant } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
-
-const assistant = Assistant({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-});
+import { CartProvider } from "@/context/CartContext";
 
 const SITE_URL = "https://recambiospa.cl";
 
@@ -87,7 +82,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={assistant.className}>
+    <html lang="es">
       <body className="min-h-screen flex flex-col">
         <script
           type="application/ld+json"
@@ -117,10 +112,12 @@ export default function RootLayout({
         <a href="#main-content" className="sr-only focus:bg-primary focus:text-white focus:px-4 focus:py-2 focus:z-[100] focus:fixed focus:top-0 focus:left-0">
           Saltar al contenido principal
         </a>
-        <Header />
-        <main id="main-content" className="flex-1">{children}</main>
-        <Footer />
-        <WhatsAppButton />
+        <CartProvider>
+          <Header />
+          <main id="main-content" className="flex-1">{children}</main>
+          <Footer />
+          <WhatsAppButton />
+        </CartProvider>
       </body>
     </html>
   );
