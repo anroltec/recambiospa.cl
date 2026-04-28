@@ -1,63 +1,26 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  Search,
-  ShoppingCart,
-  User,
-  Menu,
-  X,
-  ChevronDown,
-  Phone,
-  Truck,
-} from "lucide-react";
-
-const catalogCategories = [
-  { name: "AMARRAS", href: "/collections/amarras" },
-  { name: "BATERÍAS", href: "/collections/baterias" },
-  { name: "CALEFACCIÓN", href: "/collections/calefaccion" },
-  { name: "EXTINTORES", href: "/collections/extintores" },
-  { name: "HERRAMIENTAS", href: "/collections/herramientas" },
-  { name: "ILUMINACIÓN", href: "/collections/iluminacion" },
-  { name: "KIT ESPECIALES", href: "/collections/kit-especiales" },
-  { name: "OTROS", href: "/collections/otros" },
-];
-
-const lightVehicles = [
-  { name: "Seguridad", href: "/vehiculos-livianos/seguridad" },
-  { name: "Eléctrico", href: "/vehiculos-livianos/electrico" },
-  { name: "Herramientas", href: "/vehiculos-livianos/herramientas" },
-];
-
-const heavyVehicles = [
-  { name: "Buses y camiones", href: "/vehiculos-pesados/buses-camiones" },
-  { name: "Otros", href: "/vehiculos-pesados/otros" },
-];
-
-const navLinks = [
-  { label: "Inicio", href: "/" },
-  { label: "Nosotros", href: "/nosotros" },
-  { label: "Catálogo", href: "/collections", dropdown: "catalog" },
-  { label: "Vehículos livianos", href: "/vehiculos-livianos", dropdown: "light" },
-  { label: "Vehículos pesados", href: "/vehiculos-pesados", dropdown: "heavy" },
-  { label: "Marcas", href: "/marcas" },
-  { label: "Contacto", href: "/contacto" },
-];
-
-function getDropdownItems(key: string) {
-  if (key === "catalog") return catalogCategories;
-  if (key === "light") return lightVehicles;
-  if (key === "heavy") return heavyVehicles;
-  return [];
-}
+import { Search, ShoppingCart, User, Menu, X, ChevronDown, Phone, Truck } from "lucide-react";
+import { navLinks, getDropdownItems } from "@/data/navigation";
+import { useMenu } from "@/hooks/useMenu";
+import { useCart } from "@/context/CartContext";
 
 export default function Header() {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [mobileDropdown, setMobileDropdown] = useState<string | null>(null);
-  const [searchOpen, setSearchOpen] = useState(false);
+  const { totalQuantity } = useCart();
+  const {
+    mobileOpen,
+    openDropdown,
+    mobileDropdown,
+    searchOpen,
+    toggleMobile,
+    toggleSearch,
+    openDesktopDropdown,
+    closeDesktopDropdown,
+    toggleMobileDropdown,
+    closeMobile,
+  } = useMenu();
 
   return (
     <header className="sticky top-0 z-50">
@@ -80,22 +43,13 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Main header row - logo, search, cart */}
+      {/* Main header row */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-6">
-          {/* Logo */}
           <Link href="/" className="flex-shrink-0">
-            <Image
-              src="/logo.svg"
-              alt="Recambio SPA"
-              width={240}
-              height={80}
-              className="h-16 w-auto"
-              priority
-            />
+            <Image src="/logo.svg" alt="Recambio SPA" width={240} height={80} className="h-16 w-auto" priority />
           </Link>
 
-          {/* Search bar - desktop */}
           <div className="hidden md:flex flex-1 max-w-2xl">
             <div className="relative w-full">
               <input
@@ -109,12 +63,8 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Right icons */}
           <div className="flex items-center gap-4">
-            <button
-              className="md:hidden text-dark"
-              onClick={() => setSearchOpen(!searchOpen)}
-            >
+            <button className="md:hidden text-dark" onClick={toggleSearch}>
               <Search size={22} />
             </button>
             <Link href="/cuenta" className="text-dark hover:text-primary transition-colors">
@@ -122,20 +72,18 @@ export default function Header() {
             </Link>
             <Link href="/carrito" className="relative text-dark hover:text-primary transition-colors">
               <ShoppingCart size={24} />
-              <span className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
-                0
-              </span>
+              {totalQuantity > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                  {totalQuantity > 99 ? "99+" : totalQuantity}
+                </span>
+              )}
             </Link>
-            <button
-              className="md:hidden text-dark"
-              onClick={() => setMobileOpen(!mobileOpen)}
-            >
+            <button className="md:hidden text-dark" onClick={toggleMobile}>
               {mobileOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
 
-        {/* Mobile search */}
         {searchOpen && (
           <div className="md:hidden px-4 pb-3">
             <div className="relative">
@@ -152,7 +100,7 @@ export default function Header() {
         )}
       </div>
 
-      {/* Navigation bar - feram style */}
+      {/* Navigation bar */}
       <nav className="bg-primary-dark hidden md:block">
         <div className="w-full">
           <ul className="flex items-center justify-center divide-x divide-white/20">
@@ -160,8 +108,8 @@ export default function Header() {
               <li
                 key={link.label}
                 className="relative"
-                onMouseEnter={() => link.dropdown && setOpenDropdown(link.dropdown)}
-                onMouseLeave={() => link.dropdown && setOpenDropdown(null)}
+                onMouseEnter={() => link.dropdown && openDesktopDropdown(link.dropdown)}
+                onMouseLeave={() => link.dropdown && closeDesktopDropdown()}
               >
                 <Link
                   href={link.href}
@@ -199,18 +147,14 @@ export default function Header() {
                   <Link
                     href={link.href}
                     className="flex-1 px-5 py-3.5 text-sm font-medium text-dark"
-                    onClick={() => !link.dropdown && setMobileOpen(false)}
+                    onClick={() => !link.dropdown && closeMobile()}
                   >
                     {link.label}
                   </Link>
                   {link.dropdown && (
                     <button
                       className="px-5 py-3.5 text-gray-400"
-                      onClick={() =>
-                        setMobileDropdown(
-                          mobileDropdown === link.dropdown ? null : link.dropdown!
-                        )
-                      }
+                      onClick={() => toggleMobileDropdown(link.dropdown!)}
                     >
                       <ChevronDown
                         size={16}
@@ -226,7 +170,7 @@ export default function Header() {
                         key={item.name}
                         href={item.href}
                         className="block px-8 py-2.5 text-sm text-dark/80 hover:text-primary border-b border-gray-100/50"
-                        onClick={() => setMobileOpen(false)}
+                        onClick={closeMobile}
                       >
                         {item.name}
                       </Link>

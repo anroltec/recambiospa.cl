@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Phone, Mail, MapPin } from "lucide-react";
+import { catalogCategories, footerHelpLinks } from "@/data/navigation";
+import { footerBrandLinks } from "@/data/brands";
 
 export default function Footer() {
   return (
@@ -10,13 +12,7 @@ export default function Footer() {
           {/* Company */}
           <div>
             <div className="mb-4">
-              <Image
-                src="/logo.svg"
-                alt="Recambio SPA"
-                width={180}
-                height={60}
-                className="h-10 w-auto brightness-0 invert"
-              />
+              <Image src="/logo.svg" alt="Recambio SPA" width={180} height={60} className="h-10 w-auto brightness-0 invert" />
             </div>
             <p className="text-sm text-gray-400 leading-relaxed mb-4">
               Importación y Distribución de Soluciones para Transporte.
@@ -41,10 +37,10 @@ export default function Footer() {
           <div>
             <h3 className="font-bold text-sm uppercase tracking-wider mb-4">Catálogo</h3>
             <ul className="space-y-2 text-sm text-gray-400">
-              {["Amarras", "Baterías", "Calefacción", "Extintores", "Herramientas", "Iluminación", "Kit Especiales", "Otros"].map((cat) => (
-                <li key={cat}>
-                  <Link href={`/collections/${cat.toLowerCase()}`} className="hover:text-white transition-colors">
-                    {cat}
+              {catalogCategories.map((cat) => (
+                <li key={cat.name}>
+                  <Link href={cat.href} className="hover:text-white transition-colors capitalize">
+                    {cat.name.charAt(0) + cat.name.slice(1).toLowerCase()}
                   </Link>
                 </li>
               ))}
@@ -55,10 +51,10 @@ export default function Footer() {
           <div>
             <h3 className="font-bold text-sm uppercase tracking-wider mb-4">Marcas</h3>
             <ul className="space-y-2 text-sm text-gray-400">
-              {["Braslux", "Henkel", "Loctite", "Mobileye", "Moura", "TEROSON", "Wurth"].map((brand) => (
-                <li key={brand}>
-                  <Link href={`/collections/${brand.toLowerCase()}`} className="hover:text-white transition-colors">
-                    {brand}
+              {footerBrandLinks.map((brand) => (
+                <li key={brand.name}>
+                  <Link href={brand.href} className="hover:text-white transition-colors">
+                    {brand.name}
                   </Link>
                 </li>
               ))}
@@ -69,10 +65,13 @@ export default function Footer() {
           <div>
             <h3 className="font-bold text-sm uppercase tracking-wider mb-4">Ayuda</h3>
             <ul className="space-y-2 text-sm text-gray-400 mb-6">
-              <li><Link href="/nosotros" className="hover:text-white transition-colors">Nosotros</Link></li>
-              <li><Link href="/contacto" className="hover:text-white transition-colors">Contacto</Link></li>
-              <li><Link href="/politica-privacidad" className="hover:text-white transition-colors">Política de Privacidad</Link></li>
-              <li><Link href="/terminos" className="hover:text-white transition-colors">Términos y Condiciones</Link></li>
+              {footerHelpLinks.map((link) => (
+                <li key={link.name}>
+                  <Link href={link.href} className="hover:text-white transition-colors">
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
 
             <h3 className="font-bold text-sm uppercase tracking-wider mb-3">Suscríbete</h3>
@@ -90,7 +89,6 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Bottom */}
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-500">
           <p>© 2026, Recambio spa</p>
