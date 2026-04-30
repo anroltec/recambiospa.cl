@@ -1,7 +1,12 @@
 export interface Product {
+  id?: string;
+  handle?: string;
+  variantId?: string | null;
+  variantTitle?: string | null;
   code: string;
   name: string;
   category: string;
+  categoryLabel?: string;
   brand: string;
   price: number | null;
   images: string[];

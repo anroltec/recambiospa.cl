@@ -1,6 +1,21 @@
 import type { NextConfig } from "next";
 
 const projectRoot = process.cwd();
+const shopifyStoreDomain = process.env.SHOPIFY_STORE_DOMAIN;
+
+const remoteImagePatterns = [
+  {
+    protocol: "https" as const,
+    hostname: "cdn.shopify.com",
+  },
+];
+
+if (shopifyStoreDomain) {
+  remoteImagePatterns.push({
+    protocol: "https" as const,
+    hostname: shopifyStoreDomain,
+  });
+}
 
 const nextConfig: NextConfig = {
   compress: true,
@@ -14,6 +29,7 @@ const nextConfig: NextConfig = {
   },
   images: {
     formats: ["image/avif", "image/webp"],
+    remotePatterns: remoteImagePatterns,
   },
   async headers() {
     return [

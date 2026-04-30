@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Phone, ShoppingCart, Check, Minus, Plus } from "lucide-react";
+import { Check, Minus, Phone, Plus, ShoppingCart } from "lucide-react";
 import type { Product } from "@/types/product";
 import { formatPrice } from "@/lib/format";
 import { useCart } from "@/context/CartContext";
@@ -20,6 +20,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
   const { addItem, isInCart } = useCart();
   const inCart = isInCart(product.code);
 
@@ -27,16 +28,21 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
     setQuantity((current) => Math.max(1, current + delta));
   }
 
-  function handleAddToCart() {
-    addItem(product, quantity);
-    setJustAdded(true);
-    window.setTimeout(() => setJustAdded(false), 2000);
+  async function handleAddToCart() {
+    setIsAdding(true);
+
+    try {
+      await addItem(product, quantity);
+      setJustAdded(true);
+      window.setTimeout(() => setJustAdded(false), 2000);
+    } finally {
+      setIsAdding(false);
+    }
   }
 
   return (
     <Modal onClose={onClose}>
       <div className="md:flex">
-        {/* Image gallery */}
         <div className="md:w-1/2 p-6">
           <div className="relative aspect-square bg-gray-50 border border-gray-100 mb-3">
             <Image
@@ -49,26 +55,33 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
           </div>
           {product.images.length > 1 && (
             <div className="flex gap-2">
-              {product.images.map((img, idx) => (
+              {product.images.map((image, index) => (
                 <button
-                  key={idx}
-                  onClick={() => setSelectedImage(idx)}
+                  key={image + index}
+                  onClick={() => setSelectedImage(index)}
                   className={`relative w-16 h-16 border-2 transition-colors ${
-                    selectedImage === idx ? "border-primary" : "border-gray-200 hover:border-gray-400"
+                    selectedImage === index ? "border-primary" : "border-gray-200 hover:border-gray-400"
                   }`}
                 >
-                  <Image src={img} alt={`${product.name} ${idx + 1}`} fill className="object-contain p-1" />
+                  <Image
+                    src={image}
+                    alt={`${product.name} ${index + 1}`}
+                    fill
+                    className="object-contain p-1"
+                  />
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* Product info */}
         <div className="md:w-1/2 p-6 md:pl-0">
           <div className="flex items-center gap-2 mb-3">
             <Badge label={product.brand} />
-            <Badge label={product.inStock ? "En Stock" : "Sin Stock"} variant={product.inStock ? "success" : "muted"} />
+            <Badge
+              label={product.inStock ? "En stock" : "Sin stock"}
+              variant={product.inStock ? "success" : "muted"}
+            />
           </div>
 
           <h2 className="text-xl font-bold text-dark mb-2 leading-snug">{product.name}</h2>
@@ -94,7 +107,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
                 <div className="flex items-center border border-gray-300">
                   <button
                     onClick={() => adjustQuantity(-1)}
-                    disabled={quantity <= 1}
+                    disabled={quantity <= 1 || isAdding}
                     className="px-3 py-2 text-dark hover:bg-light disabled:opacity-30 transition-colors"
                     aria-label="Reducir cantidad"
                   >
@@ -103,7 +116,8 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
                   <span className="w-10 text-center text-sm font-bold text-dark">{quantity}</span>
                   <button
                     onClick={() => adjustQuantity(1)}
-                    className="px-3 py-2 text-dark hover:bg-light transition-colors"
+                    disabled={isAdding}
+                    className="px-3 py-2 text-dark hover:bg-light disabled:opacity-30 transition-colors"
                     aria-label="Aumentar cantidad"
                   >
                     <Plus size={14} />
@@ -112,19 +126,22 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
               </div>
 
               <Button
-                onClick={handleAddToCart}
+                onClick={() => {
+                  void handleAddToCart();
+                }}
                 fullWidth
                 variant={justAdded ? "outline" : "primary"}
                 className={justAdded ? "border-green-600 text-green-700" : ""}
               >
                 {justAdded ? (
                   <span className="flex items-center justify-center gap-2">
-                    <Check size={16} /> Agregado al carrito
+                    <Check size={16} />
+                    Agregado al carrito
                   </span>
                 ) : (
                   <span className="flex items-center justify-center gap-2">
                     <ShoppingCart size={16} />
-                    {inCart ? "Agregar más" : "Agregar al carrito"}
+                    {isAdding ? "Agregando..." : inCart ? "Agregar mas" : "Agregar al carrito"}
                   </span>
                 )}
               </Button>
@@ -143,7 +160,9 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
 
           {Object.keys(product.specs).length > 0 && (
             <div className="mb-5">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-dark mb-2">Especificaciones</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-dark mb-2">
+                Especificaciones
+              </h3>
               <table className="w-full text-xs">
                 <tbody>
                   {Object.entries(product.specs).map(([key, value]) => (

@@ -1,53 +1,45 @@
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { categories, brands } from "@/data/products";
-import { brandLogos } from "@/data/brands";
 import CatalogListing from "@/components/catalog/CatalogListing";
+import { getCatalogData, resolveCatalogSlug } from "@/lib/catalog";
 
 interface Props {
   params: Promise<{ category: string }>;
 }
 
-function resolveSlug(slug: string): { type: "category" | "brand"; label: string; value: string } | null {
-  // Check categories
-  const cat = categories.find((c) => c.id === slug);
-  if (cat) return { type: "category", label: cat.name, value: cat.id };
-
-  // Check brands (from brandLogos slugs and products brands array)
-  const brandLogo = brandLogos.find((b) => b.href === `/collections/${slug}`);
-  if (brandLogo) {
-    const match = brands.find((b) => b.toLowerCase() === brandLogo.name.toLowerCase());
-    return { type: "brand", label: brandLogo.name, value: match ?? brandLogo.name };
-  }
-
-  return null;
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category } = await params;
-  const resolved = resolveSlug(category);
-  if (!resolved) return {};
-  const prefix = resolved.type === "category" ? "Categoría" : "Marca";
+  const resolved = await resolveCatalogSlug(category);
+
+  if (!resolved) {
+    return {};
+  }
+
+  const prefix = resolved.type === "category" ? "Categoria" : "Marca";
+
   return {
     title: `${resolved.label} | Recambio SPA`,
-    description: `${prefix}: ${resolved.label} — repuestos y accesorios para transporte.`,
+    description: `${prefix}: ${resolved.label} - repuestos y accesorios para transporte.`,
   };
 }
 
 export default async function CategoryPage({ params }: Props) {
   const { category } = await params;
-  const resolved = resolveSlug(category);
+  const resolved = await resolveCatalogSlug(category);
 
-  if (!resolved) notFound();
+  if (!resolved) {
+    notFound();
+  }
+
+  const { products, categories, brands } = await getCatalogData();
 
   return (
-    <Suspense>
-      {resolved.type === "category" ? (
-        <CatalogListing initialCategory={resolved.value} />
-      ) : (
-        <CatalogListing initialBrand={resolved.value} />
-      )}
-    </Suspense>
+    <CatalogListing
+      products={products}
+      categories={categories}
+      brands={brands}
+      initialCategory={resolved.type === "category" ? resolved.value : ""}
+      initialBrand={resolved.type === "brand" ? resolved.value : ""}
+    />
   );
 }

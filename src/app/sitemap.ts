@@ -1,12 +1,13 @@
 import type { MetadataRoute } from "next";
-import { products, categories, brands } from "@/data/products";
+import { getCatalogData } from "@/lib/catalog";
+import { brandDirectory, categoryDirectory, slugify } from "@/lib/catalog-taxonomy";
 
 const SITE_URL = "https://recambiospa.cl";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
+  const { products, brands } = await getCatalogData();
 
-  // Static pages
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: SITE_URL,
@@ -52,23 +53,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
-  // Category pages
-  const categoryPages: MetadataRoute.Sitemap = categories.map((cat) => ({
-    url: `${SITE_URL}/collections/${cat.id}`,
+  const categoryPages: MetadataRoute.Sitemap = categoryDirectory.map((category) => ({
+    url: `${SITE_URL}/collections/${category.id}`,
     lastModified: now,
     changeFrequency: "weekly",
     priority: 0.8,
   }));
 
-  // Brand pages
-  const brandPages: MetadataRoute.Sitemap = brands.map((brand) => ({
-    url: `${SITE_URL}/collections/${brand.toLowerCase()}`,
-    lastModified: now,
-    changeFrequency: "weekly",
-    priority: 0.7,
-  }));
+  const brandPages: MetadataRoute.Sitemap = [...new Set([...brandDirectory, ...brands])].map(
+    (brand) => ({
+      url: `${SITE_URL}/collections/${slugify(brand)}`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    })
+  );
 
-  // Product pages
   const productPages: MetadataRoute.Sitemap = products.map((product) => ({
     url: `${SITE_URL}/producto/${product.code}`,
     lastModified: now,
