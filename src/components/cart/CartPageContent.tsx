@@ -6,6 +6,7 @@ import {
   ArrowRight,
   CheckCircle2,
   ClipboardList,
+  CreditCard,
   Mail,
   MessageCircle,
   Minus,
@@ -18,24 +19,24 @@ import {
   Wrench,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
-import { products } from "@/data/products";
 import { formatPrice } from "@/lib/format";
 import Badge from "@/components/ui/Badge";
+import type { Product } from "@/types/product";
 
 const processSteps = [
   {
-    title: "Revisamos compatibilidad",
-    description: "Validamos referencias, stock disponible y cualquier dato tecnico relevante antes de responder.",
+    title: "Revisa tu carrito",
+    description: "Confirma productos, cantidades y referencias antes de salir al checkout.",
     icon: ClipboardList,
   },
   {
-    title: "Preparamos tu cotizacion",
-    description: "Te enviamos precios, alternativas y observaciones para que cierres el pedido con menos friccion.",
-    icon: CheckCircle2,
+    title: "Completa el checkout",
+    description: "Finaliza el pedido en Shopify con tus datos, despacho y metodo de pago.",
+    icon: CreditCard,
   },
   {
     title: "Coordinamos despacho",
-    description: "Una vez confirmado, dejamos trazado el retiro o envio a la region que corresponda.",
+    description: "Con la compra confirmada, seguimos con la preparacion y entrega del pedido.",
     icon: Truck,
   },
 ];
@@ -43,13 +44,13 @@ const processSteps = [
 const supportCards = [
   {
     title: "Soporte tecnico",
-    description: "Si tienes dudas de compatibilidad, te ayudamos a depurar la referencia correcta antes de comprar.",
+    description: "Si tienes dudas de compatibilidad, te ayudamos a validar la referencia correcta antes de pagar.",
     icon: Wrench,
     tone: "dark" as const,
   },
   {
     title: "Cobertura nacional",
-    description: "Trabajamos cotizaciones para Santiago y regiones, con coordinacion de despacho segun volumen.",
+    description: "Despachamos a Santiago y regiones, con coordinacion segun volumen y disponibilidad.",
     icon: ShieldCheck,
     tone: "sand" as const,
   },
@@ -57,8 +58,8 @@ const supportCards = [
 
 const emptyHighlights = [
   "Busqueda rapida por SKU, marca o nombre de producto.",
-  "Cotizacion por WhatsApp con el resumen del pedido listo.",
-  "Asistencia para validar compatibilidad antes de cerrar.",
+  "Checkout Shopify para cerrar el pedido con un flujo mas directo.",
+  "Asistencia comercial si necesitas validar compatibilidad antes de pagar.",
 ];
 
 function buildWhatsAppHref(
@@ -81,12 +82,25 @@ function buildWhatsAppHref(
   return `https://wa.me/?text=${encodeURIComponent(lines.join("\n"))}`;
 }
 
-export default function CartPageContent() {
-  const { items, totalQuantity, totalPrice, updateQuantity, removeItem, clearCart } = useCart();
+interface CartPageContentProps {
+  catalogProducts: Product[];
+}
+
+export default function CartPageContent({ catalogProducts }: CartPageContentProps) {
+  const {
+    items,
+    totalQuantity,
+    totalPrice,
+    checkoutUrl,
+    isLoading,
+    updateQuantity,
+    removeItem,
+    clearCart,
+  } = useCart();
   const cartCodes = new Set(items.map((item) => item.product.code));
   const uniqueBrands = [...new Set(items.map((item) => item.product.brand))];
   const uniqueCategories = [...new Set(items.map((item) => item.product.category))];
-  const suggestedProducts = products
+  const suggestedProducts = catalogProducts
     .filter((product) => !cartCodes.has(product.code))
     .filter((product) =>
       items.length === 0
@@ -107,8 +121,8 @@ export default function CartPageContent() {
                 Tu carrito todavia esta vacio
               </h2>
               <p className="mt-4 max-w-xl text-sm text-white/70 leading-relaxed">
-                Agrega referencias desde el catalogo y deja listo el resumen para cotizar sin tener
-                que volver a escribir codigos o cantidades.
+                Agrega referencias desde el catalogo y deja listo el pedido para continuar a
+                checkout cuando quieras.
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
@@ -130,15 +144,15 @@ export default function CartPageContent() {
               <div className="mt-8 grid gap-3 sm:grid-cols-3">
                 <div className="bg-white/6 px-4 py-4">
                   <p className="text-[10px] uppercase tracking-[0.2em] text-white/35 mb-1">Rapido</p>
-                  <p className="text-sm font-bold">Arma tu pedido sin rehacer mensajes.</p>
+                  <p className="text-sm font-bold">Arma el pedido sin rehacer tu seleccion.</p>
                 </div>
                 <div className="bg-white/6 px-4 py-4">
                   <p className="text-[10px] uppercase tracking-[0.2em] text-white/35 mb-1">Claro</p>
-                  <p className="text-sm font-bold">SKU, cantidades y resumen quedan listos.</p>
+                  <p className="text-sm font-bold">SKU, cantidades y checkout quedan listos.</p>
                 </div>
                 <div className="bg-white/6 px-4 py-4">
                   <p className="text-[10px] uppercase tracking-[0.2em] text-white/35 mb-1">Asistido</p>
-                  <p className="text-sm font-bold">Te ayudamos a validar compatibilidad.</p>
+                  <p className="text-sm font-bold">Seguimos disponibles para validar compatibilidad.</p>
                 </div>
               </div>
             </div>
@@ -170,7 +184,7 @@ export default function CartPageContent() {
                 </h3>
               </div>
               <p className="text-sm text-dark/55 max-w-xl">
-                Una seleccion rapida para que pruebes el flujo de cotizacion y armado de pedido.
+                Una seleccion rapida para poblar el carrito y probar el flujo real de compra.
               </p>
             </div>
 
@@ -233,7 +247,9 @@ export default function CartPageContent() {
               </p>
             </div>
             <button
-              onClick={clearCart}
+              onClick={() => {
+                void clearCart();
+              }}
               className="text-xs font-bold uppercase tracking-wide text-dark/45 hover:text-primary transition-colors"
             >
               Vaciar carrito
@@ -284,7 +300,9 @@ export default function CartPageContent() {
                         </div>
 
                         <button
-                          onClick={() => removeItem(item.product.code)}
+                          onClick={() => {
+                            void removeItem(item.product.code);
+                          }}
                           className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-dark/45 hover:text-primary transition-colors"
                         >
                           <Trash2 size={14} />
@@ -297,7 +315,9 @@ export default function CartPageContent() {
                           <p className="text-xs text-dark/50 uppercase tracking-wide mb-2">Cantidad</p>
                           <div className="inline-flex items-center gap-1 bg-[#f3f0ea] p-1">
                             <button
-                              onClick={() => updateQuantity(item.product.code, item.quantity - 1)}
+                              onClick={() => {
+                                void updateQuantity(item.product.code, item.quantity - 1);
+                              }}
                               disabled={item.quantity <= 1}
                               className="h-9 w-9 flex items-center justify-center bg-white text-dark hover:bg-white/80 disabled:opacity-30 transition-colors"
                               aria-label="Reducir cantidad"
@@ -306,7 +326,9 @@ export default function CartPageContent() {
                             </button>
                             <span className="min-w-10 px-2 text-center text-sm font-bold text-dark">{item.quantity}</span>
                             <button
-                              onClick={() => updateQuantity(item.product.code, item.quantity + 1)}
+                              onClick={() => {
+                                void updateQuantity(item.product.code, item.quantity + 1);
+                              }}
                               className="h-9 w-9 flex items-center justify-center bg-white text-dark hover:bg-white/80 transition-colors"
                               aria-label="Aumentar cantidad"
                             >
@@ -318,7 +340,7 @@ export default function CartPageContent() {
                         <div className="text-left md:text-right">
                           <p className="text-xs text-dark/50 uppercase tracking-wide mb-2">Subtotal</p>
                           <p className="text-lg font-black text-dark">{formatPrice(lineTotal)}</p>
-                          <p className="text-xs text-dark/45">Precio neto + IVA</p>
+                          <p className="text-xs text-dark/45">Total por linea</p>
                         </div>
                       </div>
                     </div>
@@ -340,25 +362,45 @@ export default function CartPageContent() {
                   <span>{totalQuantity}</span>
                 </div>
                 <div className="flex items-center justify-between text-white/65">
-                  <span>Subtotal neto</span>
+                  <span>Subtotal productos</span>
                   <span>{formatPrice(totalPrice)}</span>
                 </div>
                 <div className="flex items-center justify-between text-white/65">
-                  <span>IVA estimado</span>
+                  <span>IVA referencial</span>
                   <span>{formatPrice(estimatedIva)}</span>
                 </div>
                 <div className="pt-3 border-t border-white/10 flex items-center justify-between">
-                  <span className="font-bold uppercase tracking-wide">Total aprox.</span>
+                  <span className="font-bold uppercase tracking-wide">Total estimado</span>
                   <span className="text-2xl font-black">{formatPrice(totalWithIva)}</span>
                 </div>
               </div>
 
               <p className="mt-4 text-xs text-white/45 leading-relaxed">
-                Los precios publicados son netos. El total mostrado considera IVA referencial para
-                que puedas proyectar mejor el pedido.
+                El checkout final se completa en Shopify. Despacho, impuestos finales y medios de
+                pago se confirman en ese paso.
               </p>
 
               <div className="mt-6 space-y-3">
+                {checkoutUrl ? (
+                  <a
+                    href={checkoutUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 text-sm uppercase tracking-wide transition-colors"
+                  >
+                    <CreditCard size={18} />
+                    Ir a checkout
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    disabled
+                    className="flex items-center justify-center gap-2 w-full bg-white/10 text-white/40 font-bold py-3 text-sm uppercase tracking-wide cursor-not-allowed"
+                  >
+                    <CreditCard size={18} />
+                    {isLoading ? "Cargando carrito..." : "Checkout no disponible"}
+                  </button>
+                )}
                 <a
                   href={whatsappHref}
                   target="_blank"
@@ -366,7 +408,7 @@ export default function CartPageContent() {
                   className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1da851] text-white font-bold py-3 text-sm uppercase tracking-wide transition-colors"
                 >
                   <MessageCircle size={18} />
-                  Cotizar por WhatsApp
+                  Consultar por WhatsApp
                 </a>
                 <Link
                   href="/collections"
@@ -415,8 +457,8 @@ export default function CartPageContent() {
             </h3>
           </div>
           <p className="text-sm text-dark/55 max-w-xl">
-            El carrito no termina en un checkout automatico: aqui prepara una cotizacion clara para
-            que la respuesta comercial sea mas precisa.
+            El carrito ya no termina en una cotizacion manual. Desde aqui pasas al checkout y
+            luego seguimos con validacion y despacho.
           </p>
         </div>
 

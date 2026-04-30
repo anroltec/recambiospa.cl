@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { CartProvider } from "@/context/CartContext";
+import { hasShopifyStorefrontEnv } from "@/lib/env";
 
 const SITE_URL = "https://recambiospa.cl";
 
@@ -81,6 +82,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const shopifyEnabled = hasShopifyStorefrontEnv();
+
   return (
     <html lang="es">
       <body className="min-h-screen flex flex-col">
@@ -112,7 +115,7 @@ export default function RootLayout({
         <a href="#main-content" className="sr-only focus:bg-primary focus:text-white focus:px-4 focus:py-2 focus:z-[100] focus:fixed focus:top-0 focus:left-0">
           Saltar al contenido principal
         </a>
-        <CartProvider>
+        <CartProvider shopifyEnabled={shopifyEnabled}>
           <Header />
           <main id="main-content" className="flex-1">{children}</main>
           <Footer />
