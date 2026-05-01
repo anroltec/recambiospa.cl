@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Sitio de Recambio SPA construido con [Next.js](https://nextjs.org) 16, React 19 y Tailwind CSS 4.
 
-## Getting Started
+## Desarrollo local
 
-First, run the development server:
+1. Crea o completa tus variables en `.env.local`.
+2. Levanta el servidor:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variables de entorno
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Shopify
 
-## Learn More
+- `SHOPIFY_STORE_DOMAIN`: dominio `*.myshopify.com` de la tienda.
+- `SHOPIFY_STOREFRONT_ACCESS_TOKEN`: token de Storefront API usado por catalogo, carrito y checkout.
+- `SHOPIFY_ADMIN_ACCESS_TOKEN`: token de Admin API usado para leer pedidos pagados.
+- `SHOPIFY_API_SECRET`: secret de la app, usado para validar la firma HMAC del webhook.
+- `SHOPIFY_WEBHOOK_BASE_URL`: URL publica base para los webhooks, por ejemplo `https://recambiospa.cl/api/shopify/webhooks`.
 
-To learn more about Next.js, take a look at the following resources:
+Importante: la `SHOPIFY_API_SECRET` por si sola no habilita la integracion completa. Para que funcionen carrito, checkout y el webhook `orders/paid`, tambien deben existir el dominio y ambos tokens.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Defontana
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `DEFONTANA_CLIENT`
+- `DEFONTANA_COMPANY`
+- `DEFONTANA_USER`
+- `DEFONTANA_PASSWORD`
+- `DEFONTANA_SELLER_CODE`
+- `DEFONTANA_WAREHOUSE_CODE`
+- `DEFONTANA_PRICE_LIST_CODE`
+- `DEFONTANA_DOCUMENT_TYPE`
 
-## Deploy on Vercel
+## Flujo Shopify implementado
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `src/app/api/shopify/cart/route.ts`: crea y consulta carritos en Shopify.
+- `src/app/api/shopify/cart/lines/route.ts`: agrega, actualiza y elimina lineas del carrito.
+- `src/app/api/shopify/webhooks/orders-paid/route.ts`: valida la firma del webhook y prepara la sincronizacion del pedido pagado hacia Defontana.
+- `src/lib/shopify.ts`: cliente Storefront API.
+- `src/lib/shopify-admin.ts`: cliente Admin API para pedidos.
+- `src/lib/shopify-webhooks.ts`: verificacion HMAC del webhook.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Pendiente para cerrar la integracion
+
+1. Completar `SHOPIFY_STORE_DOMAIN`, `SHOPIFY_STOREFRONT_ACCESS_TOKEN` y `SHOPIFY_ADMIN_ACCESS_TOKEN`.
+2. Configurar en Shopify el webhook `orders/paid` apuntando a `/api/shopify/webhooks/orders-paid`.
+3. Completar las credenciales de Defontana para pasar de `draft` a sincronizacion real del pedido.
