@@ -1,5 +1,6 @@
 import { PackageSearch } from "lucide-react";
 import type { Product } from "@/types/product";
+import { getProductListKey } from "@/lib/product";
 import ProductCard from "./ProductCard";
 
 interface ProductGridProps {
@@ -39,7 +40,7 @@ export default function ProductGrid({
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3">
       {products.map((product) => (
         <ProductCard
-          key={product.code}
+          key={getProductListKey(product)}
           product={product}
           onClick={onProductClick ? () => onProductClick(product) : undefined}
         />

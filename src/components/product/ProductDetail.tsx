@@ -114,7 +114,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               </p>
             </>
           ) : (
-            <p className="text-xl text-gray-400 italic mb-6">Precio a consultar</p>
+            <p className="text-xl text-gray-400 italic mb-6">Sin compra online</p>
           )}
 
           {product.description && (

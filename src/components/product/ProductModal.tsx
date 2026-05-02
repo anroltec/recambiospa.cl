@@ -93,7 +93,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
               <span className="text-sm text-gray-400">+ IVA</span>
             </div>
           ) : (
-            <p className="text-lg text-gray-500 italic mb-4">Precio a consultar</p>
+            <p className="text-lg text-gray-500 italic mb-4">Sin compra online</p>
           )}
 
           {product.description && (

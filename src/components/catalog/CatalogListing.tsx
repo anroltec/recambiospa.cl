@@ -16,6 +16,7 @@ import PageHero from "@/components/ui/PageHero";
 import ProductModal from "@/components/product/ProductModal";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/format";
+import { getProductListKey } from "@/lib/product";
 import type { Category, Product } from "@/types/product";
 
 type SortOption = "name-asc" | "name-desc" | "price-asc" | "price-desc";
@@ -392,7 +393,7 @@ export default function CatalogListing({
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                   {paginatedProducts.map((product) => (
                     <div
-                      key={product.code}
+                      key={getProductListKey(product)}
                       className="bg-white border border-gray-200 group hover:shadow-lg hover:border-primary/30 transition-all duration-200 cursor-pointer"
                       onClick={() => setSelectedProduct(product)}
                     >
@@ -429,7 +430,7 @@ export default function CatalogListing({
                             <p className="text-xs text-steel">+ IVA</p>
                           </div>
                         ) : (
-                          <p className="text-sm font-semibold text-dark/50">Consultar precio</p>
+                          <p className="text-sm font-semibold text-dark/50">Sin compra online</p>
                         )}
                         <button
                           className="w-full mt-3 bg-primary hover:bg-primary-dark text-white text-sm font-medium py-2 transition-colors"
@@ -452,10 +453,10 @@ export default function CatalogListing({
                                   Agregado
                                 </span>
                               )
-                              : isInCart(product.code)
+                            : isInCart(product.code)
                                 ? "Agregar mas"
                                 : "Agregar al carrito"
-                            : "Cotizar"}
+                            : "Sin compra online"}
                         </button>
                       </div>
                     </div>
