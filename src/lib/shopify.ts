@@ -7,6 +7,10 @@ interface ShopifyGraphQLResponse<T> {
   errors?: { message: string }[];
 }
 
+interface ShopifyFetchOptions {
+  buyerIp?: string | null;
+}
+
 interface PageInfo {
   hasNextPage: boolean;
   endCursor: string | null;
@@ -90,16 +94,27 @@ export interface ShopifyCart {
 
 async function shopifyFetch<T>(
   query: string,
-  variables?: Record<string, unknown>
+  variables?: Record<string, unknown>,
+  options: ShopifyFetchOptions = {}
 ): Promise<T> {
   const { storeDomain, storefrontAccessToken, apiVersion } = getShopifyStorefrontEnv();
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+
+  if (storefrontAccessToken.startsWith("shpat_")) {
+    headers["Shopify-Storefront-Private-Token"] = storefrontAccessToken;
+
+    if (options.buyerIp) {
+      headers["Shopify-Storefront-Buyer-IP"] = options.buyerIp;
+    }
+  } else {
+    headers["X-Shopify-Storefront-Access-Token"] = storefrontAccessToken;
+  }
 
   const response = await fetch(`https://${storeDomain}/api/${apiVersion}/graphql.json`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Shopify-Storefront-Access-Token": storefrontAccessToken,
-    },
+    headers,
     body: JSON.stringify({ query, variables }),
     next: { revalidate: 60 },
   });
@@ -298,7 +313,10 @@ export async function getProductsByCollection(
   return data.collection?.products.edges.map((edge) => edge.node) ?? [];
 }
 
-export async function getCart(cartId: string): Promise<ShopifyCart | null> {
+export async function getCart(
+  cartId: string,
+  options: ShopifyFetchOptions = {}
+): Promise<ShopifyCart | null> {
   const data = await shopifyFetch<{
     cart: ShopifyCart | null;
   }>(
@@ -309,13 +327,14 @@ export async function getCart(cartId: string): Promise<ShopifyCart | null> {
         }
       }
     `,
-    { cartId }
+    { cartId },
+    options
   );
 
   return data.cart;
 }
 
-export async function createCart(): Promise<ShopifyCart> {
+export async function createCart(options: ShopifyFetchOptions = {}): Promise<ShopifyCart> {
   const data = await shopifyFetch<{
     cartCreate: {
       cart: ShopifyCart | null;
@@ -333,7 +352,9 @@ export async function createCart(): Promise<ShopifyCart> {
           }
         }
       }
-    `
+    `,
+    undefined,
+    options
   );
 
   return assertCart(data.cartCreate.cart, "creation");
@@ -342,7 +363,8 @@ export async function createCart(): Promise<ShopifyCart> {
 export async function addToCart(
   cartId: string,
   variantId: string,
-  quantity = 1
+  quantity = 1,
+  options: ShopifyFetchOptions = {}
 ): Promise<ShopifyCart> {
   const data = await shopifyFetch<{
     cartLinesAdd: {
@@ -365,7 +387,8 @@ export async function addToCart(
     {
       cartId,
       lines: [{ merchandiseId: variantId, quantity }],
-    }
+    },
+    options
   );
 
   return assertCart(data.cartLinesAdd.cart, "add");
@@ -374,7 +397,8 @@ export async function addToCart(
 export async function updateCartLine(
   cartId: string,
   lineId: string,
-  quantity: number
+  quantity: number,
+  options: ShopifyFetchOptions = {}
 ): Promise<ShopifyCart> {
   const data = await shopifyFetch<{
     cartLinesUpdate: {
@@ -397,13 +421,18 @@ export async function updateCartLine(
     {
       cartId,
       lines: [{ id: lineId, quantity }],
-    }
+    },
+    options
   );
 
   return assertCart(data.cartLinesUpdate.cart, "update");
 }
 
-export async function removeFromCart(cartId: string, lineId: string): Promise<ShopifyCart> {
+export async function removeFromCart(
+  cartId: string,
+  lineId: string,
+  options: ShopifyFetchOptions = {}
+): Promise<ShopifyCart> {
   const data = await shopifyFetch<{
     cartLinesRemove: {
       cart: ShopifyCart | null;
@@ -422,7 +451,8 @@ export async function removeFromCart(cartId: string, lineId: string): Promise<Sh
         }
       }
     `,
-    { cartId, lineIds: [lineId] }
+    { cartId, lineIds: [lineId] },
+    options
   );
 
   return assertCart(data.cartLinesRemove.cart, "remove");

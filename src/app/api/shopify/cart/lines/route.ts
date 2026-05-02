@@ -1,3 +1,4 @@
+import type { NextRequest } from "next/server";
 import { serializeShopifyCart } from "@/lib/catalog";
 import { addToCart, removeFromCart, updateCartLine } from "@/lib/shopify";
 
@@ -21,7 +22,17 @@ type RemoveLinePayload = {
   lineId?: string;
 };
 
-export async function POST(request: Request) {
+function getBuyerIp(request: NextRequest): string | null {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+
+  if (forwardedFor) {
+    return forwardedFor.split(",")[0]?.trim() || null;
+  }
+
+  return request.headers.get("cf-connecting-ip") || request.headers.get("x-real-ip");
+}
+
+export async function POST(request: NextRequest) {
   let payload: AddLinePayload;
 
   try {
@@ -38,7 +49,12 @@ export async function POST(request: Request) {
   }
 
   try {
-    const cart = await addToCart(payload.cartId, payload.variantId, payload.quantity ?? 1);
+    const cart = await addToCart(
+      payload.cartId,
+      payload.variantId,
+      payload.quantity ?? 1,
+      { buyerIp: getBuyerIp(request) }
+    );
     return Response.json({ ok: true, cart: serializeShopifyCart(cart) });
   } catch (error) {
     return Response.json(
@@ -51,7 +67,7 @@ export async function POST(request: Request) {
   }
 }
 
-export async function PATCH(request: Request) {
+export async function PATCH(request: NextRequest) {
   let payload: UpdateLinePayload;
 
   try {
@@ -68,7 +84,9 @@ export async function PATCH(request: Request) {
   }
 
   try {
-    const cart = await updateCartLine(payload.cartId, payload.lineId, payload.quantity);
+    const cart = await updateCartLine(payload.cartId, payload.lineId, payload.quantity, {
+      buyerIp: getBuyerIp(request),
+    });
     return Response.json({ ok: true, cart: serializeShopifyCart(cart) });
   } catch (error) {
     return Response.json(
@@ -81,7 +99,7 @@ export async function PATCH(request: Request) {
   }
 }
 
-export async function DELETE(request: Request) {
+export async function DELETE(request: NextRequest) {
   let payload: RemoveLinePayload;
 
   try {
@@ -98,7 +116,9 @@ export async function DELETE(request: Request) {
   }
 
   try {
-    const cart = await removeFromCart(payload.cartId, payload.lineId);
+    const cart = await removeFromCart(payload.cartId, payload.lineId, {
+      buyerIp: getBuyerIp(request),
+    });
     return Response.json({ ok: true, cart: serializeShopifyCart(cart) });
   } catch (error) {
     return Response.json(

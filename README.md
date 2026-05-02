@@ -16,7 +16,7 @@ Abre [http://localhost:3000](http://localhost:3000).
 ### Shopify
 
 - `SHOPIFY_STORE_DOMAIN`: dominio `*.myshopify.com` de la tienda.
-- `SHOPIFY_STOREFRONT_ACCESS_TOKEN`: token de Storefront API usado por catalogo, carrito y checkout.
+- `SHOPIFY_STOREFRONT_ACCESS_TOKEN`: token de Storefront API usado por catalogo, carrito y checkout. Puede ser publico o privado; si es privado, este proyecto lo envia con el header server-side correcto.
 - `SHOPIFY_ADMIN_ACCESS_TOKEN`: token de Admin API usado para leer pedidos pagados.
 - `SHOPIFY_API_SECRET`: secret de la app, usado para validar la firma HMAC del webhook.
 - `SHOPIFY_WEBHOOK_BASE_URL`: URL publica base para los webhooks, por ejemplo `https://recambiospa.cl/api/shopify/webhooks`.
