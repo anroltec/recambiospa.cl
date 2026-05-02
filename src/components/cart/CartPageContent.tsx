@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/format";
+import { getProductListKey } from "@/lib/product";
 import Badge from "@/components/ui/Badge";
 import type { Product } from "@/types/product";
 
@@ -84,9 +85,13 @@ function buildWhatsAppHref(
 
 interface CartPageContentProps {
   catalogProducts: Product[];
+  catalogUnavailable?: boolean;
 }
 
-export default function CartPageContent({ catalogProducts }: CartPageContentProps) {
+export default function CartPageContent({
+  catalogProducts,
+  catalogUnavailable = false,
+}: CartPageContentProps) {
   const {
     items,
     totalQuantity,
@@ -112,6 +117,18 @@ export default function CartPageContent({ catalogProducts }: CartPageContentProp
   if (items.length === 0) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-10 space-y-8">
+        {catalogUnavailable && (
+          <section className="border border-[#e5d3c5] bg-[#fcf5ef] px-6 py-5 text-sm text-dark/70">
+            <p className="font-bold uppercase tracking-wide text-dark">
+              No pudimos cargar productos sugeridos
+            </p>
+            <p className="mt-2">
+              Shopify no esta respondiendo en este momento. Tu carrito sigue disponible, pero las
+              recomendaciones del catalogo pueden no aparecer hasta que se restablezca la conexion.
+            </p>
+          </section>
+        )}
+
         <section className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
           <div className="relative overflow-hidden bg-primary-dark px-8 py-10 text-white md:px-10 md:py-12">
             <div className="absolute right-0 top-0 h-28 w-28 bg-white/[0.04]" />
@@ -191,7 +208,7 @@ export default function CartPageContent({ catalogProducts }: CartPageContentProp
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               {suggestedProducts.map((product) => (
                 <Link
-                  key={product.code}
+                  key={getProductListKey(product)}
                   href={`/producto/${product.code}`}
                   className="group flex h-full flex-col overflow-hidden bg-[#f7f3eb] transition-all duration-200 hover:-translate-y-1 hover:bg-white hover:shadow-[0_18px_40px_rgba(18,18,18,0.08)]"
                 >
@@ -236,6 +253,18 @@ export default function CartPageContent({ catalogProducts }: CartPageContentProp
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10 space-y-8">
+      {catalogUnavailable && (
+        <section className="border border-[#e5d3c5] bg-[#fcf5ef] px-6 py-5 text-sm text-dark/70">
+          <p className="font-bold uppercase tracking-wide text-dark">
+            Los productos relacionados no estan disponibles
+          </p>
+          <p className="mt-2">
+            Shopify no esta respondiendo en este momento. Puedes seguir revisando tu carrito y
+            continuar con soporte comercial si necesitas ayuda.
+          </p>
+        </section>
+      )}
+
       <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
         <section className="overflow-hidden bg-white shadow-[0_18px_60px_rgba(18,18,18,0.06)]">
           <div className="flex flex-col gap-3 px-6 py-6 md:flex-row md:items-center md:justify-between md:px-8">
@@ -493,7 +522,7 @@ export default function CartPageContent({ catalogProducts }: CartPageContentProp
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {suggestedProducts.map((product) => (
               <Link
-                key={product.code}
+                key={getProductListKey(product)}
                 href={`/producto/${product.code}`}
                 className="group flex h-full flex-col overflow-hidden bg-[#f7f3eb] transition-all duration-200 hover:-translate-y-1 hover:bg-white hover:shadow-[0_18px_40px_rgba(18,18,18,0.08)]"
               >

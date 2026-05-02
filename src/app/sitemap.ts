@@ -1,13 +1,11 @@
 import type { MetadataRoute } from "next";
-import { getCatalogData } from "@/lib/catalog";
+import { getCatalogData, isCatalogConnectionError } from "@/lib/catalog";
 import { brandDirectory, categoryDirectory, slugify } from "@/lib/catalog-taxonomy";
 
 const SITE_URL = "https://recambiospa.cl";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
-  const { products, brands } = await getCatalogData();
-
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: SITE_URL,
@@ -60,21 +58,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  const brandPages: MetadataRoute.Sitemap = [...new Set([...brandDirectory, ...brands])].map(
-    (brand) => ({
-      url: `${SITE_URL}/collections/${slugify(brand)}`,
+  try {
+    const { products, brands } = await getCatalogData();
+
+    const brandPages: MetadataRoute.Sitemap = [...new Set([...brandDirectory, ...brands])].map(
+      (brand) => ({
+        url: `${SITE_URL}/collections/${slugify(brand)}`,
+        lastModified: now,
+        changeFrequency: "weekly",
+        priority: 0.7,
+      })
+    );
+
+    const productPages: MetadataRoute.Sitemap = products.map((product) => ({
+      url: `${SITE_URL}/producto/${product.code}`,
       lastModified: now,
       changeFrequency: "weekly",
-      priority: 0.7,
-    })
-  );
+      priority: 0.8,
+    }));
 
-  const productPages: MetadataRoute.Sitemap = products.map((product) => ({
-    url: `${SITE_URL}/producto/${product.code}`,
-    lastModified: now,
-    changeFrequency: "weekly",
-    priority: 0.8,
-  }));
+    return [...staticPages, ...categoryPages, ...brandPages, ...productPages];
+  } catch (error) {
+    if (isCatalogConnectionError(error)) {
+      return [...staticPages, ...categoryPages];
+    }
 
-  return [...staticPages, ...categoryPages, ...brandPages, ...productPages];
+    throw error;
+  }
 }

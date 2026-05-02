@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
 import CartPageContent from "@/components/cart/CartPageContent";
-import { getCatalogData } from "@/lib/catalog";
+import { getCatalogData, isCatalogConnectionError } from "@/lib/catalog";
+import type { Product } from "@/types/product";
 
 export const metadata: Metadata = {
   title: "Carrito de Compras",
@@ -9,7 +10,18 @@ export const metadata: Metadata = {
 };
 
 export default async function CarritoPage() {
-  const { products } = await getCatalogData();
+  let products: Product[] = [];
+  let catalogUnavailable = false;
+
+  try {
+    products = (await getCatalogData()).products;
+  } catch (error) {
+    if (isCatalogConnectionError(error)) {
+      catalogUnavailable = true;
+    } else {
+      throw error;
+    }
+  }
 
   return (
     <div className="bg-light min-h-screen">
@@ -20,7 +32,10 @@ export default async function CarritoPage() {
         ]}
         title="Carrito de Compras"
       />
-      <CartPageContent catalogProducts={products} />
+      <CartPageContent
+        catalogProducts={products}
+        catalogUnavailable={catalogUnavailable}
+      />
     </div>
   );
 }

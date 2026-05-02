@@ -25,18 +25,22 @@ import {
   type ShopifyProductVariant,
 } from "@/lib/shopify";
 
+const SHOPIFY_DEBUG_ENABLED = process.env.SHOPIFY_DEBUG === "1";
+
 export interface CatalogData {
   products: Product[];
   categories: Category[];
   brands: string[];
 }
 
-interface CatalogSourceResult {
-  data: CatalogData;
-  shopifyEnabled: boolean;
+export class CatalogConnectionError extends Error {
+  constructor(message = "No pudimos conectar con Shopify para cargar el catalogo.") {
+    super(message);
+    this.name = "CatalogConnectionError";
+  }
 }
 
-let hasLoggedShopifyFallback = false;
+let hasLoggedShopifyConnectionError = false;
 
 function parseNumber(value: string): number | null {
   const parsed = Number(value);
@@ -75,6 +79,30 @@ export function mapShopifyProductToProduct(product: ShopifyProduct): Product {
   const primaryVariant = pickPrimaryVariant(variants);
   const code = primaryVariant?.sku?.trim() || product.handle;
   const category = detectCategory(code, product.title, product.productType, product.tags);
+
+  if (SHOPIFY_DEBUG_ENABLED) {
+    console.info(
+      "[shopify-product]",
+      JSON.stringify({
+        title: product.title,
+        handle: product.handle,
+        code,
+        variantId: primaryVariant?.id ?? null,
+        variantTitle: primaryVariant?.title ?? null,
+        price: primaryVariant?.price.amount ?? null,
+        availableForSale: primaryVariant?.availableForSale ?? null,
+        hasAnyAvailableVariant: variants.some((variant) => variant.availableForSale),
+        variantCount: variants.length,
+        variants: variants.map((variant) => ({
+          id: variant.id,
+          title: variant.title,
+          sku: variant.sku,
+          price: variant.price.amount,
+          availableForSale: variant.availableForSale,
+        })),
+      })
+    );
+  }
 
   return {
     id: product.id,
@@ -183,12 +211,13 @@ const getAllShopifyProducts = cache(async (): Promise<ShopifyProduct[]> => {
   return allProducts;
 });
 
-const loadCatalogSource = cache(async (): Promise<CatalogSourceResult> => {
+export function isCatalogConnectionError(error: unknown): error is CatalogConnectionError {
+  return error instanceof CatalogConnectionError;
+}
+
+export const getCatalogData = cache(async (): Promise<CatalogData> => {
   if (!hasShopifyStorefrontEnv()) {
-    return {
-      data: getLocalCatalogData(),
-      shopifyEnabled: false,
-    };
+    return getLocalCatalogData();
   }
 
   try {
@@ -198,35 +227,21 @@ const loadCatalogSource = cache(async (): Promise<CatalogSourceResult> => {
     );
 
     return {
-      data: {
-        products,
-        categories: categoryDirectory,
-        brands,
-      },
-      shopifyEnabled: true,
+      products,
+      categories: categoryDirectory,
+      brands,
     };
   } catch (error) {
-    if (!hasLoggedShopifyFallback) {
-      hasLoggedShopifyFallback = true;
+    if (!hasLoggedShopifyConnectionError) {
+      hasLoggedShopifyConnectionError = true;
       console.warn(
-        `[catalog] Falling back to local catalog because Shopify storefront is unavailable: ${getErrorMessage(error)}`
+        `[catalog] Shopify storefront unavailable while loading catalog: ${getErrorMessage(error)}`
       );
     }
 
-    return {
-      data: getLocalCatalogData(),
-      shopifyEnabled: false,
-    };
+    throw new CatalogConnectionError();
   }
 });
-
-export const getCatalogData = cache(async (): Promise<CatalogData> => {
-  return (await loadCatalogSource()).data;
-});
-
-export async function isShopifyCatalogAvailable(): Promise<boolean> {
-  return (await loadCatalogSource()).shopifyEnabled;
-}
 
 export async function getCatalogProductByCode(code: string): Promise<Product | null> {
   const { products } = await getCatalogData();
