@@ -8,8 +8,30 @@ export const metadata: Metadata = {
     "Importacion y distribucion de repuestos y accesorios para vehiculos livianos y pesados.",
 };
 
-export default async function CollectionsPage() {
-  const { products, categories, brands } = await getCatalogData();
+interface Props {
+  searchParams: Promise<{
+    q?: string | string[];
+    category?: string | string[];
+    brand?: string | string[];
+  }>;
+}
 
-  return <CatalogListing products={products} categories={categories} brands={brands} />;
+function readSearchParam(value: string | string[] | undefined): string {
+  return Array.isArray(value) ? value[0] ?? "" : value ?? "";
+}
+
+export default async function CollectionsPage({ searchParams }: Props) {
+  const { products, categories, brands } = await getCatalogData();
+  const query = await searchParams;
+
+  return (
+    <CatalogListing
+      products={products}
+      categories={categories}
+      brands={brands}
+      initialSearchQuery={readSearchParam(query.q)}
+      initialCategory={readSearchParam(query.category)}
+      initialBrand={readSearchParam(query.brand)}
+    />
+  );
 }

@@ -31,6 +31,13 @@ export interface CatalogData {
   brands: string[];
 }
 
+interface CatalogSourceResult {
+  data: CatalogData;
+  shopifyEnabled: boolean;
+}
+
+let hasLoggedShopifyFallback = false;
+
 function parseNumber(value: string): number | null {
   const parsed = Number(value);
   return Number.isNaN(parsed) ? null : parsed;
@@ -150,6 +157,14 @@ function getLocalCatalogData(): CatalogData {
   };
 }
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "Unknown Shopify storefront error.";
+}
+
 const getAllShopifyProducts = cache(async (): Promise<ShopifyProduct[]> => {
   const allProducts: ShopifyProduct[] = [];
   let after: string | null | undefined = null;
@@ -168,22 +183,50 @@ const getAllShopifyProducts = cache(async (): Promise<ShopifyProduct[]> => {
   return allProducts;
 });
 
-export const getCatalogData = cache(async (): Promise<CatalogData> => {
+const loadCatalogSource = cache(async (): Promise<CatalogSourceResult> => {
   if (!hasShopifyStorefrontEnv()) {
-    return getLocalCatalogData();
+    return {
+      data: getLocalCatalogData(),
+      shopifyEnabled: false,
+    };
   }
 
-  const products = (await getAllShopifyProducts()).map(mapShopifyProductToProduct);
-  const brands = [...new Set(products.map((product) => product.brand))].sort((left, right) =>
-    left.localeCompare(right)
-  );
+  try {
+    const products = (await getAllShopifyProducts()).map(mapShopifyProductToProduct);
+    const brands = [...new Set(products.map((product) => product.brand))].sort(
+      (left, right) => left.localeCompare(right)
+    );
 
-  return {
-    products,
-    categories: categoryDirectory,
-    brands,
-  };
+    return {
+      data: {
+        products,
+        categories: categoryDirectory,
+        brands,
+      },
+      shopifyEnabled: true,
+    };
+  } catch (error) {
+    if (!hasLoggedShopifyFallback) {
+      hasLoggedShopifyFallback = true;
+      console.warn(
+        `[catalog] Falling back to local catalog because Shopify storefront is unavailable: ${getErrorMessage(error)}`
+      );
+    }
+
+    return {
+      data: getLocalCatalogData(),
+      shopifyEnabled: false,
+    };
+  }
 });
+
+export const getCatalogData = cache(async (): Promise<CatalogData> => {
+  return (await loadCatalogSource()).data;
+});
+
+export async function isShopifyCatalogAvailable(): Promise<boolean> {
+  return (await loadCatalogSource()).shopifyEnabled;
+}
 
 export async function getCatalogProductByCode(code: string): Promise<Product | null> {
   const { products } = await getCatalogData();

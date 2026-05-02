@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import {
   Check,
@@ -27,6 +26,7 @@ interface CatalogListingProps {
   brands: string[];
   initialCategory?: string;
   initialBrand?: string;
+  initialSearchQuery?: string;
 }
 
 export default function CatalogListing({
@@ -35,14 +35,13 @@ export default function CatalogListing({
   brands,
   initialCategory = "",
   initialBrand = "",
+  initialSearchQuery = "",
 }: CatalogListingProps) {
-  const searchParams = useSearchParams();
-  const urlQuery = searchParams.get("q") || "";
   const { addItem, isInCart } = useCart();
 
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory || searchParams.get("category") || "");
-  const [selectedBrand, setSelectedBrand] = useState(initialBrand || searchParams.get("brand") || "");
-  const [searchQuery, setSearchQuery] = useState(urlQuery);
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [selectedBrand, setSelectedBrand] = useState(initialBrand);
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [expandedSections, setExpandedSections] = useState({ categories: true, brands: true });

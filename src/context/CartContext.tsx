@@ -210,6 +210,7 @@ export function CartProvider({
   const [remoteCart, setRemoteCart] = useState<CartApiResponse>(EMPTY_REMOTE_CART);
   const [localItems, setLocalItems] = useState<CartLineItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [remoteUnavailable, setRemoteUnavailable] = useState(false);
   const cartIdRef = useRef<string | null>(null);
   const mutationQueueRef = useRef<Promise<unknown>>(Promise.resolve());
 
@@ -295,12 +296,15 @@ export function CartProvider({
         const cart = await fetchExistingCart(storedCartId);
 
         if (!cancelled) {
+          setRemoteUnavailable(false);
           syncRemoteCart(cart);
         }
       } catch (error) {
         if (!cancelled) {
           console.error("[cart] failed to hydrate Shopify cart", error);
+          setRemoteUnavailable(true);
           syncRemoteCart(null);
+          syncLocalCart(loadLocalItems());
         }
       } finally {
         if (!cancelled) {
@@ -324,11 +328,14 @@ export function CartProvider({
 
       void fetchExistingCart(nextCartId)
         .then((cart) => {
+          setRemoteUnavailable(false);
           syncRemoteCart(cart);
         })
         .catch((error) => {
           console.error("[cart] failed to sync Shopify cart from storage", error);
+          setRemoteUnavailable(true);
           syncRemoteCart(null);
+          syncLocalCart(loadLocalItems());
         });
     };
 
@@ -340,10 +347,16 @@ export function CartProvider({
     };
   }, [hydrateLocalCart, shopifyEnabled, syncLocalCart, syncRemoteCart]);
 
+  const useRemoteCart = shopifyEnabled && !remoteUnavailable;
+
   const addItem = useCallback(
     async (product: Product, quantity = 1) => {
-      if (!shopifyEnabled || !product.variantId) {
+      if (!shopifyEnabled || !product.variantId || !useRemoteCart) {
         return runMutation(async () => {
+          if (shopifyEnabled) {
+            setRemoteUnavailable(true);
+          }
+
           syncLocalCart(upsertLocalItem(loadLocalItems(), product, quantity));
         });
       }
@@ -352,33 +365,48 @@ export function CartProvider({
         const existingCartId = cartIdRef.current;
 
         try {
-          const cartId = await ensureRemoteCart();
-          const updatedCart = await addRemoteLine(cartId, product.variantId!, quantity);
-          syncRemoteCart(updatedCart);
+          try {
+            const cartId = await ensureRemoteCart();
+            const updatedCart = await addRemoteLine(cartId, product.variantId!, quantity);
+            syncRemoteCart(updatedCart);
+            return;
+          } catch (error) {
+            if (!existingCartId) {
+              throw error;
+            }
+
+            cartIdRef.current = null;
+            setStoredValue(SHOPIFY_CART_KEY, null);
+
+            const cartId = await ensureRemoteCart();
+            const updatedCart = await addRemoteLine(cartId, product.variantId!, quantity);
+            syncRemoteCart(updatedCart);
+
+            if (error instanceof Error) {
+              console.warn("[cart] recreated Shopify cart after add failure", error.message);
+            }
+          }
         } catch (error) {
-          if (!existingCartId) {
-            throw error;
-          }
-
-          cartIdRef.current = null;
-          setStoredValue(SHOPIFY_CART_KEY, null);
-
-          const cartId = await ensureRemoteCart();
-          const updatedCart = await addRemoteLine(cartId, product.variantId!, quantity);
-          syncRemoteCart(updatedCart);
-
-          if (error instanceof Error) {
-            console.warn("[cart] recreated Shopify cart after add failure", error.message);
-          }
+          console.error("[cart] falling back to local cart after Shopify add failure", error);
+          setRemoteUnavailable(true);
+          syncRemoteCart(null);
+          syncLocalCart(upsertLocalItem(loadLocalItems(), product, quantity));
         }
       });
     },
-    [ensureRemoteCart, runMutation, shopifyEnabled, syncLocalCart, syncRemoteCart]
+    [
+      ensureRemoteCart,
+      runMutation,
+      shopifyEnabled,
+      syncLocalCart,
+      syncRemoteCart,
+      useRemoteCart,
+    ]
   );
 
   const removeItem = useCallback(
     async (code: string) => {
-      if (!shopifyEnabled) {
+      if (!shopifyEnabled || !useRemoteCart) {
         return runMutation(async () => {
           syncLocalCart(loadLocalItems().filter((item) => item.product.code !== code));
         });
@@ -396,12 +424,19 @@ export function CartProvider({
         syncRemoteCart(updatedCart);
       });
     },
-    [remoteCart.items, runMutation, shopifyEnabled, syncLocalCart, syncRemoteCart]
+    [
+      remoteCart.items,
+      runMutation,
+      shopifyEnabled,
+      syncLocalCart,
+      syncRemoteCart,
+      useRemoteCart,
+    ]
   );
 
   const updateQuantity = useCallback(
     async (code: string, quantity: number) => {
-      if (!shopifyEnabled) {
+      if (!shopifyEnabled || !useRemoteCart) {
         return runMutation(async () => {
           const currentItems = loadLocalItems();
 
@@ -436,11 +471,18 @@ export function CartProvider({
         syncRemoteCart(updatedCart);
       });
     },
-    [remoteCart.items, runMutation, shopifyEnabled, syncLocalCart, syncRemoteCart]
+    [
+      remoteCart.items,
+      runMutation,
+      shopifyEnabled,
+      syncLocalCart,
+      syncRemoteCart,
+      useRemoteCart,
+    ]
   );
 
   const clearCart = useCallback(async () => {
-    if (!shopifyEnabled) {
+    if (!shopifyEnabled || !useRemoteCart) {
       return runMutation(async () => {
         syncLocalCart([]);
       });
@@ -449,9 +491,9 @@ export function CartProvider({
     return runMutation(async () => {
       syncRemoteCart(null);
     });
-  }, [runMutation, shopifyEnabled, syncLocalCart, syncRemoteCart]);
+  }, [runMutation, shopifyEnabled, syncLocalCart, syncRemoteCart, useRemoteCart]);
 
-  const activeItems = shopifyEnabled ? remoteCart.items : localItems;
+  const activeItems = useRemoteCart ? remoteCart.items : localItems;
   const totalQuantity = activeItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = activeItems.reduce(
     (sum, item) => sum + (item.product.price ?? 0) * item.quantity,
@@ -463,7 +505,7 @@ export function CartProvider({
       items: activeItems,
       totalQuantity,
       totalPrice,
-      checkoutUrl: shopifyEnabled ? remoteCart.checkoutUrl || null : null,
+      checkoutUrl: useRemoteCart ? remoteCart.checkoutUrl || null : null,
       isLoading,
       addItem,
       removeItem,
@@ -478,9 +520,9 @@ export function CartProvider({
       isLoading,
       remoteCart.checkoutUrl,
       removeItem,
-      shopifyEnabled,
       totalPrice,
       totalQuantity,
+      useRemoteCart,
       updateQuantity,
     ]
   );

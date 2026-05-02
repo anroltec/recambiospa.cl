@@ -5,6 +5,13 @@ import { getCatalogData, resolveCatalogSlug } from "@/lib/catalog";
 
 interface Props {
   params: Promise<{ category: string }>;
+  searchParams: Promise<{
+    q?: string | string[];
+  }>;
+}
+
+function readSearchParam(value: string | string[] | undefined): string {
+  return Array.isArray(value) ? value[0] ?? "" : value ?? "";
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -23,8 +30,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function CategoryPage({ params }: Props) {
+export default async function CategoryPage({ params, searchParams }: Props) {
   const { category } = await params;
+  const query = await searchParams;
   const resolved = await resolveCatalogSlug(category);
 
   if (!resolved) {
@@ -40,6 +48,7 @@ export default async function CategoryPage({ params }: Props) {
       brands={brands}
       initialCategory={resolved.type === "category" ? resolved.value : ""}
       initialBrand={resolved.type === "brand" ? resolved.value : ""}
+      initialSearchQuery={readSearchParam(query.q)}
     />
   );
 }
