@@ -55,6 +55,16 @@ export interface ShopifyProductsPage {
   pageInfo: PageInfo;
 }
 
+export interface ShopifyCollection {
+  handle: string;
+  title: string;
+}
+
+export interface ShopifyCollectionsPage {
+  collections: ShopifyCollection[];
+  pageInfo: PageInfo;
+}
+
 export interface ShopifyCartLine {
   id: string;
   quantity: number;
@@ -174,6 +184,11 @@ const PRODUCT_FIELDS = `
   }
 `;
 
+const COLLECTION_FIELDS = `
+  handle
+  title
+`;
+
 const CART_FIELDS = `
   id
   checkoutUrl
@@ -258,6 +273,40 @@ export async function getProductsPage(first = 100, after?: string | null): Promi
   return {
     products: data.products.edges.map((edge) => edge.node),
     pageInfo: data.products.pageInfo,
+  };
+}
+
+export async function getCollectionsPage(
+  first = 100,
+  after?: string | null
+): Promise<ShopifyCollectionsPage> {
+  const data = await shopifyFetch<{
+    collections: {
+      edges: { node: ShopifyCollection }[];
+      pageInfo: PageInfo;
+    };
+  }>(
+    `
+      query GetCollectionsPage($first: Int!, $after: String) {
+        collections(first: $first, after: $after, sortKey: TITLE) {
+          edges {
+            node {
+              ${COLLECTION_FIELDS}
+            }
+          }
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
+        }
+      }
+    `,
+    { first, after: after ?? null }
+  );
+
+  return {
+    collections: data.collections.edges.map((edge) => edge.node),
+    pageInfo: data.collections.pageInfo,
   };
 }
 

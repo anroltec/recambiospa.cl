@@ -19,6 +19,7 @@ export interface Category {
   id: string;
   name: string;
   color: string;
+  handle?: string;
 }
 
 export interface Brand {

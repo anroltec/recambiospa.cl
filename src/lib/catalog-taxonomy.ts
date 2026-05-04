@@ -1,15 +1,15 @@
 import type { Category } from "@/types/product";
 
 export const categoryDirectory: Category[] = [
-  { id: "iluminacion", name: "Iluminacion", color: "#F5A623" },
+  { id: "iluminacion", name: "Iluminaci\u00f3n", color: "#F5A623" },
   { id: "generales", name: "Generales", color: "#4ABFBF" },
-  { id: "baterias", name: "Baterias", color: "#7ED321" },
+  { id: "baterias", name: "Bater\u00edas", color: "#7ED321" },
   { id: "kit-especiales", name: "Kit Especiales", color: "#D0021B" },
   { id: "amarras", name: "Amarras", color: "#9B59B6" },
   { id: "herramientas", name: "Herramientas", color: "#3498DB" },
   { id: "extintores", name: "Extintores", color: "#E74C3C" },
-  { id: "calefaccion", name: "Calefaccion", color: "#2ECC71" },
-  { id: "electrico", name: "Electrico", color: "#F39C12" },
+  { id: "calefaccion", name: "Calefacci\u00f3n", color: "#2ECC71" },
+  { id: "electrico", name: "El\u00e9ctrico", color: "#F39C12" },
   { id: "seguridad", name: "Seguridad", color: "#1ABC9C" },
   { id: "adhesivos", name: "Adhesivos y Selladores", color: "#8E44AD" },
   { id: "otros", name: "Otros", color: "#95A5A6" },

@@ -1,6 +1,5 @@
 import "server-only";
 
-import { cache } from "react";
 import type { CartApiResponse, CartLineItem } from "@/types/cart";
 import type { Category, Product } from "@/types/product";
 import {
@@ -26,6 +25,7 @@ import {
 } from "@/lib/shopify";
 
 const SHOPIFY_DEBUG_ENABLED = process.env.SHOPIFY_DEBUG === "1";
+const CATALOG_CACHE_TTL_MS = 60_000;
 
 export interface CatalogData {
   products: Product[];
@@ -193,7 +193,14 @@ function getErrorMessage(error: unknown): string {
   return "Unknown Shopify storefront error.";
 }
 
-const getAllShopifyProducts = cache(async (): Promise<ShopifyProduct[]> => {
+let cachedShopifyProducts: ShopifyProduct[] | null = null;
+let cachedShopifyProductsExpiresAt = 0;
+let shopifyProductsPromise: Promise<ShopifyProduct[]> | null = null;
+let cachedCatalogData: CatalogData | null = null;
+let cachedCatalogDataExpiresAt = 0;
+let catalogDataPromise: Promise<CatalogData> | null = null;
+
+async function loadAllShopifyProducts(): Promise<ShopifyProduct[]> {
   const allProducts: ShopifyProduct[] = [];
   let after: string | null | undefined = null;
 
@@ -209,29 +216,75 @@ const getAllShopifyProducts = cache(async (): Promise<ShopifyProduct[]> => {
   }
 
   return allProducts;
-});
+}
+
+async function getAllShopifyProducts(): Promise<ShopifyProduct[]> {
+  if (cachedShopifyProducts && cachedShopifyProductsExpiresAt > Date.now()) {
+    return cachedShopifyProducts;
+  }
+
+  if (!shopifyProductsPromise) {
+    shopifyProductsPromise = loadAllShopifyProducts();
+  }
+
+  try {
+    const products = await shopifyProductsPromise;
+    cachedShopifyProducts = products;
+    cachedShopifyProductsExpiresAt = Date.now() + CATALOG_CACHE_TTL_MS;
+    return products;
+  } catch (error) {
+    if (cachedShopifyProducts) {
+      return cachedShopifyProducts;
+    }
+
+    shopifyProductsPromise = null;
+    throw error;
+  } finally {
+    shopifyProductsPromise = null;
+  }
+}
 
 export function isCatalogConnectionError(error: unknown): error is CatalogConnectionError {
   return error instanceof CatalogConnectionError;
 }
 
-export const getCatalogData = cache(async (): Promise<CatalogData> => {
+async function loadCatalogData(): Promise<CatalogData> {
   if (!hasShopifyStorefrontEnv()) {
     return getLocalCatalogData();
   }
 
-  try {
-    const products = (await getAllShopifyProducts()).map(mapShopifyProductToProduct);
-    const brands = [...new Set(products.map((product) => product.brand))].sort(
-      (left, right) => left.localeCompare(right)
-    );
+  const products = (await getAllShopifyProducts()).map(mapShopifyProductToProduct);
+  const brands = [...new Set(products.map((product) => product.brand))].sort(
+    (left, right) => left.localeCompare(right)
+  );
 
-    return {
-      products,
-      categories: categoryDirectory,
-      brands,
-    };
+  return {
+    products,
+    categories: categoryDirectory,
+    brands,
+  };
+}
+
+export async function getCatalogData(): Promise<CatalogData> {
+  if (cachedCatalogData && cachedCatalogDataExpiresAt > Date.now()) {
+    return cachedCatalogData;
+  }
+
+  if (!catalogDataPromise) {
+    catalogDataPromise = loadCatalogData();
+  }
+
+  try {
+    const data = await catalogDataPromise;
+    cachedCatalogData = data;
+    cachedCatalogDataExpiresAt = Date.now() + CATALOG_CACHE_TTL_MS;
+    hasLoggedShopifyConnectionError = false;
+    return data;
   } catch (error) {
+    if (cachedCatalogData) {
+      return cachedCatalogData;
+    }
+
     if (!hasLoggedShopifyConnectionError) {
       hasLoggedShopifyConnectionError = true;
       console.warn(
@@ -240,8 +293,10 @@ export const getCatalogData = cache(async (): Promise<CatalogData> => {
     }
 
     throw new CatalogConnectionError();
+  } finally {
+    catalogDataPromise = null;
   }
-});
+}
 
 export async function getCatalogProductByCode(code: string): Promise<Product | null> {
   const { products } = await getCatalogData();

@@ -163,7 +163,7 @@ export default function CatalogListing({
   }, []);
 
   const sidebar = (
-    <div className="space-y-1">
+    <div className="space-y-3">
       <div className="bg-white border border-gray-200 p-4">
         <div className="relative">
           <input
@@ -194,35 +194,71 @@ export default function CatalogListing({
           />
         </button>
         {expandedSections.categories && (
-          <div className="border-t border-gray-100">
+          <div className="border-t border-gray-100 px-2 py-2">
             <button
               onClick={() => handleCategoryChange("")}
-              className={`w-full flex items-center justify-between px-4 py-2.5 text-left text-sm transition-colors hover:bg-light ${
-                !selectedCategory ? "bg-primary/5 text-primary font-semibold" : "text-dark/80"
+              className={`group relative flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm transition-all ${
+                !selectedCategory
+                  ? "bg-primary/6 text-primary shadow-sm"
+                  : "text-dark/80 hover:bg-slate-50"
               }`}
             >
-              <span className="flex items-center gap-2">
-                <ChevronRight size={12} />
+              <span
+                className={`absolute inset-y-2 left-0 w-1 rounded-r-full transition-colors ${
+                  !selectedCategory ? "bg-primary" : "bg-transparent group-hover:bg-slate-200"
+                }`}
+              />
+              <span
+                className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border transition-colors ${
+                  !selectedCategory
+                    ? "border-primary/15 bg-primary text-white"
+                    : "border-slate-200 bg-white text-slate-400 group-hover:border-slate-300"
+                }`}
+              >
+                <LayoutGrid size={14} />
+              </span>
+              <span className="min-w-0 flex-1 font-medium tracking-[0.01em]">
                 Todos los productos
               </span>
-              <span className="text-xs text-steel">{products.length}</span>
+              <span
+                className={`inline-flex min-w-10 justify-center rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none transition-colors ${
+                  !selectedCategory
+                    ? "bg-primary text-white"
+                    : "bg-slate-100 text-slate-500 group-hover:bg-white"
+                }`}
+              >
+                {products.length}
+              </span>
             </button>
             {categories.map((category) => (
               <button
                 key={category.id}
                 onClick={() => handleCategoryChange(selectedCategory === category.id ? "" : category.id)}
-                className={`w-full flex items-center justify-between px-4 py-2.5 text-left text-sm transition-colors hover:bg-light ${
-                  selectedCategory === category.id ? "bg-primary/5 text-primary font-semibold" : "text-dark/80"
+                className={`group relative flex w-full items-center gap-3 rounded-sm px-4 py-3 text-left text-sm transition-all ${
+                  selectedCategory === category.id
+                    ? "bg-primary/6 text-primary shadow-sm"
+                    : "text-dark/80 hover:bg-slate-50"
                 }`}
               >
-                <span className="flex items-center gap-2">
-                  <span
-                    className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: category.color }}
-                  />
+                <span
+                  className={`absolute inset-y-2 left-0 w-1 rounded-r-full transition-colors ${
+                    selectedCategory === category.id
+                      ? "bg-primary"
+                      : "bg-transparent group-hover:bg-slate-200"
+                  }`}
+                />
+                <span className="min-w-0 flex-1 font-medium tracking-[0.01em]">
                   {category.name}
                 </span>
-                <span className="text-xs text-steel">{categoryCount[category.id] || 0}</span>
+                <span
+                  className={`inline-flex min-w-10 justify-center rounded-full px-2.5 py-1 text-[11px] font-semibold leading-none transition-colors ${
+                    selectedCategory === category.id
+                      ? "bg-primary text-white"
+                      : "bg-slate-100 text-slate-500 group-hover:bg-white"
+                  }`}
+                >
+                  {categoryCount[category.id] || 0}
+                </span>
               </button>
             ))}
           </div>
