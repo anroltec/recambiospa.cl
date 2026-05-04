@@ -3,20 +3,20 @@ import Link from "next/link";
 import { ArrowRight, CheckCircle2, Play } from "lucide-react";
 
 const servicePoints = [
-  "Asesoría en selección de productos según aplicación y necesidad.",
-  "Respaldo técnico y comercial para talleres, flotas y clientes particulares.",
-  "Soporte postventa sobre nuestras líneas y marcas distribuidas.",
+  "Asesor\u00eda en selecci\u00f3n de productos seg\u00fan aplicaci\u00f3n y necesidad.",
+  "Respaldo t\u00e9cnico y comercial para talleres, flotas y clientes particulares.",
+  "Soporte postventa sobre nuestras l\u00edneas y marcas distribuidas.",
 ];
 
 export default function TechnicalServiceSection() {
   return (
     <section className="bg-white py-16">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="mx-auto max-w-7xl px-4">
         <div className="grid gap-10 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.85fr)] xl:items-center">
-          <div className="relative min-h-[360px] sm:min-h-[460px] lg:min-h-[560px] bg-primary-dark overflow-hidden">
+          <div className="relative min-h-[360px] overflow-hidden bg-primary-dark sm:min-h-[460px] lg:min-h-[560px]">
             <Image
               src="/banners/banner1.jpg"
-              alt="Servicio técnico Recambio SpA"
+              alt="Servicio t&eacute;cnico Recambio SpA"
               fill
               className="object-cover object-[68%_center]"
               sizes="(max-width: 1279px) 100vw, 62vw"
@@ -32,21 +32,21 @@ export default function TechnicalServiceSection() {
 
           <div className="max-w-xl">
             <div>
-              <h2 className="text-2xl font-bold text-primary-dark uppercase tracking-wide">
-                Respaldo y soporte para cada línea de producto
+              <h2 className="text-2xl font-bold uppercase tracking-wide text-primary-dark">
+                Respaldo y soporte para cada l&iacute;nea de producto
               </h2>
             </div>
 
             <div className="mt-6 space-y-5 text-base leading-8 text-dark/72">
               <p>
-                En <strong>Recambio SpA</strong> brindamos respaldo y soporte de
-                excelencia para que nuestros clientes puedan trabajar de forma
-                eficiente y con mayor seguridad en cada operación.
+                En <strong>Recambio SpA</strong> brindamos respaldo y soporte de excelencia para
+                que nuestros clientes trabajen de forma eficiente y con mayor seguridad en cada
+                operaci&oacute;n.
               </p>
               <p>
-                Nuestro equipo está calificado y en constante capacitación para
-                entregar asesoría, selección de productos y soporte postventa
-                con criterio técnico y atención cercana.
+                Nuestro equipo est&aacute; calificado y en constante capacitaci&oacute;n para entregar
+                asesor&iacute;a, selecci&oacute;n de productos y soporte postventa con criterio t&eacute;cnico y
+                atenci&oacute;n cercana.
               </p>
             </div>
 
@@ -65,10 +65,10 @@ export default function TechnicalServiceSection() {
 
             <div className="mt-8">
               <Link
-                href="/contacto"
+                href="/servicio-tecnico"
                 className="inline-flex items-center gap-2 border-2 border-primary-dark px-7 py-3 text-sm font-bold uppercase tracking-[0.16em] text-primary-dark transition-colors hover:bg-primary-dark hover:text-white"
               >
-                Saber más
+                Saber m&aacute;s
                 <ArrowRight size={16} />
               </Link>
             </div>

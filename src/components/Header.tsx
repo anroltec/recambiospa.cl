@@ -15,43 +15,7 @@ import {
   Truck,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
-
-const catalogCategories = [
-  { name: "AMARRAS", href: "/collections/amarras" },
-  { name: "BATERÍAS", href: "/collections/baterias" },
-  { name: "CALEFACCIÓN", href: "/collections/calefaccion" },
-  { name: "EXTINTORES", href: "/collections/extintores" },
-  { name: "HERRAMIENTAS", href: "/collections/herramientas" },
-  { name: "ILUMINACIÓN", href: "/collections/iluminacion" },
-  { name: "KIT ESPECIALES", href: "/collections/kit-especiales" },
-  { name: "OTROS", href: "/collections/otros" },
-];
-
-const lightVehicles = [
-  { name: "Seguridad", href: "/vehiculos-livianos/seguridad" },
-  { name: "Eléctrico", href: "/vehiculos-livianos/electrico" },
-  { name: "Herramientas", href: "/vehiculos-livianos/herramientas" },
-];
-
-const heavyVehicles = [
-  { name: "Buses y camiones", href: "/vehiculos-pesados/buses-camiones" },
-  { name: "Otros", href: "/vehiculos-pesados/otros" },
-];
-
-const navLinks = [
-  { label: "Inicio", href: "/" },
-  { label: "Nosotros", href: "/nosotros" },
-  { label: "Catálogo", href: "/collections", dropdown: "catalog" },
-  { label: "Marcas", href: "/marcas" },
-  { label: "Contacto", href: "/contacto" },
-];
-
-function getDropdownItems(key: string) {
-  if (key === "catalog") return catalogCategories;
-  if (key === "light") return lightVehicles;
-  if (key === "heavy") return heavyVehicles;
-  return [];
-}
+import { getDropdownItems, navLinks } from "@/data/navigation";
 
 export default function Header() {
   const router = useRouter();
@@ -84,29 +48,29 @@ export default function Header() {
 
   return (
     <header ref={headerRef} className="sticky top-0 z-50">
-      {/* Top bar */}
-      <div className="bg-dark text-white text-xs">
-        <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between">
+      <div className="bg-dark text-xs text-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2">
           <div className="flex items-center gap-5">
-            <a href="https://wa.me/" className="flex items-center gap-1.5 hover:text-primary-light transition-colors">
+            <a
+              href="https://wa.me/"
+              className="flex items-center gap-1.5 transition-colors hover:text-primary-light"
+            >
               <Phone size={12} />
               <span>+569 xxxx xxxx</span>
             </a>
-            <span className="hidden sm:flex items-center gap-1.5 text-white/70">
+            <span className="hidden items-center gap-1.5 text-white/70 sm:flex">
               <Truck size={12} />
               Envíos a todo Chile
             </span>
           </div>
-          <span className="hidden sm:flex items-center gap-1.5 text-white/70">
+          <span className="hidden items-center gap-1.5 text-white/70 sm:flex">
             Lun - Vie: 9:00 - 18:00
           </span>
         </div>
       </div>
 
-      {/* Main header row - logo, search, cart */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between gap-6">
-          {/* Logo */}
+      <div className="border-b border-gray-200 bg-white">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-4">
           <Link href="/" className="flex-shrink-0">
             <Image
               src="/logo.svg"
@@ -118,39 +82,48 @@ export default function Header() {
             />
           </Link>
 
-          {/* Search bar - desktop */}
-          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl">
+          <form onSubmit={handleSearch} className="hidden max-w-2xl flex-1 md:flex">
             <div className="relative w-full">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar productos, marcas, SKU..."
-                className="w-full border border-gray-300 rounded-sm px-4 py-2.5 text-sm text-dark placeholder:text-steel focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                className="w-full rounded-sm border border-gray-300 px-4 py-2.5 text-sm text-dark placeholder:text-steel focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
-              <button type="submit" className="absolute right-0 top-0 h-full bg-primary hover:bg-primary-dark text-white px-4 transition-colors">
+              <button
+                type="submit"
+                className="absolute right-0 top-0 h-full bg-primary px-4 text-white transition-colors hover:bg-primary-dark"
+              >
                 <Search size={18} />
               </button>
             </div>
           </form>
 
-          {/* Right icons */}
           <div className="flex items-center gap-4">
             <button
-              className="md:hidden text-dark"
+              className="text-dark md:hidden"
               onClick={() => setSearchOpen(!searchOpen)}
-              aria-label={searchOpen ? "Cerrar b\u00fasqueda" : "Abrir b\u00fasqueda"}
+              aria-label={searchOpen ? "Cerrar búsqueda" : "Abrir búsqueda"}
             >
               <Search size={22} />
             </button>
-            <Link href="/cuenta" className="text-dark hover:text-primary transition-colors" aria-label="Mi cuenta">
+            <Link
+              href="/cuenta"
+              className="text-dark transition-colors hover:text-primary"
+              aria-label="Mi cuenta"
+            >
               <User size={24} />
             </Link>
-            <Link href="/carrito" className="relative text-dark hover:text-primary transition-colors" aria-label="Carrito de compras">
+            <Link
+              href="/carrito"
+              className="relative text-dark transition-colors hover:text-primary"
+              aria-label="Carrito de compras"
+            >
               <ShoppingCart size={24} />
               {totalQuantity > 0 && (
                 <span
-                  className="absolute -top-1.5 -right-1.5 min-w-4 h-4 px-1 bg-primary text-white text-[10px] rounded-full flex items-center justify-center font-bold"
+                  className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white"
                   aria-hidden="true"
                 >
                   {totalQuantity > 99 ? "99+" : totalQuantity}
@@ -158,9 +131,9 @@ export default function Header() {
               )}
             </Link>
             <button
-              className="md:hidden text-dark"
+              className="text-dark md:hidden"
               onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label={mobileOpen ? "Cerrar men\u00fa" : "Abrir men\u00fa"}
+              aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
               aria-expanded={mobileOpen}
             >
               {mobileOpen ? <X size={24} /> : <Menu size={24} />}
@@ -168,18 +141,20 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Mobile search */}
         {searchOpen && (
-          <form onSubmit={handleSearch} className="md:hidden px-4 pb-3">
+          <form onSubmit={handleSearch} className="px-4 pb-3 md:hidden">
             <div className="relative">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar productos..."
-                className="w-full border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:border-primary"
+                className="w-full border border-gray-300 px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
               />
-              <button type="submit" className="absolute right-0 top-0 h-full bg-primary text-white px-4">
+              <button
+                type="submit"
+                className="absolute right-0 top-0 h-full bg-primary px-4 text-white"
+              >
                 <Search size={16} />
               </button>
             </div>
@@ -187,8 +162,7 @@ export default function Header() {
         )}
       </div>
 
-      {/* Navigation bar - feram style */}
-      <nav className="bg-primary-dark hidden md:block">
+      <nav className="hidden bg-primary-dark md:block">
         <div className="w-full">
           <ul className="flex items-center justify-center divide-x divide-white/20">
             {navLinks.map((link) => (
@@ -200,18 +174,18 @@ export default function Header() {
               >
                 <Link
                   href={link.href}
-                  className="flex items-center gap-1.5 px-8 py-3.5 text-sm font-semibold uppercase tracking-wide text-white/90 hover:text-white hover:bg-white/10 transition-colors"
+                  className="flex items-center gap-1.5 px-8 py-3.5 text-sm font-semibold uppercase tracking-wide text-white/90 transition-colors hover:bg-white/10 hover:text-white"
                 >
                   {link.label}
                   {link.dropdown && <ChevronDown size={14} />}
                 </Link>
                 {link.dropdown && openDropdown === link.dropdown && (
-                  <div className="absolute top-full left-0 bg-white shadow-xl min-w-[240px] py-1 z-50 border-t-2 border-primary">
+                  <div className="absolute left-0 top-full z-50 min-w-[240px] border-t-2 border-primary bg-white py-1 shadow-xl">
                     {getDropdownItems(link.dropdown).map((item) => (
                       <Link
                         key={item.name}
                         href={item.href}
-                        className="block px-5 py-2.5 text-sm text-dark hover:bg-light hover:text-primary transition-colors"
+                        className="block px-5 py-2.5 text-sm text-dark transition-colors hover:bg-light hover:text-primary"
                       >
                         {item.name}
                       </Link>
@@ -224,9 +198,11 @@ export default function Header() {
         </div>
       </nav>
 
-      {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden bg-white shadow-xl border-t fixed inset-x-0 bottom-0 overflow-y-auto z-40" style={{ top: `${headerHeight}px` }}>
+        <div
+          className="fixed inset-x-0 bottom-0 z-40 overflow-y-auto border-t bg-white shadow-xl md:hidden"
+          style={{ top: `${headerHeight}px` }}
+        >
           <nav>
             {navLinks.map((link) => (
               <div key={link.label} className="border-b border-gray-100">
@@ -243,13 +219,15 @@ export default function Header() {
                       className="px-5 py-3.5 text-steel"
                       onClick={() =>
                         setMobileDropdown(
-                          mobileDropdown === link.dropdown ? null : link.dropdown!
+                          mobileDropdown === link.dropdown ? null : (link.dropdown ?? null),
                         )
                       }
                     >
                       <ChevronDown
                         size={16}
-                        className={`transition-transform ${mobileDropdown === link.dropdown ? "rotate-180" : ""}`}
+                        className={`transition-transform ${
+                          mobileDropdown === link.dropdown ? "rotate-180" : ""
+                        }`}
                       />
                     </button>
                   )}
@@ -260,7 +238,7 @@ export default function Header() {
                       <Link
                         key={item.name}
                         href={item.href}
-                        className="block px-8 py-2.5 text-sm text-dark/80 hover:text-primary border-b border-gray-100/50"
+                        className="block border-b border-gray-100/50 px-8 py-2.5 text-sm text-dark/80 hover:text-primary"
                         onClick={() => setMobileOpen(false)}
                       >
                         {item.name}

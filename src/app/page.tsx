@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import HeroBanner from "@/components/HeroBanner";
-import PromoBanner from "@/components/PromoBanner";
 import CategoryCards from "@/components/CategoryCards";
 import FeaturedProducts from "@/components/FeaturedProducts";
 import BrandsSection from "@/components/BrandsSection";
@@ -73,7 +72,6 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
       />
       <HeroBanner />
-      <PromoBanner />
       <CategoryCards />
       <FeaturedProducts />
       <BrandsSection />

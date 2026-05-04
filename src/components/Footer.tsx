@@ -78,6 +78,7 @@ export default function Footer() {
               <h3 className="font-bold text-sm uppercase tracking-wider mb-4 text-white">Ayuda</h3>
               <ul className="space-y-2 text-sm text-steel mb-6">
                 <li><Link href="/nosotros" className="hover:text-white transition-colors">Nosotros</Link></li>
+                <li><Link href="/servicio-tecnico" className="hover:text-white transition-colors">Servicio t&eacute;cnico</Link></li>
                 <li><Link href="/contacto" className="hover:text-white transition-colors">Contacto</Link></li>
                 <li><Link href="/politica-privacidad" className="hover:text-white transition-colors">Pol&iacute;tica de Privacidad</Link></li>
                 <li><Link href="/terminos" className="hover:text-white transition-colors">T&eacute;rminos y Condiciones</Link></li>
