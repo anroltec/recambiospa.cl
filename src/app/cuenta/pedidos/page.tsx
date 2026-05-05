@@ -3,22 +3,23 @@ import PageHero from "@/components/ui/PageHero";
 import AccountPanel from "@/components/account/AccountPanel";
 
 export const metadata: Metadata = {
-  title: "Mi Cuenta",
+  title: "Mis Pedidos",
   robots: { index: false, follow: false },
 };
 
-export default function CuentaPage() {
+export default function CuentaPedidosPage() {
   return (
     <div className="bg-light min-h-screen">
       <PageHero
         breadcrumbs={[
           { label: "Inicio", href: "/" },
-          { label: "Mi Cuenta" },
+          { label: "Mi Cuenta", href: "/cuenta" },
+          { label: "Pedidos" },
         ]}
-        title="Mi Cuenta"
-        description="Accede con tu cuenta de cliente para revisar pedidos y mantener al dia los datos de empresa y facturacion."
+        title="Historial de Compras"
+        description="Consulta el historial de pedidos del cliente autenticado directamente desde Shopify."
       />
-      <AccountPanel view="dashboard" />
+      <AccountPanel view="orders" />
     </div>
   );
 }

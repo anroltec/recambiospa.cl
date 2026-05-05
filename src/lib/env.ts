@@ -27,6 +27,13 @@ export interface DefontanaEnv {
   documentType: string | null;
 }
 
+export interface CustomerAccountEnv {
+  authMode: "storefront" | "customer-account-api";
+  metafieldNamespace: string;
+  sessionCookieName: string;
+  sessionSecret: string;
+}
+
 const DEFAULT_SHOPIFY_API_VERSION = "2026-04";
 const DEFAULT_DEFONTANA_BASE_URL = "https://api-v2.defontana.com";
 
@@ -85,5 +92,26 @@ export function getDefontanaEnv(): DefontanaEnv {
     warehouseCode: optionalEnv("DEFONTANA_WAREHOUSE_CODE"),
     priceListCode: optionalEnv("DEFONTANA_PRICE_LIST_CODE"),
     documentType: optionalEnv("DEFONTANA_DOCUMENT_TYPE"),
+  };
+}
+
+export function getCustomerAccountEnv(): CustomerAccountEnv {
+  const authMode =
+    process.env.SHOPIFY_CUSTOMER_AUTH_MODE?.trim() || "storefront";
+
+  if (authMode !== "storefront" && authMode !== "customer-account-api") {
+    throw new Error(
+      "SHOPIFY_CUSTOMER_AUTH_MODE must be either 'storefront' or 'customer-account-api'."
+    );
+  }
+
+  return {
+    authMode,
+    metafieldNamespace:
+      process.env.SHOPIFY_CUSTOMER_METAFIELD_NAMESPACE?.trim() || "recambio",
+    sessionCookieName:
+      process.env.SHOPIFY_CUSTOMER_SESSION_COOKIE?.trim() ||
+      "recambio_customer_session",
+    sessionSecret: requireEnv("SESSION_SECRET"),
   };
 }

@@ -3,22 +3,23 @@ import PageHero from "@/components/ui/PageHero";
 import AccountPanel from "@/components/account/AccountPanel";
 
 export const metadata: Metadata = {
-  title: "Mi Cuenta",
+  title: "Datos Empresa",
   robots: { index: false, follow: false },
 };
 
-export default function CuentaPage() {
+export default function CuentaEmpresaPage() {
   return (
     <div className="bg-light min-h-screen">
       <PageHero
         breadcrumbs={[
           { label: "Inicio", href: "/" },
-          { label: "Mi Cuenta" },
+          { label: "Mi Cuenta", href: "/cuenta" },
+          { label: "Datos Empresa" },
         ]}
-        title="Mi Cuenta"
-        description="Accede con tu cuenta de cliente para revisar pedidos y mantener al dia los datos de empresa y facturacion."
+        title="Datos Empresa"
+        description="Administra RUT, razon social, giro y direccion de facturacion desde tu cuenta de cliente."
       />
-      <AccountPanel view="dashboard" />
+      <AccountPanel view="company" />
     </div>
   );
 }
