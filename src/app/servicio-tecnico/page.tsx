@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronDown, MapPin, MessageCircle, PhoneCall } from "lucide-react";
+import { ChevronDown, MessageCircle, PhoneCall } from "lucide-react";
 import Container from "@/components/ui/Container";
 
 export const metadata: Metadata = {
@@ -369,22 +369,6 @@ export default function ServicioTecnicoPage() {
             </div>
           </div>
 
-          <div className="mt-10 grid gap-4 text-[15px] leading-8 text-dark/72 sm:grid-cols-2">
-            <div className="flex items-start gap-3 rounded-sm bg-[#f7f4ee] px-5 py-4">
-              <MapPin size={18} className="mt-1 flex-shrink-0 text-primary" />
-              <p>
-                Atendemos desde Santiago y coordinamos despachos a todo Chile para respaldar
-                talleres, flotas y clientes particulares.
-              </p>
-            </div>
-            <div className="flex items-start gap-3 rounded-sm bg-[#f7f4ee] px-5 py-4">
-              <PhoneCall size={18} className="mt-1 flex-shrink-0 text-primary" />
-              <p>
-                Si necesitas una revisi&oacute;n previa de referencia o compatibilidad, escr&iacute;benos y
-                te orientamos antes de cotizar.
-              </p>
-            </div>
-          </div>
         </Container>
       </section>
     </div>
