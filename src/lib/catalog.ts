@@ -70,7 +70,15 @@ function pickPrimaryVariant(variants: ShopifyProductVariant[]): ShopifyProductVa
 }
 
 function buildProductImages(images: ShopifyProduct["images"]): string[] {
-  const urls = images.edges.map((edge) => edge.node.url).filter(Boolean);
+  const urls = images.edges
+    .map((edge) => {
+      try {
+        return decodeURIComponent(edge.node.url);
+      } catch {
+        return edge.node.url;
+      }
+    })
+    .filter(Boolean);
   return urls.length > 0 ? urls : ["/products/placeholder.svg"];
 }
 
