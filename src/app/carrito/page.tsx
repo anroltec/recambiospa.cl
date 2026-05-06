@@ -28,10 +28,10 @@ export default async function CarritoPage() {
       <section className="border-b border-black/8">
         <Container className="py-12 md:py-16">
           <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#a28c74]">
-              Compra y cotizacion
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary/72">
+              Resumen de compra
             </p>
-            <h1 className="mt-4 text-4xl font-black uppercase tracking-tight text-[#5b5147] md:text-6xl">
+            <h1 className="mt-4 text-4xl font-black uppercase tracking-tight text-primary-dark md:text-6xl">
               Tu carrito
             </h1>
           </div>

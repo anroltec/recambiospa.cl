@@ -6,7 +6,6 @@ import {
   ArrowRight,
   CreditCard,
   LoaderCircle,
-  MessageCircle,
   Minus,
   Plus,
   ShoppingCart,
@@ -16,39 +15,6 @@ import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/format";
 import { getProductListKey } from "@/lib/product";
 import type { Product } from "@/types/product";
-
-const termsList = [
-  "Venta minima de $5.000.",
-  "Cantidad maxima por pedido: 25 productos.",
-  "Los valores no incluyen despacho.",
-  "La cotizacion tiene una validez referencial de 5 dias calendario.",
-];
-
-function buildWhatsAppHref(
-  items: ReturnType<typeof useCart>["items"],
-  subtotal: number,
-  totalWithIva: number
-) {
-  if (items.length === 0) {
-    return `https://wa.me/?text=${encodeURIComponent(
-      "Hola, quiero cotizar repuestos en recambiospa.cl."
-    )}`;
-  }
-
-  const lines = [
-    "Hola, quiero cotizar los siguientes productos:",
-    "",
-    ...items.map(
-      (item, index) =>
-        `${index + 1}. ${item.product.name} | SKU: ${item.product.code} | Cantidad: ${item.quantity}`
-    ),
-    "",
-    `Subtotal neto: ${formatPrice(subtotal)}`,
-    `Total aprox. con IVA: ${formatPrice(totalWithIva)}`,
-  ];
-
-  return `https://wa.me/?text=${encodeURIComponent(lines.join("\n"))}`;
-}
 
 interface SummaryRowProps {
   label: string;
@@ -65,8 +31,8 @@ function SummaryRow({
 }: SummaryRowProps) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <span className={`text-[1.05rem] text-[#5b5147] ${labelClassName}`.trim()}>{label}</span>
-      <span className={`text-[1.05rem] text-[#5b5147] ${valueClassName}`.trim()}>{value}</span>
+      <span className={`text-[1.05rem] text-dark/72 ${labelClassName}`.trim()}>{label}</span>
+      <span className={`text-[1.05rem] text-primary-dark ${valueClassName}`.trim()}>{value}</span>
     </div>
   );
 }
@@ -104,7 +70,6 @@ export default function CartPageContent({
   const isHydratingCart = isLoading && items.length === 0;
   const estimatedIva = Math.round(totalPrice * 0.19);
   const totalWithIva = totalPrice + estimatedIva;
-  const whatsappHref = buildWhatsAppHref(items, totalPrice, totalWithIva);
   const hasUnpricedItems = items.some((item) => item.product.price === null);
   const cartCountLabel = isHydratingCart
     ? "Cargando carrito..."
@@ -114,7 +79,9 @@ export default function CartPageContent({
     <div className="mx-auto max-w-7xl px-4 pb-14 pt-10 md:pb-20 md:pt-12">
       {catalogUnavailable && (
         <section className="border border-[#ead7c8] bg-[#fcf6f0] px-6 py-5 text-sm text-dark/70">
-          <p className="font-bold uppercase tracking-wide text-dark">No pudimos cargar sugeridos</p>
+          <p className="font-bold uppercase tracking-wide text-primary-dark">
+            No pudimos cargar sugeridos
+          </p>
           <p className="mt-2">
             Shopify no esta respondiendo en este momento. Puedes seguir usando el carrito, pero las
             recomendaciones del catalogo podrian no aparecer hasta que se restablezca la conexion.
@@ -126,11 +93,11 @@ export default function CartPageContent({
         <section className="min-w-0">
           <div className="flex flex-col gap-3 border-b border-black/10 pb-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-lg font-semibold text-[#5b5147]">{cartCountLabel}</p>
+              <p className="text-lg font-semibold text-primary-dark">{cartCountLabel}</p>
               <p className="mt-1 text-sm text-dark/50">
                 {items.length > 0
                   ? "Revisa cantidades y subtotales antes de continuar."
-                  : isHydratingCart
+                    : isHydratingCart
                     ? "Estamos recuperando la seleccion guardada."
                     : "Aqui veras las referencias agregadas, sus cantidades y el resumen del pedido."}
               </p>
@@ -140,7 +107,7 @@ export default function CartPageContent({
                 onClick={() => {
                   void clearCart();
                 }}
-                className="text-xs font-bold uppercase tracking-[0.18em] text-dark/45 transition-colors hover:text-primary"
+                className="text-xs font-bold uppercase tracking-[0.18em] text-primary-dark/70 transition-colors hover:text-primary"
               >
                 Vaciar carrito
               </button>
@@ -150,7 +117,7 @@ export default function CartPageContent({
           {items.length === 0 ? (
             <div className="flex min-h-[420px] items-center border-b border-black/10">
               <div className="max-w-md space-y-4 py-10">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#f6f2ed] text-[#5b5147]">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#f6f2ed] text-primary-dark">
                   {isHydratingCart ? (
                     <LoaderCircle size={20} className="animate-spin" />
                   ) : (
@@ -158,17 +125,17 @@ export default function CartPageContent({
                   )}
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-black uppercase tracking-tight text-[#5b5147]">
+                  <h2 className="text-2xl font-black uppercase tracking-tight text-primary-dark">
                     {isHydratingCart ? "Recuperando tu carrito" : "Tu carrito todavia esta vacio"}
                   </h2>
                   <p className="text-sm leading-relaxed text-dark/60">
                     Agrega productos desde el catalogo y el resumen lateral se actualizara al
-                    instante para comprar o cotizar.
+                    instante para comprar.
                   </p>
                 </div>
                 <Link
                   href="/collections"
-                  className="inline-flex items-center gap-2 rounded-sm bg-[#ff473d] px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition-colors hover:bg-[#f0372f]"
+                  className="inline-flex items-center gap-2 rounded-sm bg-primary px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition-colors hover:bg-primary-light"
                 >
                   Explorar catalogo
                   <ArrowRight size={15} />
@@ -209,7 +176,7 @@ export default function CartPageContent({
                       </Link>
 
                       <div className="min-w-0">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#8f7d68]">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/72">
                           {item.product.brand}
                         </p>
                         <Link
@@ -237,9 +204,9 @@ export default function CartPageContent({
                       <div className="flex flex-col gap-4 md:items-end">
                         <div className="w-full text-left md:text-right">
                           <p className="text-[11px] uppercase tracking-[0.18em] text-dark/40">
-                            Valor unitario
+                              Valor unitario
                           </p>
-                          <p className="mt-1 text-base font-bold text-[#5b5147]">
+                          <p className="mt-1 text-base font-bold text-primary-dark">
                             {unitPriceLabel}
                           </p>
                         </div>
@@ -285,7 +252,7 @@ export default function CartPageContent({
                           <p className="text-[11px] uppercase tracking-[0.18em] text-dark/40">
                             Subtotal
                           </p>
-                          <p className="mt-1 text-2xl font-black text-[#5b5147]">
+                          <p className="mt-1 text-2xl font-black text-primary-dark">
                             {lineTotalLabel}
                           </p>
                         </div>
@@ -298,9 +265,9 @@ export default function CartPageContent({
           )}
         </section>
 
-        <aside className="space-y-4 xl:sticky xl:top-28">
+        <aside className="xl:sticky xl:top-28">
           <section className="border border-black/10 bg-white px-6 py-6">
-            <h2 className="text-[2rem] font-black uppercase tracking-tight text-[#5b5147]">
+            <h2 className="text-[2rem] font-black uppercase tracking-tight text-primary-dark">
               Resumen
             </h2>
 
@@ -309,7 +276,7 @@ export default function CartPageContent({
               <SummaryRow
                 label="Despacho:"
                 value="Por confirmar"
-                valueClassName="text-[#d39d00]"
+                valueClassName="text-primary"
               />
               <SummaryRow label="Subtotal:" value={formatPrice(totalPrice)} />
               <SummaryRow label="IVA 19%:" value={formatPrice(estimatedIva)} />
@@ -318,7 +285,7 @@ export default function CartPageContent({
                 <SummaryRow
                   label="Total"
                   value={formatPrice(totalWithIva)}
-                  labelClassName="text-primary text-[1.15rem]"
+                  labelClassName="text-primary-dark text-[1.15rem] font-semibold"
                   valueClassName="text-primary text-[2rem] font-black"
                 />
               </div>
@@ -330,7 +297,7 @@ export default function CartPageContent({
               }`}
             >
               {hasUnpricedItems
-                ? "Hay productos con precio por confirmar. El total final puede ajustarse cuando se valide la cotizacion."
+                ? "Hay productos con precio por confirmar. El total final puede ajustarse al validar el pedido."
                 : "Despacho, impuestos finales y eventuales ajustes se confirman antes del pago."}
             </p>
 
@@ -340,7 +307,7 @@ export default function CartPageContent({
                   href={checkoutUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-11 items-center justify-center gap-2 rounded-sm bg-[#ff473d] px-4 text-lg font-bold uppercase tracking-wide text-white transition-colors hover:bg-[#f0372f]"
+                  className="flex h-11 items-center justify-center gap-2 rounded-sm bg-primary px-4 text-lg font-bold uppercase tracking-wide text-white transition-colors hover:bg-primary-light"
                 >
                   <CreditCard size={18} />
                   Comprar
@@ -349,40 +316,20 @@ export default function CartPageContent({
                 <button
                   type="button"
                   disabled
-                  className="flex h-11 w-full items-center justify-center gap-2 rounded-sm bg-[#ff473d]/45 px-4 text-lg font-bold uppercase tracking-wide text-white/85"
+                  className="flex h-11 w-full items-center justify-center gap-2 rounded-sm bg-primary/45 px-4 text-lg font-bold uppercase tracking-wide text-white/85"
                 >
                   <CreditCard size={18} />
                   {isLoading ? "Cargando..." : "Comprar"}
                 </button>
               )}
 
-              <a
-                href={whatsappHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-11 items-center justify-center gap-2 rounded-sm bg-[#72695f] px-4 text-lg font-bold uppercase tracking-wide text-white transition-colors hover:bg-[#655c53]"
-              >
-                <MessageCircle size={18} />
-                Cotizar
-              </a>
-
               <Link
                 href="/collections"
-                className="flex h-11 items-center justify-center rounded-sm border border-black/10 px-4 text-sm font-semibold uppercase tracking-[0.18em] text-[#5b5147] transition-colors hover:bg-[#f7f3ef]"
+                className="flex h-11 items-center justify-center rounded-sm border border-primary-dark px-4 text-sm font-semibold uppercase tracking-[0.18em] text-primary-dark transition-colors hover:bg-primary-dark hover:text-white"
               >
                 Seguir comprando
               </Link>
             </div>
-          </section>
-
-          <section className="border border-[#b8dde6] bg-[#d8eef5] px-6 py-5">
-            <h3 className="text-[1.65rem] font-semibold text-[#0a5166]">Condiciones Generales</h3>
-            <div className="mt-4 h-px bg-[#98cad6]" />
-            <ul className="mt-4 space-y-3 text-sm leading-relaxed text-[#0f5568]">
-              {termsList.map((term) => (
-                <li key={term}>* {term}</li>
-              ))}
-            </ul>
           </section>
         </aside>
       </div>
@@ -391,10 +338,10 @@ export default function CartPageContent({
         <section className="mt-12 border-t border-black/8 pt-10">
           <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#a28c74]">
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary/72">
                 Sigue armando el pedido
               </p>
-              <h2 className="mt-3 text-3xl font-black uppercase tracking-tight text-[#5b5147]">
+              <h2 className="mt-3 text-3xl font-black uppercase tracking-tight text-primary-dark">
                 Productos sugeridos
               </h2>
             </div>
