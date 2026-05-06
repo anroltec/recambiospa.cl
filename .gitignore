@@ -39,6 +39,9 @@ pnpm-lock.yaml
 # vercel
 .vercel
 
+# MCP config — contains personal access tokens, never commit
+.mcp.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
