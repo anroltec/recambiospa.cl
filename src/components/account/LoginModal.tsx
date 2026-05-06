@@ -1,17 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  AlertCircle,
-  Eye,
-  EyeOff,
-  Loader2,
-  Receipt,
-  ShieldCheck,
-  ShoppingBag,
-  UserRound,
-} from "lucide-react";
+import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 
 type Mode = "login" | "register";
@@ -21,25 +13,39 @@ interface LoginModalProps {
 }
 
 const EMPTY_LOGIN = { email: "", password: "" };
-const EMPTY_REGISTER = { firstName: "", lastName: "", email: "", password: "", confirm: "" };
+const EMPTY_REGISTER = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  password: "",
+  confirm: "",
+};
 
-const FEATURES = [
-  {
-    icon: ShoppingBag,
-    title: "Historial de compras",
-    desc: "Pedidos, montos y estados de despacho en un solo lugar.",
+const MODE_COPY = {
+  login: {
+    title: "Acceder",
+    submit: "Entrar",
+    loading: "Entrando...",
+    switchPrompt: "\u00bfSin cuenta todav\u00eda?",
+    switchCta: "Crear una",
   },
-  {
-    icon: Receipt,
-    title: "Datos de facturación",
-    desc: "RUT, razón social, giro y dirección siempre actualizados.",
+  register: {
+    title: "Crear cuenta",
+    submit: "Crear cuenta",
+    loading: "Creando cuenta...",
+    switchPrompt: "\u00bfYa tienes acceso?",
+    switchCta: "Entrar",
   },
+} satisfies Record<
+  Mode,
   {
-    icon: ShieldCheck,
-    title: "Base para ERP",
-    desc: "Integración lista para Defontana y facturación electrónica.",
-  },
-];
+    title: string;
+    submit: string;
+    loading: string;
+    switchPrompt: string;
+    switchCta: string;
+  }
+>;
 
 export default function LoginModal({ onClose }: LoginModalProps) {
   const router = useRouter();
@@ -86,11 +92,15 @@ export default function LoginModal({ onClose }: LoginModalProps) {
         body: JSON.stringify({ email: loginValues.email, password: loginValues.password }),
       });
       const data = (await res.json()) as { ok: boolean; error?: string };
-      if (!res.ok || !data.ok) throw new Error(data.error ?? "No fue posible iniciar sesion.");
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error ?? "No fue posible iniciar sesi\u00f3n.");
+      }
       onClose();
       router.push("/cuenta");
     } catch (err) {
-      setLoginError(err instanceof Error ? err.message : "No fue posible iniciar sesion.");
+      setLoginError(
+        err instanceof Error ? err.message : "No fue posible iniciar sesi\u00f3n."
+      );
     } finally {
       setIsSubmittingLogin(false);
     }
@@ -99,9 +109,10 @@ export default function LoginModal({ onClose }: LoginModalProps) {
   async function handleRegister(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (regValues.password !== regValues.confirm) {
-      setRegError("Las contraseñas no coinciden.");
+      setRegError("Las contrase\u00f1as no coinciden.");
       return;
     }
+
     setIsSubmittingReg(true);
     setRegError(null);
 
@@ -117,7 +128,9 @@ export default function LoginModal({ onClose }: LoginModalProps) {
         }),
       });
       const data = (await res.json()) as { ok: boolean; error?: string };
-      if (!res.ok || !data.ok) throw new Error(data.error ?? "No fue posible crear la cuenta.");
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error ?? "No fue posible crear la cuenta.");
+      }
       onClose();
       router.push("/cuenta");
     } catch (err) {
@@ -137,207 +150,219 @@ export default function LoginModal({ onClose }: LoginModalProps) {
     );
   }
 
+  const copy = MODE_COPY[mode];
+
   return (
-    <Modal onClose={onClose} maxWidth="max-w-2xl">
-      <div className="flex min-h-[520px] flex-col lg:flex-row">
-        {/* ── Brand panel ── */}
-        <div className="flex flex-col justify-between bg-primary-dark p-8 lg:w-64 lg:shrink-0">
-          {/* Top */}
-          <div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20">
-              <UserRound size={20} className="text-primary-light" />
-            </div>
+    <Modal
+      onClose={onClose}
+      maxWidth="max-w-[1080px]"
+      panelClassName="max-h-[94vh] overflow-hidden"
+      closeButtonClassName="top-5 right-5 h-11 w-11 rounded-none border-[#e7dfd4] bg-white/94 shadow-none hover:bg-[#f3eee7]"
+    >
+      <div className="overflow-hidden bg-[#10151b]">
+        <div className="grid min-h-[600px] lg:min-h-[560px] lg:grid-cols-[360px_minmax(0,1fr)]">
+          <aside className="relative min-h-[220px] overflow-hidden border-b border-black/10 bg-[#10151b] lg:min-h-[560px] lg:border-b-0 lg:border-r">
+            <div className="absolute -inset-px bg-[#10151b] bg-[url('/banners/banner2.jpg')] bg-cover bg-no-repeat [background-position:78%_center]" />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,14,18,0.08)_0%,rgba(10,14,18,0.58)_68%,rgba(10,14,18,0.92)_100%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,14,18,0.82)_0%,rgba(10,14,18,0.52)_54%,rgba(10,14,18,0.14)_100%)]" />
+            <div className="absolute left-0 top-0 h-full w-1 bg-primary" />
 
-            <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.25em] text-primary">
-              Panel B2B
-            </p>
-            <h2 className="mt-2 text-xl font-black uppercase leading-snug text-white">
-              Recambio SPA
-            </h2>
-            <p className="mt-3 text-xs leading-relaxed text-white/40">
-              Compra, factura y gestiona tu historial desde un mismo lugar.
-            </p>
-
-            <div className="mt-8 space-y-5">
-              {FEATURES.map((f) => (
-                <div key={f.title} className="flex items-start gap-3">
-                  <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded bg-white/10">
-                    <f.icon size={13} className="text-white/70" />
-                  </div>
-                  <div>
-                    <p className="text-[11px] font-bold uppercase tracking-wide text-white/80">
-                      {f.title}
-                    </p>
-                    <p className="mt-0.5 text-[11px] leading-relaxed text-white/35">{f.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Bottom accent */}
-          <div className="mt-8 h-px w-10 bg-primary" />
-        </div>
-
-        {/* ── Form panel ── */}
-        <div className="flex flex-1 flex-col p-8">
-          {/* Pill tab switcher */}
-          <div className="mb-7 flex rounded-full bg-gray-100 p-1">
-            <TabBtn active={mode === "login"} onClick={() => switchMode("login")}>
-              Iniciar Sesión
-            </TabBtn>
-            <TabBtn active={mode === "register"} onClick={() => switchMode("register")}>
-              Crear Cuenta
-            </TabBtn>
-          </div>
-
-          {mode === "login" ? (
-            <form
-              onSubmit={(e) => void handleLogin(e)}
-              className="flex flex-1 flex-col justify-between"
-            >
-              <div className="space-y-5">
-                <Field label="Email corporativo">
-                  <Input
-                    type="email"
-                    value={loginValues.email}
-                    onChange={(e) => setLoginValues((v) => ({ ...v, email: e.target.value }))}
-                    placeholder="cliente@empresa.cl"
-                    autoComplete="email"
-                    required
-                  />
-                </Field>
-
-                <Field label="Contraseña">
-                  <div className="relative">
-                    <Input
-                      type={showLoginPw ? "text" : "password"}
-                      value={loginValues.password}
-                      onChange={(e) =>
-                        setLoginValues((v) => ({ ...v, password: e.target.value }))
-                      }
-                      placeholder="••••••••"
-                      autoComplete="current-password"
-                      required
-                      className="pr-11"
-                    />
-                    <PwToggle show={showLoginPw} onToggle={() => setShowLoginPw((v) => !v)} />
-                  </div>
-                </Field>
-
-                {loginError ? <ErrorBanner message={loginError} /> : null}
-              </div>
-
-              <div className="mt-8">
-                <SubmitBtn loading={isSubmittingLogin} loadingText="Ingresando…">
-                  Iniciar Sesión
-                </SubmitBtn>
-                <p className="mt-4 text-center text-xs text-dark/40">
-                  ¿Sin cuenta?{" "}
-                  <button
-                    type="button"
-                    onClick={() => switchMode("register")}
-                    className="font-semibold text-primary hover:underline"
-                  >
-                    Crear una ahora
-                  </button>
+            <div className="relative flex h-full items-end p-5 sm:p-6 lg:p-8">
+              <div className="border border-white/16 bg-black/25 px-4 py-4 backdrop-blur-[2px]">
+                <Image
+                  src="/logo.svg"
+                  alt="Recambio SpA"
+                  width={170}
+                  height={58}
+                  className="h-auto w-[136px] sm:w-[160px]"
+                />
+                <p className="mt-3 text-[10px] font-medium uppercase tracking-[0.2em] text-white/58">
+                  Acceso clientes
                 </p>
               </div>
-            </form>
-          ) : (
-            <form
-              onSubmit={(e) => void handleRegister(e)}
-              className="flex flex-1 flex-col justify-between"
-            >
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <Field label="Nombre">
+            </div>
+          </aside>
+
+          <div className="flex flex-1 flex-col bg-white px-6 py-5 sm:px-8 sm:py-6 lg:px-10 lg:py-7">
+            <div className="flex items-center justify-between gap-4">
+              <div className="inline-flex border border-[#e6ddd1] bg-[#f5f0e8]">
+                <TabBtn active={mode === "login"} onClick={() => switchMode("login")}>
+                  Entrar
+                </TabBtn>
+                <TabBtn active={mode === "register"} onClick={() => switchMode("register")}>
+                  Crear cuenta
+                </TabBtn>
+              </div>
+              <div className="hidden h-px w-16 bg-dark/10 sm:block" />
+            </div>
+
+            <div className="mt-8 lg:mt-10">
+              <h3 className="text-3xl font-black tracking-tight text-dark sm:text-[2.15rem]">
+                {copy.title}
+              </h3>
+            </div>
+
+            {mode === "login" ? (
+              <form
+                onSubmit={(e) => void handleLogin(e)}
+                className="mt-7 flex flex-1 flex-col justify-between"
+              >
+                <div className="space-y-5">
+                  <Field label="Correo">
                     <Input
-                      type="text"
-                      value={regValues.firstName}
-                      onChange={(e) => setRegValues((v) => ({ ...v, firstName: e.target.value }))}
-                      placeholder="Juan"
-                      autoComplete="given-name"
+                      type="email"
+                      value={loginValues.email}
+                      onChange={(e) => setLoginValues((v) => ({ ...v, email: e.target.value }))}
+                      placeholder="cliente@empresa.cl"
+                      autoComplete="email"
+                      required
                     />
                   </Field>
-                  <Field label="Apellido">
-                    <Input
-                      type="text"
-                      value={regValues.lastName}
-                      onChange={(e) => setRegValues((v) => ({ ...v, lastName: e.target.value }))}
-                      placeholder="Pérez"
-                      autoComplete="family-name"
-                    />
+
+                  <Field label={"Contrase\u00f1a"}>
+                    <div className="relative">
+                      <Input
+                        type={showLoginPw ? "text" : "password"}
+                        value={loginValues.password}
+                        onChange={(e) =>
+                          setLoginValues((v) => ({ ...v, password: e.target.value }))
+                        }
+                        placeholder={"Ingresa tu contrase\u00f1a"}
+                        autoComplete="current-password"
+                        required
+                        className="pr-14"
+                      />
+                      <PwToggle
+                        show={showLoginPw}
+                        onToggle={() => setShowLoginPw((value) => !value)}
+                      />
+                    </div>
                   </Field>
+
+                  {loginError ? <ErrorBanner message={loginError} /> : null}
                 </div>
 
-                <Field label="Email corporativo">
-                  <Input
-                    type="email"
-                    value={regValues.email}
-                    onChange={(e) => setRegValues((v) => ({ ...v, email: e.target.value }))}
-                    placeholder="cliente@empresa.cl"
-                    autoComplete="email"
-                    required
-                  />
-                </Field>
-
-                <Field label="Contraseña">
-                  <div className="relative">
-                    <Input
-                      type={showRegPw ? "text" : "password"}
-                      value={regValues.password}
-                      onChange={(e) =>
-                        setRegValues((v) => ({ ...v, password: e.target.value }))
-                      }
-                      placeholder="Mínimo 5 caracteres"
-                      autoComplete="new-password"
-                      required
-                      minLength={5}
-                      className="pr-11"
-                    />
-                    <PwToggle show={showRegPw} onToggle={() => setShowRegPw((v) => !v)} />
+                <div className="mt-7">
+                  <SubmitBtn loading={isSubmittingLogin} loadingText={copy.loading}>
+                    {copy.submit}
+                  </SubmitBtn>
+                  <p className="mt-4 text-center text-sm text-dark/46">
+                    {copy.switchPrompt}{" "}
+                    <button
+                      type="button"
+                      onClick={() => switchMode("register")}
+                      className="font-semibold text-primary transition-colors hover:text-primary-light"
+                    >
+                      {copy.switchCta}
+                    </button>
+                  </p>
+                </div>
+              </form>
+            ) : (
+              <form
+                onSubmit={(e) => void handleRegister(e)}
+                className="mt-7 flex flex-1 flex-col justify-between"
+              >
+                <div className="space-y-5">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label="Nombre">
+                      <Input
+                        type="text"
+                        value={regValues.firstName}
+                        onChange={(e) =>
+                          setRegValues((v) => ({ ...v, firstName: e.target.value }))
+                        }
+                        placeholder="Juan"
+                        autoComplete="given-name"
+                      />
+                    </Field>
+                    <Field label="Apellido">
+                      <Input
+                        type="text"
+                        value={regValues.lastName}
+                        onChange={(e) =>
+                          setRegValues((v) => ({ ...v, lastName: e.target.value }))
+                        }
+                        placeholder={"P\u00e9rez"}
+                        autoComplete="family-name"
+                      />
+                    </Field>
                   </div>
-                </Field>
 
-                <Field label="Confirmar contraseña">
-                  <Input
-                    type={showRegPw ? "text" : "password"}
-                    value={regValues.confirm}
-                    onChange={(e) => setRegValues((v) => ({ ...v, confirm: e.target.value }))}
-                    placeholder="Repite la contraseña"
-                    autoComplete="new-password"
-                    required
-                  />
-                </Field>
+                  <Field label="Correo">
+                    <Input
+                      type="email"
+                      value={regValues.email}
+                      onChange={(e) => setRegValues((v) => ({ ...v, email: e.target.value }))}
+                      placeholder="cliente@empresa.cl"
+                      autoComplete="email"
+                      required
+                    />
+                  </Field>
 
-                {regError ? <ErrorBanner message={regError} /> : null}
-              </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <Field label={"Contrase\u00f1a"}>
+                      <div className="relative">
+                        <Input
+                          type={showRegPw ? "text" : "password"}
+                          value={regValues.password}
+                          onChange={(e) =>
+                            setRegValues((v) => ({ ...v, password: e.target.value }))
+                          }
+                          placeholder={"Crea una contrase\u00f1a"}
+                          autoComplete="new-password"
+                          required
+                          minLength={5}
+                          className="pr-14"
+                        />
+                        <PwToggle
+                          show={showRegPw}
+                          onToggle={() => setShowRegPw((value) => !value)}
+                        />
+                      </div>
+                      <HelperText>{"M\u00ednimo 5 caracteres."}</HelperText>
+                    </Field>
 
-              <div className="mt-6">
-                <SubmitBtn loading={isSubmittingReg} loadingText="Creando cuenta…">
-                  Crear Cuenta
-                </SubmitBtn>
-                <p className="mt-4 text-center text-xs text-dark/40">
-                  ¿Ya tienes cuenta?{" "}
-                  <button
-                    type="button"
-                    onClick={() => switchMode("login")}
-                    className="font-semibold text-primary hover:underline"
-                  >
-                    Inicia sesión
-                  </button>
-                </p>
-              </div>
-            </form>
-          )}
+                    <Field label={"Confirmar contrase\u00f1a"}>
+                      <Input
+                        type={showRegPw ? "text" : "password"}
+                        value={regValues.confirm}
+                        onChange={(e) =>
+                          setRegValues((v) => ({ ...v, confirm: e.target.value }))
+                        }
+                        placeholder={"Repite tu contrase\u00f1a"}
+                        autoComplete="new-password"
+                        required
+                      />
+                    </Field>
+                  </div>
+
+                  {regError ? <ErrorBanner message={regError} /> : null}
+                </div>
+
+                <div className="mt-7">
+                  <SubmitBtn loading={isSubmittingReg} loadingText={copy.loading}>
+                    {copy.submit}
+                  </SubmitBtn>
+                  <p className="mt-4 text-center text-sm text-dark/46">
+                    {copy.switchPrompt}{" "}
+                    <button
+                      type="button"
+                      onClick={() => switchMode("login")}
+                      className="font-semibold text-primary transition-colors hover:text-primary-light"
+                    >
+                      {copy.switchCta}
+                    </button>
+                  </p>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </Modal>
   );
 }
-
-/* ── Sub-components ── */
 
 function TabBtn({
   active,
@@ -352,8 +377,9 @@ function TabBtn({
     <button
       type="button"
       onClick={onClick}
-      className={`flex-1 rounded-full py-2 text-[11px] font-bold uppercase tracking-wider transition-all duration-200 ${
-        active ? "bg-white text-dark shadow-sm" : "text-dark/40 hover:text-dark/60"
+      aria-pressed={active}
+      className={`border-r border-[#e6ddd1] px-5 py-2.5 text-sm font-semibold transition-colors last:border-r-0 sm:px-7 ${
+        active ? "bg-white text-dark" : "text-dark/46 hover:text-dark/76"
       }`}
     >
       {children}
@@ -361,12 +387,16 @@ function TabBtn({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.18em] text-dark/40">
-        {label}
-      </span>
+      <span className="mb-2 block text-[13px] font-medium text-dark/70">{label}</span>
       {children}
     </label>
   );
@@ -378,10 +408,14 @@ function Input({
 }: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
-      className={`w-full border-0 border-b-2 border-gray-200 bg-transparent pb-2 pt-1 text-sm text-dark placeholder:text-dark/25 focus:border-primary focus:outline-none transition-colors ${className}`}
+      className={`w-full border border-[#e5ddd2] bg-[#f6f2eb] px-4 py-3 text-[15px] text-dark transition-colors placeholder:text-dark/34 focus:border-primary focus:bg-white focus:outline-none ${className}`}
       {...props}
     />
   );
+}
+
+function HelperText({ children }: { children: React.ReactNode }) {
+  return <p className="mt-1.5 text-xs text-dark/44">{children}</p>;
 }
 
 function PwToggle({ show, onToggle }: { show: boolean; onToggle: () => void }) {
@@ -389,11 +423,12 @@ function PwToggle({ show, onToggle }: { show: boolean; onToggle: () => void }) {
     <button
       type="button"
       onClick={onToggle}
-      tabIndex={-1}
-      aria-label={show ? "Ocultar contraseña" : "Mostrar contraseña"}
-      className="absolute right-0 top-1/2 -translate-y-1/2 text-dark/30 hover:text-dark/60 transition-colors"
+      aria-label={
+        show ? "Ocultar contrase\u00f1a" : "Mostrar contrase\u00f1a"
+      }
+      className="absolute right-4 top-1/2 -translate-y-1/2 text-dark/30 transition-colors hover:text-dark/60"
     >
-      {show ? <EyeOff size={15} /> : <Eye size={15} />}
+      {show ? <EyeOff size={17} /> : <Eye size={17} />}
     </button>
   );
 }
@@ -411,11 +446,11 @@ function SubmitBtn({
     <button
       type="submit"
       disabled={loading}
-      className="flex w-full items-center justify-center gap-2 bg-primary py-3.5 text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-primary-light disabled:opacity-60"
+      className="flex w-full items-center justify-center gap-2 bg-primary px-6 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-60"
     >
       {loading ? (
         <>
-          <Loader2 size={14} className="animate-spin" />
+          <Loader2 size={16} className="animate-spin" />
           {loadingText}
         </>
       ) : (
@@ -427,8 +462,8 @@ function SubmitBtn({
 
 function ErrorBanner({ message }: { message: string }) {
   return (
-    <div className="flex items-start gap-2 rounded bg-red-50 px-3 py-2.5 text-xs text-red-600">
-      <AlertCircle size={13} className="mt-0.5 shrink-0" />
+    <div className="flex items-start gap-2 border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700">
+      <AlertCircle size={15} className="mt-0.5 shrink-0" />
       <span>{message}</span>
     </div>
   );
