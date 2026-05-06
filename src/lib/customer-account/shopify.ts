@@ -363,7 +363,8 @@ export async function updateShopifyCustomerProfile(
       customer: {
         firstName: normalizeOptional(input.firstName),
         lastName: normalizeOptional(input.lastName),
-        phone: normalizeOptional(input.phone),
+        // phone is managed exclusively in Supabase — Shopify rejects
+        // Chilean +56 format and it is not needed for order fulfillment
       },
     }
   );
