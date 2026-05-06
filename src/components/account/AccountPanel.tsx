@@ -1,22 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   AlertCircle,
-  Building2,
   ChevronRight,
   Loader2,
-  LogOut,
   MapPin,
   Receipt,
   Save,
-  ShieldCheck,
   ShoppingBag,
-  UserRound,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
-import Badge from "@/components/ui/Badge";
 import { formatDate } from "@/lib/format";
 import type {
   CustomerCompanyProfile,
@@ -44,16 +40,8 @@ interface ProfileResponse {
 interface OrdersResponse {
   ok: true;
   orders: CustomerOrderSummary[];
-  pageInfo: {
-    hasNextPage: boolean;
-    endCursor: string | null;
-  };
+  pageInfo: { hasNextPage: boolean; endCursor: string | null };
 }
-
-const EMPTY_LOGIN = {
-  email: "",
-  password: "",
-};
 
 const EMPTY_FORM: CustomerCompanyProfileInput = {
   firstName: "",
@@ -72,796 +60,416 @@ const EMPTY_FORM: CustomerCompanyProfileInput = {
   billingNotes: "",
 };
 
-function toFormValues(profile: CustomerCompanyProfile): CustomerCompanyProfileInput {
+function toFormValues(p: CustomerCompanyProfile): CustomerCompanyProfileInput {
   return {
-    firstName: profile.firstName ?? "",
-    lastName: profile.lastName ?? "",
-    phone: profile.phone ?? "",
-    rut: profile.rut ?? "",
-    razonSocial: profile.razonSocial ?? "",
-    giro: profile.giro ?? "",
-    billingAddressLine1: profile.billingAddressLine1 ?? "",
-    billingAddressLine2: profile.billingAddressLine2 ?? "",
-    billingComuna: profile.billingComuna ?? "",
-    billingCity: profile.billingCity ?? "",
-    billingRegion: profile.billingRegion ?? "",
-    billingPostalCode: profile.billingPostalCode ?? "",
-    billingCountryCode: profile.billingCountryCode ?? "CL",
-    billingNotes: profile.billingNotes ?? "",
+    firstName:          p.firstName          ?? "",
+    lastName:           p.lastName           ?? "",
+    phone:              p.phone              ?? "",
+    rut:                p.rut                ?? "",
+    razonSocial:        p.razonSocial        ?? "",
+    giro:               p.giro               ?? "",
+    billingAddressLine1: p.billingAddressLine1 ?? "",
+    billingAddressLine2: p.billingAddressLine2 ?? "",
+    billingComuna:      p.billingComuna      ?? "",
+    billingCity:        p.billingCity        ?? "",
+    billingRegion:      p.billingRegion      ?? "",
+    billingPostalCode:  p.billingPostalCode  ?? "",
+    billingCountryCode: p.billingCountryCode ?? "CL",
+    billingNotes:       p.billingNotes       ?? "",
   };
 }
 
-function formatMoney(amount: string, currencyCode: string): string {
-  const parsed = Number(amount);
-
-  if (Number.isNaN(parsed)) {
-    return `${amount} ${currencyCode}`;
-  }
-
+function formatMoney(amount: string, currency: string): string {
+  const n = Number(amount);
+  if (Number.isNaN(n)) return `${amount} ${currency}`;
   return new Intl.NumberFormat("es-CL", {
     style: "currency",
-    currency: currencyCode,
-    minimumFractionDigits: currencyCode === "CLP" ? 0 : 2,
-    maximumFractionDigits: currencyCode === "CLP" ? 0 : 2,
-  }).format(parsed);
+    currency,
+    minimumFractionDigits: currency === "CLP" ? 0 : 2,
+    maximumFractionDigits: currency === "CLP" ? 0 : 2,
+  }).format(n);
 }
 
-function getProfileBadgeVariant(status: CustomerCompanyProfile["profileStatus"]) {
-  return status === "complete" ? "success" : "primary";
+function getProfileStatusLabel(s: CustomerCompanyProfile["profileStatus"]) {
+  return s === "complete" ? "Perfil completo" : "Perfil incompleto";
 }
 
-function getProfileStatusLabel(status: CustomerCompanyProfile["profileStatus"]) {
-  return status === "complete" ? "Perfil listo" : "Perfil incompleto";
-}
-
-function getFinancialStatusLabel(status: string | null) {
-  if (!status) return "Sin estado";
-
-  const labels: Record<string, string> = {
-    PAID: "Pagado",
-    PARTIALLY_PAID: "Pago parcial",
-    PENDING: "Pendiente",
-    AUTHORIZED: "Autorizado",
-    PARTIALLY_REFUNDED: "Reembolso parcial",
-    REFUNDED: "Reembolsado",
-    VOIDED: "Anulado",
+function getFinancialStatusLabel(s: string | null) {
+  const map: Record<string, string> = {
+    PAID: "Pagado", PARTIALLY_PAID: "Pago parcial", PENDING: "Pendiente",
+    AUTHORIZED: "Autorizado", PARTIALLY_REFUNDED: "Reembolso parcial",
+    REFUNDED: "Reembolsado", VOIDED: "Anulado",
   };
-
-  return labels[status] ?? status;
+  return s ? (map[s] ?? s) : "Sin estado";
 }
 
-function getFulfillmentStatusLabel(status: string | null) {
-  if (!status) return "Preparando";
-
-  const labels: Record<string, string> = {
-    FULFILLED: "Despachado",
-    PARTIALLY_FULFILLED: "Despacho parcial",
-    UNFULFILLED: "Pendiente",
-    IN_PROGRESS: "En proceso",
-    ON_HOLD: "En espera",
-    OPEN: "Abierto",
-    SCHEDULED: "Programado",
+function getFulfillmentStatusLabel(s: string | null) {
+  const map: Record<string, string> = {
+    FULFILLED: "Despachado", PARTIALLY_FULFILLED: "Parcial", UNFULFILLED: "Pendiente",
+    IN_PROGRESS: "En proceso", ON_HOLD: "En espera",
   };
-
-  return labels[status] ?? status;
+  return s ? (map[s] ?? s) : "Preparando";
 }
 
-function getAccountName(profile: CustomerCompanyProfile): string {
-  const fullName = `${profile.firstName ?? ""} ${profile.lastName ?? ""}`.trim();
-  return fullName || profile.email;
-}
+/* ───────────────────────────────── Main panel ── */
 
 export default function AccountPanel({ view }: AccountPanelProps) {
-  const [panelStatus, setPanelStatus] = useState<PanelStatus>("loading");
-  const [profile, setProfile] = useState<CustomerCompanyProfile | null>(null);
-  const [formValues, setFormValues] = useState<CustomerCompanyProfileInput>(EMPTY_FORM);
-  const [orders, setOrders] = useState<CustomerOrderSummary[]>([]);
-  const [ordersCursor, setOrdersCursor] = useState<string | null>(null);
-  const [hasMoreOrders, setHasMoreOrders] = useState(false);
-  const [loginValues, setLoginValues] = useState(EMPTY_LOGIN);
-  const [isSubmittingLogin, setIsSubmittingLogin] = useState(false);
-  const [isSavingProfile, setIsSavingProfile] = useState(false);
-  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [loginError, setLoginError] = useState<string | null>(null);
+  const router = useRouter();
+  const [panelStatus,    setPanelStatus]    = useState<PanelStatus>("loading");
+  const [profile,        setProfile]        = useState<CustomerCompanyProfile | null>(null);
+  const [formValues,     setFormValues]     = useState<CustomerCompanyProfileInput>(EMPTY_FORM);
+  const [orders,         setOrders]         = useState<CustomerOrderSummary[]>([]);
+  const [ordersCursor,   setOrdersCursor]   = useState<string | null>(null);
+  const [hasMoreOrders,  setHasMoreOrders]  = useState(false);
+  const [isSavingProfile,setIsSavingProfile]= useState(false);
+  const [isLoadingOrders,setIsLoadingOrders]= useState(false);
   const [profileMessage, setProfileMessage] = useState<string | null>(null);
-  const [ordersError, setOrdersError] = useState<string | null>(null);
+  const [ordersError,    setOrdersError]    = useState<string | null>(null);
 
   useEffect(() => {
-    let isMounted = true;
-
-    async function loadProfile() {
-      try {
-        const response = await fetch("/api/customer/profile", {
-          method: "GET",
-          cache: "no-store",
-        });
-
-        if (!isMounted) return;
-
-        if (response.status === 401) {
-          setPanelStatus("guest");
-          setProfile(null);
-          setFormValues(EMPTY_FORM);
-          return;
-        }
-
-        const data = (await response.json()) as ProfileResponse | ApiErrorResponse;
-
-        if (!response.ok || !data.ok) {
-          throw new Error(data.ok ? "Unable to fetch customer profile." : data.error);
-        }
-
+    let mounted = true;
+    fetch("/api/customer/profile", { method: "GET", cache: "no-store" })
+      .then(async (res) => {
+        if (!mounted) return;
+        if (res.status === 401) { router.replace("/"); return; }
+        const data = (await res.json()) as ProfileResponse | ApiErrorResponse;
+        if (!res.ok || !data.ok) throw new Error(data.ok ? "" : data.error);
         setProfile(data.profile);
         setFormValues(toFormValues(data.profile));
         setPanelStatus("ready");
-      } catch (error) {
-        if (!isMounted) return;
-
-        setPanelStatus("guest");
-        setLoginError(
-          error instanceof Error
-            ? error.message
-            : "No fue posible cargar la cuenta del cliente."
-        );
-      }
-    }
-
-    void loadProfile();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+      })
+      .catch(() => { if (mounted) router.replace("/"); });
+    return () => { mounted = false; };
+  }, [router]);
 
   useEffect(() => {
-    if (panelStatus !== "ready" || (view !== "dashboard" && view !== "orders")) {
-      return;
-    }
-
-    const first = view === "dashboard" ? 5 : 12;
-    void loadOrders(first);
+    if (panelStatus !== "ready" || (view !== "dashboard" && view !== "orders")) return;
+    void loadOrders(view === "dashboard" ? 5 : 12);
   }, [panelStatus, view]);
 
   async function loadOrders(first: number, after?: string | null, append = false) {
     setIsLoadingOrders(true);
     setOrdersError(null);
-
     try {
-      const searchParams = new URLSearchParams({ first: String(first) });
-
-      if (after) {
-        searchParams.set("after", after);
-      }
-
-      const response = await fetch(`/api/customer/orders?${searchParams.toString()}`, {
-        method: "GET",
-        cache: "no-store",
-      });
-
-      if (response.status === 401) {
-        setPanelStatus("guest");
-        setProfile(null);
-        setOrders([]);
-        return;
-      }
-
-      const data = (await response.json()) as OrdersResponse | ApiErrorResponse;
-
-      if (!response.ok || !data.ok) {
-        throw new Error(data.ok ? "Unable to fetch customer orders." : data.error);
-      }
-
-      setOrders((currentOrders) =>
-        append ? [...currentOrders, ...data.orders] : data.orders
-      );
+      const params = new URLSearchParams({ first: String(first) });
+      if (after) params.set("after", after);
+      const res = await fetch(`/api/customer/orders?${params.toString()}`, { cache: "no-store" });
+      if (res.status === 401) { setPanelStatus("guest"); setProfile(null); return; }
+      const data = (await res.json()) as OrdersResponse | ApiErrorResponse;
+      if (!res.ok || !data.ok) throw new Error(data.ok ? "" : data.error);
+      setOrders((prev) => append ? [...prev, ...data.orders] : data.orders);
       setOrdersCursor(data.pageInfo.endCursor);
       setHasMoreOrders(data.pageInfo.hasNextPage);
-    } catch (error) {
-      setOrdersError(
-        error instanceof Error ? error.message : "No fue posible cargar los pedidos."
-      );
+    } catch (e) {
+      setOrdersError(e instanceof Error ? e.message : "No fue posible cargar los pedidos.");
     } finally {
       setIsLoadingOrders(false);
     }
   }
 
-  async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setIsSubmittingLogin(true);
-    setLoginError(null);
-
-    try {
-      const response = await fetch("/api/customer/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(loginValues),
-      });
-
-      const data = (await response.json()) as ProfileResponse | ApiErrorResponse;
-
-      if (!response.ok || !data.ok) {
-        throw new Error(data.ok ? "Unable to log in customer." : data.error);
-      }
-
-      setProfile(data.profile);
-      setFormValues(toFormValues(data.profile));
-      setPanelStatus("ready");
-      setLoginValues(EMPTY_LOGIN);
-      setProfileMessage(null);
-    } catch (error) {
-      setLoginError(
-        error instanceof Error ? error.message : "No fue posible iniciar sesion."
-      );
-    } finally {
-      setIsSubmittingLogin(false);
-    }
-  }
-
-  async function handleLogout() {
-    setIsLoggingOut(true);
-
-    try {
-      await fetch("/api/customer/auth/logout", {
-        method: "POST",
-      });
-    } finally {
-      setIsLoggingOut(false);
-      setPanelStatus("guest");
-      setProfile(null);
-      setOrders([]);
-      setOrdersCursor(null);
-      setHasMoreOrders(false);
-      setFormValues(EMPTY_FORM);
-      setProfileMessage(null);
-    }
-  }
-
-  async function handleSaveProfile(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function handleSaveProfile(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     setIsSavingProfile(true);
     setProfileMessage(null);
-
     try {
-      const response = await fetch("/api/customer/profile", {
+      const res = await fetch("/api/customer/profile", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formValues),
       });
-
-      const data = (await response.json()) as ProfileResponse | ApiErrorResponse;
-
-      if (!response.ok || !data.ok) {
-        throw new Error(data.ok ? "Unable to update customer profile." : data.error);
-      }
-
+      const data = (await res.json()) as ProfileResponse | ApiErrorResponse;
+      if (!res.ok || !data.ok) throw new Error(data.ok ? "" : data.error);
       setProfile(data.profile);
       setFormValues(toFormValues(data.profile));
-      setProfileMessage("Los datos de empresa y facturacion fueron guardados en Shopify.");
-    } catch (error) {
-      setProfileMessage(
-        error instanceof Error ? error.message : "No fue posible guardar el perfil."
-      );
+      setProfileMessage("ok");
+    } catch (e) {
+      setProfileMessage(e instanceof Error ? e.message : "No fue posible guardar el perfil.");
     } finally {
       setIsSavingProfile(false);
     }
   }
 
   function handleFormChange(field: keyof CustomerCompanyProfileInput, value: string) {
-    setFormValues((current) => ({
-      ...current,
-      [field]: value,
-    }));
+    setFormValues((prev) => ({ ...prev, [field]: value }));
   }
 
+  /* Loading */
   if (panelStatus === "loading") {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-10">
-        <div className="flex min-h-[320px] items-center justify-center border border-gray-200 bg-white">
-          <div className="flex items-center gap-3 text-sm text-dark/60">
-            <Loader2 size={18} className="animate-spin text-primary" />
-            Cargando panel del cliente...
-          </div>
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="flex items-center gap-3 text-sm text-dark/50">
+          <Loader2 size={20} className="animate-spin text-primary" />
+          Cargando...
         </div>
       </div>
     );
   }
 
-  if (panelStatus === "guest" || !profile) {
-    return (
-      <AccountGuestState
-        loginValues={loginValues}
-        onLoginValuesChange={setLoginValues}
-        onSubmit={handleLogin}
-        isSubmittingLogin={isSubmittingLogin}
-        loginError={loginError}
-      />
-    );
-  }
+  if (panelStatus === "guest" || !profile) return null;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
-      <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
-        <AccountSidebar
-          view={view}
+    <div className="mx-auto max-w-7xl px-4 py-6">
+      {view === "dashboard" && (
+        <DashboardView
           profile={profile}
-          isLoggingOut={isLoggingOut}
-          onLogout={handleLogout}
+          orders={orders}
+          isLoadingOrders={isLoadingOrders}
+          ordersError={ordersError}
         />
-
-        <section className="space-y-6">
-          {view === "dashboard" ? (
-            <DashboardView
-              profile={profile}
-              orders={orders}
-              isLoadingOrders={isLoadingOrders}
-              ordersError={ordersError}
-            />
-          ) : null}
-
-          {view === "company" ? (
-            <CompanyView
-              profile={profile}
-              formValues={formValues}
-              isSavingProfile={isSavingProfile}
-              profileMessage={profileMessage}
-              onFormChange={handleFormChange}
-              onSubmit={handleSaveProfile}
-            />
-          ) : null}
-
-          {view === "orders" ? (
-            <OrdersView
-              orders={orders}
-              isLoadingOrders={isLoadingOrders}
-              ordersError={ordersError}
-              hasMoreOrders={hasMoreOrders}
-              canLoadMore={Boolean(ordersCursor)}
-              onLoadMore={() => void loadOrders(12, ordersCursor, true)}
-            />
-          ) : null}
-        </section>
-      </div>
+      )}
+      {view === "company" && (
+        <CompanyView
+          profile={profile}
+          formValues={formValues}
+          isSavingProfile={isSavingProfile}
+          profileMessage={profileMessage}
+          onFormChange={handleFormChange}
+          onSubmit={handleSaveProfile}
+        />
+      )}
+      {view === "orders" && (
+        <OrdersView
+          orders={orders}
+          isLoadingOrders={isLoadingOrders}
+          ordersError={ordersError}
+          hasMoreOrders={hasMoreOrders}
+          canLoadMore={Boolean(ordersCursor)}
+          onLoadMore={() => void loadOrders(12, ordersCursor, true)}
+        />
+      )}
     </div>
   );
 }
 
-function AccountGuestState({
-  loginValues,
-  onLoginValuesChange,
-  onSubmit,
-  isSubmittingLogin,
-  loginError,
-}: {
-  loginValues: { email: string; password: string };
-  onLoginValuesChange: React.Dispatch<
-    React.SetStateAction<{ email: string; password: string }>
-  >;
-  onSubmit: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
-  isSubmittingLogin: boolean;
-  loginError: string | null;
-}) {
-  return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
-      <div className="grid gap-6 lg:grid-cols-[420px_minmax(0,1fr)]">
-        <div className="border border-gray-200 bg-white p-8">
-          <div className="mb-6 flex items-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <UserRound size={30} className="text-primary" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-black uppercase tracking-tight text-dark">
-                Inicia sesion
-              </h2>
-              <p className="mt-1 text-sm text-dark/60">
-                Usa la misma cuenta de cliente que tienes en Shopify.
-              </p>
-            </div>
-          </div>
-
-          <form className="space-y-4" onSubmit={onSubmit}>
-            <label className="block">
-              <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.18em] text-dark/60">
-                Email
-              </span>
-              <input
-                type="email"
-                value={loginValues.email}
-                onChange={(event) =>
-                  onLoginValuesChange((current) => ({
-                    ...current,
-                    email: event.target.value,
-                  }))
-                }
-                placeholder="cliente@empresa.cl"
-                className="w-full border border-gray-300 px-4 py-3 text-sm text-dark focus:border-primary focus:outline-none"
-                autoComplete="email"
-              />
-            </label>
-
-            <label className="block">
-              <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.18em] text-dark/60">
-                Contraseña
-              </span>
-              <input
-                type="password"
-                value={loginValues.password}
-                onChange={(event) =>
-                  onLoginValuesChange((current) => ({
-                    ...current,
-                    password: event.target.value,
-                  }))
-                }
-                placeholder="••••••••"
-                className="w-full border border-gray-300 px-4 py-3 text-sm text-dark focus:border-primary focus:outline-none"
-                autoComplete="current-password"
-              />
-            </label>
-
-            {loginError ? (
-              <div className="flex items-start gap-2 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                <AlertCircle size={16} className="mt-0.5 shrink-0" />
-                <span>{loginError}</span>
-              </div>
-            ) : null}
-
-            <Button
-              type="submit"
-              fullWidth
-              size="lg"
-              disabled={isSubmittingLogin}
-              className="flex items-center justify-center gap-2"
-            >
-              {isSubmittingLogin ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  Ingresando
-                </>
-              ) : (
-                "Iniciar sesion"
-              )}
-            </Button>
-          </form>
-        </div>
-
-        <div className="border border-gray-200 bg-white p-8">
-          <div className="mb-8 flex items-start justify-between gap-4">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
-                Panel B2B
-              </p>
-              <h3 className="mt-2 text-3xl font-black uppercase leading-tight text-dark">
-                Compra, factura y consulta tu historial desde un mismo lugar
-              </h3>
-            </div>
-            <ShieldCheck size={34} className="hidden text-primary lg:block" />
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-3">
-            {[
-              {
-                icon: ShoppingBag,
-                title: "Historial de compras",
-                description: "Revisa pedidos pagados, montos y estados de despacho.",
-              },
-              {
-                icon: Building2,
-                title: "Datos empresa",
-                description: "Actualiza RUT, razon social, giro y direccion de facturacion.",
-              },
-              {
-                icon: Receipt,
-                title: "Base para ERP",
-                description: "La informacion queda lista para alimentar el flujo con Defontana.",
-              },
-            ].map((item) => (
-              <div key={item.title} className="border border-gray-200 bg-light p-5">
-                <item.icon size={22} className="text-primary" />
-                <h4 className="mt-3 text-sm font-bold uppercase tracking-wide text-dark">
-                  {item.title}
-                </h4>
-                <p className="mt-2 text-sm leading-relaxed text-dark/60">
-                  {item.description}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-8 border-l-4 border-primary bg-primary/5 px-5 py-4 text-sm text-dark/70">
-            Si aun no tienes acceso como cliente, primero debes existir como customer en
-            Shopify con email y contraseña activos.
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function AccountSidebar({
-  view,
-  profile,
-  isLoggingOut,
-  onLogout,
-}: {
-  view: AccountView;
-  profile: CustomerCompanyProfile;
-  isLoggingOut: boolean;
-  onLogout: () => Promise<void>;
-}) {
-  return (
-    <aside className="space-y-4">
-      <div className="border border-gray-200 bg-white p-6">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-          <UserRound size={26} className="text-primary" />
-        </div>
-        <h2 className="mt-4 text-xl font-black uppercase text-dark">
-          {getAccountName(profile)}
-        </h2>
-        <p className="mt-1 text-sm text-dark/60">{profile.email}</p>
-        <div className="mt-4">
-          <Badge
-            label={getProfileStatusLabel(profile.profileStatus)}
-            variant={getProfileBadgeVariant(profile.profileStatus)}
-          />
-        </div>
-
-        <button
-          type="button"
-          onClick={() => void onLogout()}
-          disabled={isLoggingOut}
-          className="mt-6 flex items-center gap-2 text-sm font-semibold text-dark/70 transition-colors hover:text-primary disabled:opacity-60"
-        >
-          {isLoggingOut ? <Loader2 size={16} className="animate-spin" /> : <LogOut size={16} />}
-          Cerrar sesion
-        </button>
-      </div>
-
-      <nav className="border border-gray-200 bg-white p-3">
-        {[
-          { href: "/cuenta", label: "Resumen", icon: ShieldCheck, active: view === "dashboard" },
-          { href: "/cuenta/empresa", label: "Datos empresa", icon: Building2, active: view === "company" },
-          { href: "/cuenta/pedidos", label: "Pedidos", icon: ShoppingBag, active: view === "orders" },
-        ].map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`flex items-center justify-between px-4 py-3 text-sm font-semibold uppercase tracking-wide transition-colors ${
-              item.active
-                ? "bg-primary text-white"
-                : "text-dark/70 hover:bg-light hover:text-primary"
-            }`}
-          >
-            <span className="flex items-center gap-2">
-              <item.icon size={16} />
-              {item.label}
-            </span>
-            <ChevronRight size={14} />
-          </Link>
-        ))}
-      </nav>
-    </aside>
-  );
-}
+/* ─────────────────────────────── Dashboard ── */
 
 function DashboardView({
-  profile,
-  orders,
-  isLoadingOrders,
-  ordersError,
+  profile, orders, isLoadingOrders, ordersError,
 }: {
   profile: CustomerCompanyProfile;
   orders: CustomerOrderSummary[];
   isLoadingOrders: boolean;
   ordersError: string | null;
 }) {
+  const complete = profile.profileStatus === "complete";
+  const displayName = [profile.firstName, profile.lastName].filter(Boolean).join(" ") || profile.email;
+
   return (
-    <>
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="border border-gray-200 bg-white p-5">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-dark/50">
-            Estado del perfil
+    <div className="space-y-6">
+      {/* Welcome banner */}
+      <div className="flex flex-col gap-4 border-b border-gray-200 pb-6 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+            Panel B2B
           </p>
-          <h3 className="mt-3 text-lg font-black uppercase text-dark">
-            {profile.profileStatus === "complete" ? "Listo para facturar" : "Faltan datos"}
-          </h3>
-          <p className="mt-2 text-sm text-dark/60">
-            {profile.profileStatus === "complete"
-              ? "El cliente ya tiene razon social, direccion y datos tributarios cargados."
-              : "Completa el perfil para dejar lista la facturacion empresa."}
-          </p>
+          <h1 className="mt-1 text-2xl font-black uppercase text-dark">{displayName}</h1>
+          <p className="mt-0.5 text-sm text-dark/50">{profile.email}</p>
         </div>
-
-        <div className="border border-gray-200 bg-white p-5">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-dark/50">
-            Razón social
-          </p>
-          <h3 className="mt-3 text-lg font-black uppercase text-dark">
-            {profile.razonSocial || "Sin definir"}
-          </h3>
-          <p className="mt-2 text-sm text-dark/60">RUT: {profile.rut || "Aun no informado"}</p>
-        </div>
-
-        <div className="border border-gray-200 bg-white p-5">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-dark/50">
-            Direccion principal
-          </p>
-          <h3 className="mt-3 text-lg font-black uppercase text-dark">
-            {profile.billingCity || "Sin ciudad"}
-          </h3>
-          <p className="mt-2 text-sm text-dark/60">
-            {profile.billingAddressLine1 || "Aun no existe una direccion registrada"}
-          </p>
-        </div>
+        <span
+          className={`inline-flex items-center gap-1.5 self-start rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-wider ${
+            complete
+              ? "bg-green-100 text-green-700"
+              : "bg-amber-100 text-amber-700"
+          }`}
+        >
+          <span className={`h-1.5 w-1.5 rounded-full ${complete ? "bg-green-500" : "bg-amber-500"}`} />
+          {getProfileStatusLabel(profile.profileStatus)}
+        </span>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.7fr)]">
-        <div className="border border-gray-200 bg-white">
-          <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-            <div>
-              <h3 className="text-lg font-black uppercase text-dark">Ultimos pedidos</h3>
-              <p className="text-sm text-dark/60">Resumen rapido del historial mas reciente.</p>
-            </div>
-            <Link
-              href="/cuenta/pedidos"
-              className="text-sm font-bold uppercase tracking-wide text-primary hover:text-primary-dark"
-            >
-              Ver todos
-            </Link>
-          </div>
-
-          <div className="p-6">
-            <OrdersBlock
-              orders={orders}
-              isLoading={isLoadingOrders}
-              error={ordersError}
-              compact
-            />
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <div className="border border-gray-200 bg-white p-6">
-            <h3 className="text-lg font-black uppercase text-dark">Datos guardados en Shopify</h3>
-            <p className="mt-2 text-sm leading-relaxed text-dark/60">
-              Esta version guarda identidad, direccion principal y datos tributarios
-              directamente en Shopify. No depende de una base de datos adicional.
-            </p>
-          </div>
-
-          <div className="border border-gray-200 bg-primary-dark p-6 text-white">
-            <div className="flex items-center gap-3">
-              <MapPin size={20} className="text-primary" />
-              <h3 className="text-lg font-black uppercase">Siguiente acción</h3>
-            </div>
-            <p className="mt-3 text-sm leading-relaxed text-white/70">
-              {profile.profileStatus === "complete"
-                ? "Tu perfil esta listo. Lo siguiente es conectar estos datos con el flujo de pedidos pagados."
-                : "Completa razon social, RUT, giro y direccion para dejar listo el flujo funcional."}
-            </p>
-            <Link
-              href="/cuenta/empresa"
-              className="mt-5 inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-primary"
-            >
-              Ir a datos empresa
-              <ChevronRight size={16} />
-            </Link>
-          </div>
-        </div>
+      {/* Stat cards */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <StatCard
+          label="Razón social"
+          value={profile.razonSocial || "Sin definir"}
+          sub={profile.rut ? `RUT: ${profile.rut}` : "RUT no informado"}
+          accent={!!profile.razonSocial}
+        />
+        <StatCard
+          label="Giro"
+          value={profile.giro || "Sin definir"}
+          sub="Actividad tributaria"
+          accent={!!profile.giro}
+        />
+        <StatCard
+          label="Dirección"
+          value={profile.billingCity || "Sin ciudad"}
+          sub={profile.billingAddressLine1 || "Sin dirección registrada"}
+          accent={!!profile.billingAddressLine1}
+        />
       </div>
-    </>
+
+      {/* CTA if incomplete */}
+      {!complete && (
+        <div className="flex items-center justify-between border border-amber-200 bg-amber-50 px-5 py-4">
+          <div className="flex items-center gap-3">
+            <MapPin size={18} className="shrink-0 text-amber-600" />
+            <p className="text-sm text-amber-800">
+              Completa tu perfil con RUT, razón social y dirección para habilitar la facturación.
+            </p>
+          </div>
+          <Link
+            href="/cuenta/empresa"
+            className="ml-4 flex shrink-0 items-center gap-1 text-sm font-bold text-amber-700 hover:text-amber-900"
+          >
+            Completar
+            <ChevronRight size={15} />
+          </Link>
+        </div>
+      )}
+
+      {/* Recent orders */}
+      <div>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-sm font-bold uppercase tracking-[0.15em] text-dark/60">
+            Últimos pedidos
+          </h2>
+          <Link
+            href="/cuenta/pedidos"
+            className="text-xs font-bold uppercase tracking-wide text-primary hover:underline"
+          >
+            Ver todos
+          </Link>
+        </div>
+        <OrdersBlock orders={orders} isLoading={isLoadingOrders} error={ordersError} compact />
+      </div>
+    </div>
   );
 }
 
+function StatCard({
+  label, value, sub, accent,
+}: {
+  label: string; value: string; sub: string; accent: boolean;
+}) {
+  return (
+    <div className={`border bg-white p-5 ${accent ? "border-gray-200" : "border-dashed border-gray-300"}`}>
+      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-dark/40">{label}</p>
+      <p className={`mt-2 truncate text-base font-black uppercase ${accent ? "text-dark" : "text-dark/30"}`}>
+        {value}
+      </p>
+      <p className="mt-1 truncate text-xs text-dark/40">{sub}</p>
+    </div>
+  );
+}
+
+/* ─────────────────────────────── Company form ── */
+
 function CompanyView({
-  profile,
-  formValues,
-  isSavingProfile,
-  profileMessage,
-  onFormChange,
-  onSubmit,
+  profile, formValues, isSavingProfile, profileMessage, onFormChange, onSubmit,
 }: {
   profile: CustomerCompanyProfile;
   formValues: CustomerCompanyProfileInput;
   isSavingProfile: boolean;
   profileMessage: string | null;
   onFormChange: (field: keyof CustomerCompanyProfileInput, value: string) => void;
-  onSubmit: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
 }) {
+  const saved = profileMessage === "ok";
+
   return (
-    <div className="border border-gray-200 bg-white">
-      <div className="border-b border-gray-200 px-6 py-5">
-        <h2 className="text-2xl font-black uppercase tracking-tight text-dark">
-          Datos de empresa y facturación
-        </h2>
-        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-dark/60">
-          Estos datos se guardan en Shopify usando el customer, su direccion principal y
-          metafields tributarios. Son la base para el flujo de facturacion y para la
-          integracion con Defontana.
-        </p>
-      </div>
+    <form onSubmit={onSubmit} className="space-y-0">
+      {/* ── Contacto ── */}
+      <FormSection title="Contacto personal" sub="Nombre, apellido y teléfono de contacto.">
+        <div className="grid gap-5 sm:grid-cols-3">
+          <FormField label="Nombre" value={formValues.firstName} onChange={(v) => onFormChange("firstName", v)} />
+          <FormField label="Apellido" value={formValues.lastName} onChange={(v) => onFormChange("lastName", v)} />
+          <PhoneField value={formValues.phone} onChange={(v) => onFormChange("phone", v)} />
+        </div>
+      </FormSection>
 
-      <form className="space-y-6 p-6" onSubmit={onSubmit}>
-        <div className="grid gap-5 md:grid-cols-2">
-          <FormField label="Nombre" value={formValues.firstName} onChange={(value) => onFormChange("firstName", value)} />
-          <FormField label="Apellido" value={formValues.lastName} onChange={(value) => onFormChange("lastName", value)} />
-          <FormField label="Telefono" value={formValues.phone} onChange={(value) => onFormChange("phone", value)} />
-          <FormField label="RUT" value={formValues.rut} onChange={(value) => onFormChange("rut", value)} required />
-          <FormField label="Razón social" value={formValues.razonSocial} onChange={(value) => onFormChange("razonSocial", value)} required />
-          <FormField label="Giro" value={formValues.giro} onChange={(value) => onFormChange("giro", value)} required />
-          <FormField label="Direccion" value={formValues.billingAddressLine1} onChange={(value) => onFormChange("billingAddressLine1", value)} required />
-          <FormField label="Direccion complementaria" value={formValues.billingAddressLine2 ?? ""} onChange={(value) => onFormChange("billingAddressLine2", value)} />
+      {/* ── Tributario ── */}
+      <FormSection title="Datos tributarios" sub="RUT, razón social y giro para facturación electrónica.">
+        <div className="grid gap-5 sm:grid-cols-3">
+          <FormField label="RUT *"          value={formValues.rut}         onChange={(v) => onFormChange("rut", v)} />
+          <FormField label="Razón social *" value={formValues.razonSocial} onChange={(v) => onFormChange("razonSocial", v)} />
+          <FormField label="Giro *"         value={formValues.giro}        onChange={(v) => onFormChange("giro", v)} />
+        </div>
+      </FormSection>
+
+      {/* ── Dirección ── */}
+      <FormSection title="Dirección de facturación" sub="Dirección que aparecerá en las facturas emitidas.">
+        <div className="grid gap-5 sm:grid-cols-2">
+          <FormField label="Calle y número *"     value={formValues.billingAddressLine1}  onChange={(v) => onFormChange("billingAddressLine1", v)} />
+          <FormField label="Complemento"           value={formValues.billingAddressLine2 ?? ""} onChange={(v) => onFormChange("billingAddressLine2", v)} />
           <FormField
-            label="Comuna"
+            label="Comuna *"
             value={formValues.billingComuna}
-            onChange={(value) => onFormChange("billingComuna", value)}
-            required
-            helperText="Se guarda como metafield porque Shopify no la maneja como campo nativo."
+            onChange={(v) => onFormChange("billingComuna", v)}
+            helperText="Se guarda como metafield en Shopify."
           />
-          <FormField label="Ciudad" value={formValues.billingCity} onChange={(value) => onFormChange("billingCity", value)} required />
-          <FormField label="Region" value={formValues.billingRegion ?? ""} onChange={(value) => onFormChange("billingRegion", value)} />
-          <FormField label="Codigo postal" value={formValues.billingPostalCode ?? ""} onChange={(value) => onFormChange("billingPostalCode", value)} />
+          <FormField label="Ciudad *"             value={formValues.billingCity}          onChange={(v) => onFormChange("billingCity", v)} />
+          <RegionSelect value={formValues.billingRegion ?? ""}   onChange={(v) => onFormChange("billingRegion", v)} />
+          <FormField label="Código postal"        value={formValues.billingPostalCode ?? ""} onChange={(v) => onFormChange("billingPostalCode", v)} />
         </div>
+      </FormSection>
 
-        <div className="grid gap-5 md:grid-cols-[220px_minmax(0,1fr)]">
-          <FormField label="Pais" value={formValues.billingCountryCode ?? "CL"} onChange={(value) => onFormChange("billingCountryCode", value)} />
-          <TextAreaField label="Notas de facturación" value={formValues.billingNotes ?? ""} onChange={(value) => onFormChange("billingNotes", value)} />
-        </div>
+      {/* ── Notas ── */}
+      <FormSection title="Notas de facturación" sub="Información adicional para el equipo de facturación.">
+        <TextAreaField
+          label=""
+          value={formValues.billingNotes ?? ""}
+          onChange={(v) => onFormChange("billingNotes", v)}
+        />
+      </FormSection>
 
-        {profileMessage ? (
+      {/* ── Footer ── */}
+      <div className="flex flex-col gap-4 border-t border-gray-200 bg-white px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+        {profileMessage && (
           <div
-            className={`flex items-start gap-2 px-4 py-3 text-sm ${
-              profileMessage.includes("guardados")
-                ? "border border-green-200 bg-green-50 text-green-700"
-                : "border border-red-200 bg-red-50 text-red-700"
+            className={`flex items-center gap-2 text-sm ${
+              saved ? "text-green-700" : "text-red-600"
             }`}
           >
-            <AlertCircle size={16} className="mt-0.5 shrink-0" />
-            <span>{profileMessage}</span>
+            <AlertCircle size={15} className="shrink-0" />
+            {saved ? "Datos guardados correctamente en Shopify." : profileMessage}
           </div>
-        ) : null}
-
-        <div className="flex flex-col gap-3 border-t border-gray-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="text-sm text-dark/55">
-            Estado actual:{" "}
+        )}
+        {!profileMessage && (
+          <p className="text-xs text-dark/40">
+            Estado:{" "}
             <span className="font-semibold text-dark">
               {getProfileStatusLabel(profile.profileStatus)}
             </span>
-          </div>
-          <Button
-            type="submit"
-            size="lg"
-            disabled={isSavingProfile}
-            className="flex items-center justify-center gap-2"
-          >
-            {isSavingProfile ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                Guardando
-              </>
-            ) : (
-              <>
-                <Save size={16} />
-                Guardar datos
-              </>
-            )}
-          </Button>
-        </div>
-      </form>
+          </p>
+        )}
+        <Button
+          type="submit"
+          size="lg"
+          disabled={isSavingProfile}
+          className="flex shrink-0 items-center justify-center gap-2"
+        >
+          {isSavingProfile ? (
+            <><Loader2 size={15} className="animate-spin" /> Guardando…</>
+          ) : (
+            <><Save size={15} /> Guardar datos</>
+          )}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+function FormSection({
+  title, sub, children,
+}: {
+  title: string; sub: string; children: React.ReactNode;
+}) {
+  return (
+    <div className="border-b border-gray-100 bg-white px-6 py-6">
+      <div className="mb-5">
+        <h3 className="text-xs font-bold uppercase tracking-[0.18em] text-dark">{title}</h3>
+        <p className="mt-0.5 text-xs text-dark/40">{sub}</p>
+      </div>
+      {children}
     </div>
   );
 }
 
+/* ─────────────────────────────── Orders ── */
+
 function OrdersView({
-  orders,
-  isLoadingOrders,
-  ordersError,
-  hasMoreOrders,
-  canLoadMore,
-  onLoadMore,
+  orders, isLoadingOrders, ordersError, hasMoreOrders, canLoadMore, onLoadMore,
 }: {
   orders: CustomerOrderSummary[];
   isLoadingOrders: boolean;
@@ -871,109 +479,36 @@ function OrdersView({
   onLoadMore: () => void;
 }) {
   return (
-    <div className="border border-gray-200 bg-white">
-      <div className="border-b border-gray-200 px-6 py-5">
-        <h2 className="text-2xl font-black uppercase tracking-tight text-dark">
-          Historial de compras
-        </h2>
-        <p className="mt-2 text-sm leading-relaxed text-dark/60">
-          Este listado se carga desde Shopify usando la sesion autenticada del cliente.
-        </p>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-[10px] font-bold uppercase tracking-[0.2em] text-dark/40">
+            {orders.length > 0 ? `${orders.length} pedidos cargados` : ""}
+          </h1>
+        </div>
       </div>
-
-      <div className="p-6">
-        <OrdersBlock orders={orders} isLoading={isLoadingOrders} error={ordersError} />
-
-        {hasMoreOrders ? (
-          <div className="mt-6 flex justify-center">
-            <Button
-              type="button"
-              variant="outline"
-              size="md"
-              disabled={isLoadingOrders || !canLoadMore}
-              onClick={onLoadMore}
-            >
-              {isLoadingOrders ? "Cargando..." : "Cargar más pedidos"}
-            </Button>
-          </div>
-        ) : null}
-      </div>
+      <OrdersBlock orders={orders} isLoading={isLoadingOrders} error={ordersError} />
+      {hasMoreOrders && (
+        <div className="flex justify-center pt-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="md"
+            disabled={isLoadingOrders || !canLoadMore}
+            onClick={onLoadMore}
+          >
+            {isLoadingOrders ? "Cargando…" : "Cargar más pedidos"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
 
-function FormField({
-  label,
-  value,
-  onChange,
-  required = false,
-  helperText,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  required?: boolean;
-  helperText?: string;
-}) {
-  return (
-    <label className="block">
-      <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.18em] text-dark/60">
-        {label}
-        {required ? " *" : ""}
-      </span>
-      <input
-        type="text"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="w-full border border-gray-300 px-4 py-3 text-sm text-dark focus:border-primary focus:outline-none"
-      />
-      {helperText ? (
-        <span className="mt-2 block text-xs leading-relaxed text-dark/45">{helperText}</span>
-      ) : null}
-    </label>
-  );
-}
-
-function TextAreaField({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <label className="block">
-      <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.18em] text-dark/60">
-        {label}
-      </span>
-      <textarea
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        rows={4}
-        className="w-full resize-none border border-gray-300 px-4 py-3 text-sm text-dark focus:border-primary focus:outline-none"
-      />
-    </label>
-  );
-}
-
-function StatusPill({ label, tone = "neutral" }: { label: string; tone?: "neutral" | "success" }) {
-  const className =
-    tone === "success" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600";
-
-  return (
-    <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${className}`}>
-      {label}
-    </span>
-  );
-}
+/* ─────────────────────────────── Shared blocks ── */
 
 function OrdersBlock({
-  orders,
-  isLoading,
-  error,
-  compact = false,
+  orders, isLoading, error, compact = false,
 }: {
   orders: CustomerOrderSummary[];
   isLoading: boolean;
@@ -982,73 +517,201 @@ function OrdersBlock({
 }) {
   if (isLoading && !orders.length) {
     return (
-      <div className="flex min-h-[180px] items-center justify-center text-sm text-dark/60">
+      <div className="flex min-h-[160px] items-center justify-center text-sm text-dark/50">
         <Loader2 size={18} className="mr-2 animate-spin text-primary" />
-        Cargando pedidos...
+        Cargando pedidos…
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="flex items-start gap-2 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-        <AlertCircle size={16} className="mt-0.5 shrink-0" />
-        <span>{error}</span>
+        <AlertCircle size={15} className="mt-0.5 shrink-0" />
+        {error}
       </div>
     );
   }
-
   if (!orders.length) {
     return (
-      <div className="border border-dashed border-gray-300 bg-light px-6 py-10 text-center">
-        <ShoppingBag size={26} className="mx-auto text-primary" />
-        <h3 className="mt-4 text-lg font-black uppercase text-dark">Aun no hay pedidos</h3>
-        <p className="mt-2 text-sm text-dark/60">
-          Cuando el cliente compre en Shopify, su historial aparecera aqui.
-        </p>
+      <div className="flex flex-col items-center justify-center gap-3 border border-dashed border-gray-300 bg-light py-14 text-center">
+        <ShoppingBag size={28} className="text-dark/20" />
+        <p className="text-sm font-bold uppercase text-dark/30">Aún no hay pedidos</p>
+        <p className="text-xs text-dark/30">Cuando realices una compra aparecerá aquí.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div className="divide-y divide-gray-100 border border-gray-200 bg-white">
       {orders.map((order) => (
-        <article
+        <div
           key={order.id}
-          className={`border border-gray-200 ${compact ? "px-4 py-4" : "px-5 py-5"}`}
+          className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${
+            compact ? "px-5 py-4" : "px-6 py-5"
+          }`}
         >
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/8">
+              <Receipt size={15} className="text-primary" />
+            </div>
             <div>
-              <div className="flex flex-wrap items-center gap-3">
-                <h4 className="text-lg font-black uppercase text-dark">{order.name}</h4>
-                <StatusPill
-                  label={getFinancialStatusLabel(order.financialStatus)}
-                  tone={order.financialStatus === "PAID" ? "success" : "neutral"}
-                />
-                <StatusPill label={getFulfillmentStatusLabel(order.fulfillmentStatus)} />
-              </div>
-              <p className="mt-2 text-sm text-dark/60">
-                Fecha:{" "}
-                <span className="font-medium text-dark">
-                  {order.processedAt ? formatDate(order.processedAt) : "Sin fecha"}
-                </span>
+              <p className="text-sm font-black uppercase text-dark">{order.name}</p>
+              <p className="mt-0.5 text-xs text-dark/40">
+                {order.processedAt ? formatDate(order.processedAt) : "Sin fecha"}
               </p>
             </div>
-
-            <div className="flex items-center gap-3 text-right">
-              <Receipt size={18} className="text-primary" />
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-dark/45">
-                  Total
-                </p>
-                <p className="text-base font-black uppercase text-dark">
-                  {formatMoney(order.totalAmount, order.currencyCode)}
-                </p>
-              </div>
-            </div>
           </div>
-        </article>
+
+          <div className="flex items-center gap-3 pl-13 sm:pl-0">
+            <OrderBadge
+              label={getFinancialStatusLabel(order.financialStatus)}
+              tone={order.financialStatus === "PAID" ? "green" : "gray"}
+            />
+            <OrderBadge label={getFulfillmentStatusLabel(order.fulfillmentStatus)} tone="blue" />
+            <p className="ml-2 min-w-[90px] text-right text-sm font-black text-dark">
+              {formatMoney(order.totalAmount, order.currencyCode)}
+            </p>
+          </div>
+        </div>
       ))}
     </div>
+  );
+}
+
+function OrderBadge({ label, tone }: { label: string; tone: "green" | "gray" | "blue" }) {
+  const cls = {
+    green: "bg-green-100 text-green-700",
+    gray:  "bg-gray-100  text-gray-600",
+    blue:  "bg-blue-100  text-blue-700",
+  }[tone];
+  return (
+    <span className={`hidden rounded-full px-2.5 py-1 text-[11px] font-semibold sm:inline-flex ${cls}`}>
+      {label}
+    </span>
+  );
+}
+
+/* ─────────────────────────────── Form primitives ── */
+
+const CHILE_PHONE_RE = /^[2-9]\d{8}$/;
+
+function stripCountryCode(raw: string): string {
+  const s = raw.replace(/\s+/g, "");
+  if (s.startsWith("+56")) return s.slice(3);
+  if (s.startsWith("56") && s.length > 9) return s.slice(2);
+  return s;
+}
+
+function PhoneField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [error, setError] = useState<string | null>(null);
+  const local = stripCountryCode(value);
+
+  function handleChange(raw: string) {
+    const digits = raw.replace(/\D/g, "").slice(0, 9);
+    onChange(digits ? `+56${digits}` : "");
+    if (error) validate(digits);
+  }
+
+  function validate(digits: string) {
+    if (!digits) { setError(null); return; }
+    setError(CHILE_PHONE_RE.test(digits) ? null : "9 dígitos válidos — ej: 9 1234 5678");
+  }
+
+  return (
+    <div>
+      <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.18em] text-dark/60">
+        Teléfono
+      </span>
+      <div className={`flex border transition-colors focus-within:border-primary ${error ? "border-red-400" : "border-gray-300"}`}>
+        <span className="flex select-none items-center border-r border-gray-200 bg-gray-50 px-3 text-sm font-semibold text-dark/50">
+          +56
+        </span>
+        <input
+          type="tel"
+          value={local}
+          onChange={(e) => handleChange(e.target.value)}
+          onBlur={() => validate(local)}
+          placeholder="9 1234 5678"
+          maxLength={9}
+          autoComplete="tel-national"
+          className="flex-1 bg-transparent px-4 py-3 text-sm text-dark focus:outline-none"
+        />
+      </div>
+      {error && <span className="mt-1.5 block text-xs text-red-500">{error}</span>}
+    </div>
+  );
+}
+
+const CHILE_REGIONS = [
+  "Arica y Parinacota", "Tarapacá", "Antofagasta", "Atacama", "Coquimbo",
+  "Valparaíso", "Metropolitana de Santiago",
+  "Libertador General Bernardo O'Higgins",
+  "Maule", "Ñuble", "Biobío", "La Araucanía", "Los Ríos", "Los Lagos",
+  "Aisén del General Carlos Ibáñez del Campo",
+  "Magallanes y de la Antártica Chilena",
+];
+
+function RegionSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.18em] text-dark/60">
+        Región
+      </span>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full border border-gray-300 px-4 py-3 text-sm text-dark focus:border-primary focus:outline-none"
+      >
+        <option value="">Selecciona una región</option>
+        {CHILE_REGIONS.map((r) => (
+          <option key={r} value={r}>{r}</option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function FormField({
+  label, value, onChange, helperText,
+}: {
+  label: string; value: string; onChange: (v: string) => void; helperText?: string;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.18em] text-dark/60">
+        {label}
+      </span>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full border border-gray-300 px-4 py-3 text-sm text-dark focus:border-primary focus:outline-none"
+      />
+      {helperText && (
+        <span className="mt-1.5 block text-xs text-dark/40">{helperText}</span>
+      )}
+    </label>
+  );
+}
+
+function TextAreaField({
+  label, value, onChange,
+}: {
+  label: string; value: string; onChange: (v: string) => void;
+}) {
+  return (
+    <label className="block">
+      {label && (
+        <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.18em] text-dark/60">
+          {label}
+        </span>
+      )}
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        rows={4}
+        className="w-full resize-none border border-gray-300 px-4 py-3 text-sm text-dark focus:border-primary focus:outline-none"
+      />
+    </label>
   );
 }
