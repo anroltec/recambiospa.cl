@@ -143,7 +143,7 @@ export default function CartPageContent({
               </div>
             </div>
           ) : (
-            <div className="divide-y divide-black/8">
+            <div className="grid grid-cols-2 gap-4 md:block md:divide-y md:divide-black/8">
               {items.map((item) => {
                 const image = item.product.images[0];
                 const unitPriceLabel =
@@ -154,83 +154,97 @@ export default function CartPageContent({
                     : "Por confirmar";
 
                 return (
-                  <article key={item.product.code} className="py-6 first:pt-8">
-                    <div className="grid gap-5 md:grid-cols-[112px_minmax(0,1fr)_220px]">
+                  <article
+                    key={item.product.code}
+                    className="flex h-full flex-col border border-black/8 bg-white p-3 md:border-0 md:bg-transparent md:px-0 md:py-6 md:first:pt-8"
+                  >
+                    <div className="flex h-full flex-col gap-3 md:grid md:grid-cols-[112px_minmax(0,1fr)_220px] md:gap-5">
                       <Link
                         href={`/producto/${item.product.code}`}
-                        className="relative block aspect-square overflow-hidden rounded-sm bg-[#f6f2ed]"
+                        className="relative block aspect-[4/3] overflow-hidden rounded-sm bg-[#f6f2ed] md:aspect-square"
                       >
                         {image ? (
                           <Image
                             src={image}
                             alt={item.product.name}
                             fill
-                            className="object-contain p-3"
-                            sizes="112px"
+                            className="object-contain p-2.5 md:p-3"
+                            sizes="(max-width: 767px) 50vw, 112px"
                           />
                         ) : (
                           <div className="absolute inset-0 flex items-center justify-center text-[#cbbfb1]">
-                            <ShoppingCart size={26} />
+                            <ShoppingCart size={22} className="md:h-[26px] md:w-[26px]" />
                           </div>
                         )}
                       </Link>
 
                       <div className="min-w-0">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary/72">
+                        <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-primary/72 md:text-[11px] md:tracking-[0.22em]">
                           {item.product.brand}
                         </p>
                         <Link
                           href={`/producto/${item.product.code}`}
-                          className="mt-2 block text-lg font-black uppercase tracking-tight text-dark transition-colors hover:text-primary"
+                          className="mt-2 block text-[0.95rem] font-black uppercase leading-tight tracking-tight text-dark transition-colors hover:text-primary md:text-lg"
                         >
                           {item.product.name}
                         </Link>
-                        <p className="mt-2 text-sm text-dark/55">SKU: {item.product.code}</p>
-                        <p className="mt-1 text-sm text-dark/45">
+                        <p className="mt-2 text-xs text-dark/55 md:text-sm">SKU: {item.product.code}</p>
+                        <p className="mt-1 text-xs text-dark/45 md:text-sm">
                           {item.product.categoryLabel ?? item.product.category}
                         </p>
                         {!item.product.inStock ? (
-                          <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#b07d00]">
+                          <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#b07d00] md:mt-3 md:text-xs md:tracking-[0.18em]">
                             Stock por confirmar
                           </p>
                         ) : null}
                         {item.product.price === null ? (
-                          <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#b07d00]">
+                          <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#b07d00] md:text-xs md:tracking-[0.18em]">
                             Precio sujeto a confirmacion
                           </p>
                         ) : null}
                       </div>
 
-                      <div className="flex flex-col gap-4 md:items-end">
-                        <div className="w-full text-left md:text-right">
-                          <p className="text-[11px] uppercase tracking-[0.18em] text-dark/40">
+                      <div className="mt-auto flex flex-col gap-3 border-t border-black/8 pt-3 md:mt-0 md:items-end md:border-t-0 md:pt-0">
+                        <div className="grid grid-cols-2 gap-3 md:w-full md:grid-cols-1">
+                          <div className="w-full text-left md:text-right">
+                            <p className="text-[10px] uppercase tracking-[0.14em] text-dark/40 md:text-[11px] md:tracking-[0.18em]">
                               Valor unitario
-                          </p>
-                          <p className="mt-1 text-base font-bold text-primary-dark">
-                            {unitPriceLabel}
-                          </p>
+                            </p>
+                            <p className="mt-1 text-sm font-bold text-primary-dark md:text-base">
+                              {unitPriceLabel}
+                            </p>
+                          </div>
+
+                          <div className="w-full text-left md:text-right">
+                            <p className="text-[10px] uppercase tracking-[0.14em] text-dark/40 md:text-[11px] md:tracking-[0.18em]">
+                              Subtotal
+                            </p>
+                            <p className="mt-1 text-xl font-black text-primary-dark md:text-2xl">
+                              {lineTotalLabel}
+                            </p>
+                          </div>
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-3 md:justify-end">
+                        <div className="flex flex-wrap items-center justify-between gap-2 md:justify-end md:gap-3">
                           <div className="inline-flex items-center border border-black/10 bg-[#f5f2ec]">
                             <button
                               onClick={() => {
                                 void updateQuantity(item.product.code, item.quantity - 1);
                               }}
                               disabled={item.quantity <= 1}
-                              className="flex h-10 w-10 items-center justify-center bg-white text-dark transition-colors hover:bg-[#faf8f4] disabled:cursor-not-allowed disabled:opacity-30"
+                              className="flex h-8 w-8 items-center justify-center bg-white text-dark transition-colors hover:bg-[#faf8f4] disabled:cursor-not-allowed disabled:opacity-30 md:h-10 md:w-10"
                               aria-label="Reducir cantidad"
                             >
                               <Minus size={14} />
                             </button>
-                            <span className="min-w-12 px-3 text-center text-sm font-bold text-dark">
+                            <span className="min-w-10 px-2 text-center text-sm font-bold text-dark md:min-w-12 md:px-3">
                               {item.quantity}
                             </span>
                             <button
                               onClick={() => {
                                 void updateQuantity(item.product.code, item.quantity + 1);
                               }}
-                              className="flex h-10 w-10 items-center justify-center bg-white text-dark transition-colors hover:bg-[#faf8f4]"
+                              className="flex h-8 w-8 items-center justify-center bg-white text-dark transition-colors hover:bg-[#faf8f4] md:h-10 md:w-10"
                               aria-label="Aumentar cantidad"
                             >
                               <Plus size={14} />
@@ -241,20 +255,11 @@ export default function CartPageContent({
                             onClick={() => {
                               void removeItem(item.product.code);
                             }}
-                            className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.18em] text-dark/45 transition-colors hover:text-primary"
+                            className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.12em] text-dark/45 transition-colors hover:text-primary md:gap-1.5 md:text-xs md:tracking-[0.18em]"
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={13} className="md:h-[14px] md:w-[14px]" />
                             Quitar
                           </button>
-                        </div>
-
-                        <div className="w-full text-left md:text-right">
-                          <p className="text-[11px] uppercase tracking-[0.18em] text-dark/40">
-                            Subtotal
-                          </p>
-                          <p className="mt-1 text-2xl font-black text-primary-dark">
-                            {lineTotalLabel}
-                          </p>
                         </div>
                       </div>
                     </div>
@@ -350,7 +355,7 @@ export default function CartPageContent({
             </p>
           </div>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-3 md:gap-4 xl:grid-cols-4">
             {suggestedProducts.map((product) => (
               <Link
                 key={getProductListKey(product)}
@@ -362,26 +367,26 @@ export default function CartPageContent({
                     src={product.images[0]}
                     alt={product.name}
                     fill
-                    className="object-contain p-4"
-                    sizes="(max-width: 1280px) 50vw, 25vw"
+                    className="object-contain p-3 md:p-4"
+                    sizes="(max-width: 767px) 50vw, (max-width: 1280px) 50vw, 25vw"
                   />
                 </div>
-                <div className="flex flex-1 flex-col p-4">
-                  <h4 className="font-bold uppercase tracking-tight text-dark transition-colors group-hover:text-primary">
+                <div className="flex flex-1 flex-col p-3 md:p-4">
+                  <h4 className="text-sm font-bold uppercase leading-tight tracking-tight text-dark transition-colors group-hover:text-primary md:text-base">
                     {product.name}
                   </h4>
-                  <p className="text-xs text-dark/45 mt-1">SKU: {product.code}</p>
-                  <div className="mt-auto pt-4 flex items-end justify-between gap-3">
+                  <p className="mt-1 text-[11px] text-dark/45 md:text-xs">SKU: {product.code}</p>
+                  <div className="mt-auto flex items-end justify-between gap-2 pt-3 md:gap-3 md:pt-4">
                     <div>
-                      <p className="text-lg font-black text-dark">
+                      <p className="text-base font-black text-dark md:text-lg">
                         {product.price !== null ? formatPrice(product.price) : "Consultar"}
                       </p>
-                      <p className="text-[10px] uppercase tracking-wide text-dark/40">
+                      <p className="text-[9px] uppercase tracking-wide text-dark/40 md:text-[10px]">
                         {product.price !== null ? "Precio neto" : "Precio por confirmar"}
                       </p>
                     </div>
                     <ArrowRight
-                      size={16}
+                      size={14}
                       className="text-dark/35 transition-colors group-hover:text-primary"
                     />
                   </div>
