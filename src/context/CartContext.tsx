@@ -211,29 +211,37 @@ export function CartProvider({
   const [localItems, setLocalItems] = useState<CartLineItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [remoteUnavailable, setRemoteUnavailable] = useState(false);
+  const [hasRemoteCart, setHasRemoteCart] = useState(false);
   const cartIdRef = useRef<string | null>(null);
   const mutationQueueRef = useRef<Promise<unknown>>(Promise.resolve());
 
   const syncRemoteCart = useCallback((nextCart: CartApiResponse | null) => {
     const normalizedCart = nextCart ?? EMPTY_REMOTE_CART;
-    cartIdRef.current = normalizedCart.id || null;
-    setStoredValue(SHOPIFY_CART_KEY, normalizedCart.id || null);
+    const nextCartId = normalizedCart.id || null;
+    cartIdRef.current = nextCartId;
+    setStoredValue(SHOPIFY_CART_KEY, nextCartId);
     startTransition(() => {
       setRemoteCart(normalizedCart);
+      setHasRemoteCart(Boolean(nextCartId));
     });
   }, []);
 
-  const syncLocalCart = useCallback((items: CartLineItem[]) => {
-    saveLocalItems(items);
+  const replaceLocalCart = useCallback((items: CartLineItem[]) => {
     startTransition(() => {
       setLocalItems(items);
     });
   }, []);
 
+  const syncLocalCart = useCallback((items: CartLineItem[]) => {
+    saveLocalItems(items);
+    replaceLocalCart(items);
+  }, [replaceLocalCart]);
+
   const hydrateLocalCart = useCallback(() => {
-    syncLocalCart(loadLocalItems());
-    setIsLoading(false);
-  }, [syncLocalCart]);
+    const items = loadLocalItems();
+    replaceLocalCart(items);
+    return items;
+  }, [replaceLocalCart]);
 
   const runMutation = useCallback(function runMutation<T>(
     operation: () => Promise<T>
@@ -263,12 +271,13 @@ export function CartProvider({
       queueMicrotask(() => {
         if (!cancelled) {
           hydrateLocalCart();
+          setIsLoading(false);
         }
       });
 
       const handleStorage = (event: StorageEvent) => {
         if (event.key === LOCAL_CART_KEY) {
-          syncLocalCart(loadLocalItems());
+          hydrateLocalCart();
         }
       };
 
@@ -281,16 +290,19 @@ export function CartProvider({
     }
 
     async function hydrateRemoteCart() {
+      hydrateLocalCart();
       const storedCartId = getStoredValue(SHOPIFY_CART_KEY);
 
       if (!storedCartId) {
         if (!cancelled) {
+          setHasRemoteCart(false);
           setIsLoading(false);
         }
         return;
       }
 
       cartIdRef.current = storedCartId;
+      setHasRemoteCart(true);
 
       try {
         const cart = await fetchExistingCart(storedCartId);
@@ -301,10 +313,13 @@ export function CartProvider({
         }
       } catch (error) {
         if (!cancelled) {
-          console.error("[cart] failed to hydrate Shopify cart", error);
+          console.warn(
+            "[cart] failed to hydrate Shopify cart",
+            error instanceof Error ? error.message : error
+          );
           setRemoteUnavailable(true);
           syncRemoteCart(null);
-          syncLocalCart(loadLocalItems());
+          hydrateLocalCart();
         }
       } finally {
         if (!cancelled) {
@@ -316,6 +331,11 @@ export function CartProvider({
     void hydrateRemoteCart();
 
     const handleStorage = (event: StorageEvent) => {
+      if (event.key === LOCAL_CART_KEY) {
+        hydrateLocalCart();
+        return;
+      }
+
       if (event.key !== SHOPIFY_CART_KEY) return;
 
       const nextCartId = event.newValue;
@@ -326,16 +346,21 @@ export function CartProvider({
         return;
       }
 
+      setHasRemoteCart(true);
+
       void fetchExistingCart(nextCartId)
         .then((cart) => {
           setRemoteUnavailable(false);
           syncRemoteCart(cart);
         })
         .catch((error) => {
-          console.error("[cart] failed to sync Shopify cart from storage", error);
+          console.warn(
+            "[cart] failed to sync Shopify cart from storage",
+            error instanceof Error ? error.message : error
+          );
           setRemoteUnavailable(true);
           syncRemoteCart(null);
-          syncLocalCart(loadLocalItems());
+          hydrateLocalCart();
         });
     };
 
@@ -345,18 +370,16 @@ export function CartProvider({
       cancelled = true;
       window.removeEventListener("storage", handleStorage);
     };
-  }, [hydrateLocalCart, shopifyEnabled, syncLocalCart, syncRemoteCart]);
+  }, [hydrateLocalCart, shopifyEnabled, syncRemoteCart]);
 
-  const useRemoteCart = shopifyEnabled && !remoteUnavailable;
+  const canUseRemoteCart = shopifyEnabled && !remoteUnavailable;
+  const useRemoteSnapshot = canUseRemoteCart && hasRemoteCart;
+  const shouldPreferLocalCart = !hasRemoteCart && localItems.length > 0;
 
   const addItem = useCallback(
     async (product: Product, quantity = 1) => {
-      if (!shopifyEnabled || !product.variantId || !useRemoteCart) {
+      if (!shopifyEnabled || !product.variantId || !canUseRemoteCart || shouldPreferLocalCart) {
         return runMutation(async () => {
-          if (shopifyEnabled) {
-            setRemoteUnavailable(true);
-          }
-
           syncLocalCart(upsertLocalItem(loadLocalItems(), product, quantity));
         });
       }
@@ -387,7 +410,10 @@ export function CartProvider({
             }
           }
         } catch (error) {
-          console.error("[cart] falling back to local cart after Shopify add failure", error);
+          console.warn(
+            "[cart] falling back to local cart after Shopify add failure",
+            error instanceof Error ? error.message : error
+          );
           setRemoteUnavailable(true);
           syncRemoteCart(null);
           syncLocalCart(upsertLocalItem(loadLocalItems(), product, quantity));
@@ -400,13 +426,14 @@ export function CartProvider({
       shopifyEnabled,
       syncLocalCart,
       syncRemoteCart,
-      useRemoteCart,
+      canUseRemoteCart,
+      shouldPreferLocalCart,
     ]
   );
 
   const removeItem = useCallback(
     async (code: string) => {
-      if (!shopifyEnabled || !useRemoteCart) {
+      if (!shopifyEnabled || !useRemoteSnapshot) {
         return runMutation(async () => {
           syncLocalCart(loadLocalItems().filter((item) => item.product.code !== code));
         });
@@ -430,13 +457,13 @@ export function CartProvider({
       shopifyEnabled,
       syncLocalCart,
       syncRemoteCart,
-      useRemoteCart,
+      useRemoteSnapshot,
     ]
   );
 
   const updateQuantity = useCallback(
     async (code: string, quantity: number) => {
-      if (!shopifyEnabled || !useRemoteCart) {
+      if (!shopifyEnabled || !useRemoteSnapshot) {
         return runMutation(async () => {
           const currentItems = loadLocalItems();
 
@@ -477,12 +504,12 @@ export function CartProvider({
       shopifyEnabled,
       syncLocalCart,
       syncRemoteCart,
-      useRemoteCart,
+      useRemoteSnapshot,
     ]
   );
 
   const clearCart = useCallback(async () => {
-    if (!shopifyEnabled || !useRemoteCart) {
+    if (!shopifyEnabled || !useRemoteSnapshot) {
       return runMutation(async () => {
         syncLocalCart([]);
       });
@@ -491,9 +518,9 @@ export function CartProvider({
     return runMutation(async () => {
       syncRemoteCart(null);
     });
-  }, [runMutation, shopifyEnabled, syncLocalCart, syncRemoteCart, useRemoteCart]);
+  }, [runMutation, shopifyEnabled, syncLocalCart, syncRemoteCart, useRemoteSnapshot]);
 
-  const activeItems = useRemoteCart ? remoteCart.items : localItems;
+  const activeItems = useRemoteSnapshot ? remoteCart.items : localItems;
   const totalQuantity = activeItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = activeItems.reduce(
     (sum, item) => sum + (item.product.price ?? 0) * item.quantity,
@@ -505,7 +532,7 @@ export function CartProvider({
       items: activeItems,
       totalQuantity,
       totalPrice,
-      checkoutUrl: useRemoteCart ? remoteCart.checkoutUrl || null : null,
+      checkoutUrl: useRemoteSnapshot ? remoteCart.checkoutUrl || null : null,
       isLoading,
       addItem,
       removeItem,
@@ -522,7 +549,7 @@ export function CartProvider({
       removeItem,
       totalPrice,
       totalQuantity,
-      useRemoteCart,
+      useRemoteSnapshot,
       updateQuantity,
     ]
   );

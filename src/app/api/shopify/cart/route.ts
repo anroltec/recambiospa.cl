@@ -15,6 +15,17 @@ function getBuyerIp(request: NextRequest): string | null {
   return request.headers.get("cf-connecting-ip") || request.headers.get("x-real-ip");
 }
 
+function getErrorStatus(error: unknown): number {
+  if (
+    error instanceof Error &&
+    error.message.startsWith("Unable to reach Shopify Storefront API")
+  ) {
+    return 503;
+  }
+
+  return 500;
+}
+
 export async function GET(request: NextRequest) {
   const cartId = request.nextUrl.searchParams.get("cartId");
 
@@ -42,7 +53,7 @@ export async function GET(request: NextRequest) {
         ok: false,
         error: error instanceof Error ? error.message : "Unable to fetch Shopify cart.",
       },
-      { status: 500 }
+      { status: getErrorStatus(error) }
     );
   }
 }
@@ -57,7 +68,7 @@ export async function POST(request: NextRequest) {
         ok: false,
         error: error instanceof Error ? error.message : "Unable to create Shopify cart.",
       },
-      { status: 500 }
+      { status: getErrorStatus(error) }
     );
   }
 }
