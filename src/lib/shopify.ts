@@ -11,6 +11,10 @@ interface ShopifyFetchOptions {
   buyerIp?: string | null;
 }
 
+interface ShopifyUserError {
+  message: string;
+}
+
 interface PageInfo {
   hasNextPage: boolean;
   endCursor: string | null;
@@ -122,12 +126,30 @@ async function shopifyFetch<T>(
     headers["X-Shopify-Storefront-Access-Token"] = storefrontAccessToken;
   }
 
-  const response = await fetch(`https://${storeDomain}/api/${apiVersion}/graphql.json`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ query, variables }),
-    next: { revalidate: 60 },
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(`https://${storeDomain}/api/${apiVersion}/graphql.json`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ query, variables }),
+      next: { revalidate: 60 },
+    });
+  } catch (error) {
+    const cause =
+      error instanceof Error && error.cause instanceof Error ? error.cause : null;
+    const causeDetails =
+      cause && "code" in cause
+        ? `${String(cause.code)} ${"address" in cause ? String(cause.address) : ""}:${"port" in cause ? String(cause.port) : ""}`.trim()
+        : null;
+
+    throw new Error(
+      causeDetails
+        ? `Unable to reach Shopify Storefront API (${causeDetails}).`
+        : "Unable to reach Shopify Storefront API.",
+      { cause: error }
+    );
+  }
 
   if (!response.ok) {
     throw new Error(`Shopify API error: ${response.status} ${response.statusText}`);
@@ -144,6 +166,21 @@ async function shopifyFetch<T>(
   }
 
   return json.data;
+}
+
+function throwIfUserErrors(
+  userErrors: ShopifyUserError[] | undefined,
+  fallbackMessage: string
+): void {
+  const firstMessage = userErrors?.find((error) => error.message?.trim())?.message?.trim();
+
+  if (firstMessage) {
+    throw new Error(firstMessage);
+  }
+
+  if (userErrors && userErrors.length > 0) {
+    throw new Error(fallbackMessage);
+  }
 }
 
 const PRODUCT_FIELDS = `
@@ -406,6 +443,7 @@ export async function createCart(options: ShopifyFetchOptions = {}): Promise<Sho
     options
   );
 
+  throwIfUserErrors(data.cartCreate.userErrors, "Shopify cart creation failed.");
   return assertCart(data.cartCreate.cart, "creation");
 }
 
@@ -440,6 +478,7 @@ export async function addToCart(
     options
   );
 
+  throwIfUserErrors(data.cartLinesAdd.userErrors, "Shopify cart add failed.");
   return assertCart(data.cartLinesAdd.cart, "add");
 }
 
@@ -474,6 +513,7 @@ export async function updateCartLine(
     options
   );
 
+  throwIfUserErrors(data.cartLinesUpdate.userErrors, "Shopify cart update failed.");
   return assertCart(data.cartLinesUpdate.cart, "update");
 }
 
@@ -504,5 +544,6 @@ export async function removeFromCart(
     options
   );
 
+  throwIfUserErrors(data.cartLinesRemove.userErrors, "Shopify cart remove failed.");
   return assertCart(data.cartLinesRemove.cart, "remove");
 }

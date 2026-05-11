@@ -31,6 +31,26 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
     remotePatterns: remoteImagePatterns,
   },
+  async redirects() {
+    if (!shopifyStoreDomain) {
+      return [];
+    }
+
+    return [
+      {
+        source: "/cart/:path*",
+        destination: `https://${shopifyStoreDomain}/cart/:path*`,
+        permanent: false,
+        basePath: false,
+      },
+      {
+        source: "/checkouts/:path*",
+        destination: `https://${shopifyStoreDomain}/checkouts/:path*`,
+        permanent: false,
+        basePath: false,
+      },
+    ];
+  },
   async headers() {
     return [
       {

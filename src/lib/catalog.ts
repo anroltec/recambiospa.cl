@@ -15,7 +15,7 @@ import {
   getCategoryName,
   slugify,
 } from "@/lib/catalog-taxonomy";
-import { hasShopifyStorefrontEnv } from "@/lib/env";
+import { getShopifyStorefrontEnv, hasShopifyStorefrontEnv } from "@/lib/env";
 import {
   getProductsPage,
   type ShopifyCart,
@@ -156,6 +156,25 @@ function mapCartLineToProduct(line: ShopifyCartLine): Product {
   };
 }
 
+function normalizeCheckoutUrl(checkoutUrl: string): string {
+  const { checkoutDomain, storeDomain } = getShopifyStorefrontEnv();
+  const targetDomain = checkoutDomain || storeDomain;
+
+  if (!targetDomain) {
+    return checkoutUrl;
+  }
+
+  const targetOrigin = targetDomain.includes("://")
+    ? new URL(targetDomain)
+    : new URL(`https://${targetDomain}`);
+  const resolvedCheckoutUrl = new URL(checkoutUrl);
+
+  resolvedCheckoutUrl.protocol = targetOrigin.protocol;
+  resolvedCheckoutUrl.host = targetOrigin.host;
+
+  return resolvedCheckoutUrl.toString();
+}
+
 export function serializeShopifyCart(cart: ShopifyCart): CartApiResponse {
   const items: CartLineItem[] = cart.lines.edges.map((edge) => ({
     lineId: edge.node.id,
@@ -165,7 +184,7 @@ export function serializeShopifyCart(cart: ShopifyCart): CartApiResponse {
 
   return {
     id: cart.id,
-    checkoutUrl: cart.checkoutUrl,
+    checkoutUrl: normalizeCheckoutUrl(cart.checkoutUrl),
     totalQuantity: cart.totalQuantity,
     totalPrice: items.reduce(
       (sum, item) => sum + (item.product.price ?? 0) * item.quantity,

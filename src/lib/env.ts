@@ -4,6 +4,7 @@ export interface ShopifyStorefrontEnv {
   storeDomain: string;
   storefrontAccessToken: string;
   apiVersion: string;
+  checkoutDomain: string | null;
 }
 
 export interface ShopifyAdminEnv {
@@ -61,6 +62,7 @@ export function getShopifyStorefrontEnv(): ShopifyStorefrontEnv {
     storeDomain: requireEnv("SHOPIFY_STORE_DOMAIN"),
     storefrontAccessToken: requireEnv("SHOPIFY_STOREFRONT_ACCESS_TOKEN"),
     apiVersion: process.env.SHOPIFY_API_VERSION?.trim() || DEFAULT_SHOPIFY_API_VERSION,
+    checkoutDomain: optionalEnv("SHOPIFY_CHECKOUT_DOMAIN"),
   };
 }
 

@@ -32,6 +32,17 @@ function getBuyerIp(request: NextRequest): string | null {
   return request.headers.get("cf-connecting-ip") || request.headers.get("x-real-ip");
 }
 
+function getErrorStatus(error: unknown): number {
+  if (
+    error instanceof Error &&
+    error.message.startsWith("Unable to reach Shopify Storefront API")
+  ) {
+    return 503;
+  }
+
+  return 500;
+}
+
 export async function POST(request: NextRequest) {
   let payload: AddLinePayload;
 
@@ -62,7 +73,7 @@ export async function POST(request: NextRequest) {
         ok: false,
         error: error instanceof Error ? error.message : "Unable to add line to Shopify cart.",
       },
-      { status: 500 }
+      { status: getErrorStatus(error) }
     );
   }
 }
@@ -94,7 +105,7 @@ export async function PATCH(request: NextRequest) {
         ok: false,
         error: error instanceof Error ? error.message : "Unable to update Shopify cart line.",
       },
-      { status: 500 }
+      { status: getErrorStatus(error) }
     );
   }
 }
@@ -126,7 +137,7 @@ export async function DELETE(request: NextRequest) {
         ok: false,
         error: error instanceof Error ? error.message : "Unable to remove Shopify cart line.",
       },
-      { status: 500 }
+      { status: getErrorStatus(error) }
     );
   }
 }
