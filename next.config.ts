@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 
 const projectRoot = process.cwd();
 const shopifyStoreDomain = process.env.SHOPIFY_STORE_DOMAIN;
+const shopifyCheckoutDomain =
+  process.env.SHOPIFY_CHECKOUT_DOMAIN?.trim() || shopifyStoreDomain;
 
 const remoteImagePatterns = [
   {
@@ -32,20 +34,20 @@ const nextConfig: NextConfig = {
     remotePatterns: remoteImagePatterns,
   },
   async redirects() {
-    if (!shopifyStoreDomain) {
+    if (!shopifyCheckoutDomain) {
       return [];
     }
 
     return [
       {
         source: "/cart/:path*",
-        destination: `https://${shopifyStoreDomain}/cart/:path*`,
+        destination: `https://${shopifyCheckoutDomain}/cart/:path*`,
         permanent: false,
         basePath: false,
       },
       {
         source: "/checkouts/:path*",
-        destination: `https://${shopifyStoreDomain}/checkouts/:path*`,
+        destination: `https://${shopifyCheckoutDomain}/checkouts/:path*`,
         permanent: false,
         basePath: false,
       },

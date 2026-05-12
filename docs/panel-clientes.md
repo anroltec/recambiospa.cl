@@ -200,6 +200,57 @@ Responsabilidad:
 - invalidar cookie local
 - intentar revocar el customer access token en Shopify
 
+### `POST /api/customer/auth/recover`
+
+Entrada:
+
+```json
+{
+  "email": "cliente@empresa.cl"
+}
+```
+
+Responsabilidad:
+
+- disparar `customerRecover` en Shopify
+- devolver respuesta generica para no exponer si el correo existe o no
+
+### `POST /api/customer/auth/reset`
+
+Entrada:
+
+```json
+{
+  "resetUrl": "https://tienda.myshopify.com/account/reset/...",
+  "password": "******",
+  "confirmPassword": "******"
+}
+```
+
+Responsabilidad:
+
+- consumir `customerResetByUrl`
+- crear una nueva sesion local con el token devuelto por Shopify
+
+### `POST /api/customer/auth/password`
+
+Entrada:
+
+```json
+{
+  "currentPassword": "******",
+  "newPassword": "******",
+  "confirmPassword": "******"
+}
+```
+
+Responsabilidad:
+
+- exigir sesion activa
+- reautenticar al cliente con su password actual
+- cambiar password con `customerUpdate`
+- rotar la cookie local porque Shopify invalida los tokens anteriores
+
 ### `GET /api/customer/profile`
 
 Responsabilidad:
@@ -294,3 +345,5 @@ Implementado en el repo:
 2. validar scopes y configuracion de la app de Shopify
 3. probar con customers reales de Shopify
 4. enriquecer el webhook `orders-paid` con customer, direccion y metafields
+5. actualizar en Shopify el email "Customer account password reset" para que apunte a:
+   - `https://recambiospa.cl/cuenta/restablecer?reset_url={{ customer.reset_password_url }}`
