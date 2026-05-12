@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 
-type Mode = "login" | "register";
+type Mode = "login" | "register" | "recover";
 
 interface LoginModalProps {
   onClose: () => void;
@@ -20,6 +20,7 @@ const EMPTY_REGISTER = {
   password: "",
   confirm: "",
 };
+const EMPTY_RECOVER = { email: "" };
 
 const MODE_COPY = {
   login: {
@@ -35,6 +36,13 @@ const MODE_COPY = {
     loading: "Creando cuenta...",
     switchPrompt: "\u00bfYa tienes acceso?",
     switchCta: "Entrar",
+  },
+  recover: {
+    title: "Recuperar acceso",
+    submit: "Enviar enlace",
+    loading: "Enviando enlace...",
+    switchPrompt: "\u00bfYa recuerdas tu contrase\u00f1a?",
+    switchCta: "Volver a entrar",
   },
 } satisfies Record<
   Mode,
@@ -62,6 +70,11 @@ export default function LoginModal({ onClose }: LoginModalProps) {
   const [regError, setRegError] = useState<string | null>(null);
   const [isSubmittingReg, setIsSubmittingReg] = useState(false);
 
+  const [recoverValues, setRecoverValues] = useState(EMPTY_RECOVER);
+  const [recoverError, setRecoverError] = useState<string | null>(null);
+  const [recoverMessage, setRecoverMessage] = useState<string | null>(null);
+  const [isSubmittingRecover, setIsSubmittingRecover] = useState(false);
+
   useEffect(() => {
     fetch("/api/customer/profile", { method: "GET", cache: "no-store" })
       .then((res) => {
@@ -78,6 +91,8 @@ export default function LoginModal({ onClose }: LoginModalProps) {
     setMode(next);
     setLoginError(null);
     setRegError(null);
+    setRecoverError(null);
+    setRecoverMessage(null);
   }
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
@@ -140,6 +155,41 @@ export default function LoginModal({ onClose }: LoginModalProps) {
     }
   }
 
+  async function handleRecover(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setIsSubmittingRecover(true);
+    setRecoverError(null);
+    setRecoverMessage(null);
+
+    try {
+      const res = await fetch("/api/customer/auth/recover", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: recoverValues.email }),
+      });
+      const data = (await res.json()) as {
+        ok: boolean;
+        error?: string;
+        message?: string;
+      };
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error ?? "No fue posible iniciar la recuperacion.");
+      }
+      setRecoverMessage(
+        data.message ??
+          "Si existe una cuenta con ese correo, enviamos un enlace para restablecer la contrasena."
+      );
+    } catch (err) {
+      setRecoverError(
+        err instanceof Error
+          ? err.message
+          : "No fue posible iniciar la recuperacion."
+      );
+    } finally {
+      setIsSubmittingRecover(false);
+    }
+  }
+
   if (checkingAuth) {
     return (
       <Modal onClose={onClose} maxWidth="max-w-sm">
@@ -192,6 +242,9 @@ export default function LoginModal({ onClose }: LoginModalProps) {
                 <TabBtn active={mode === "register"} onClick={() => switchMode("register")}>
                   Crear cuenta
                 </TabBtn>
+                <TabBtn active={mode === "recover"} onClick={() => switchMode("recover")}>
+                  Recuperar
+                </TabBtn>
               </div>
               <div className="hidden h-px w-16 bg-dark/10 sm:block" />
             </div>
@@ -237,6 +290,18 @@ export default function LoginModal({ onClose }: LoginModalProps) {
                         onToggle={() => setShowLoginPw((value) => !value)}
                       />
                     </div>
+                    <div className="mt-2 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRecoverValues({ email: loginValues.email });
+                          switchMode("recover");
+                        }}
+                        className="text-xs font-semibold uppercase tracking-[0.12em] text-primary transition-colors hover:text-primary-light"
+                      >
+                        Olvide mi contrasena
+                      </button>
+                    </div>
                   </Field>
 
                   {loginError ? <ErrorBanner message={loginError} /> : null}
@@ -258,7 +323,7 @@ export default function LoginModal({ onClose }: LoginModalProps) {
                   </p>
                 </div>
               </form>
-            ) : (
+            ) : mode === "register" ? (
               <form
                 onSubmit={(e) => void handleRegister(e)}
                 className="mt-7 flex flex-1 flex-col justify-between"
@@ -342,6 +407,53 @@ export default function LoginModal({ onClose }: LoginModalProps) {
 
                 <div className="mt-7">
                   <SubmitBtn loading={isSubmittingReg} loadingText={copy.loading}>
+                    {copy.submit}
+                  </SubmitBtn>
+                  <p className="mt-4 text-center text-sm text-dark/46">
+                    {copy.switchPrompt}{" "}
+                    <button
+                      type="button"
+                      onClick={() => switchMode("login")}
+                      className="font-semibold text-primary transition-colors hover:text-primary-light"
+                    >
+                      {copy.switchCta}
+                    </button>
+                  </p>
+                </div>
+              </form>
+            ) : (
+              <form
+                onSubmit={(e) => void handleRecover(e)}
+                className="mt-7 flex flex-1 flex-col justify-between"
+              >
+                <div className="space-y-5">
+                  <p className="max-w-xl text-sm leading-6 text-dark/56">
+                    Ingresa el correo del cliente y enviaremos un enlace para
+                    restablecer la contrasena en una pantalla segura del sitio.
+                  </p>
+
+                  <Field label="Correo">
+                    <Input
+                      type="email"
+                      value={recoverValues.email}
+                      onChange={(e) =>
+                        setRecoverValues((v) => ({ ...v, email: e.target.value }))
+                      }
+                      placeholder="cliente@empresa.cl"
+                      autoComplete="email"
+                      required
+                    />
+                  </Field>
+
+                  {recoverError ? <ErrorBanner message={recoverError} /> : null}
+                  {recoverMessage ? <SuccessBanner message={recoverMessage} /> : null}
+                </div>
+
+                <div className="mt-7">
+                  <SubmitBtn
+                    loading={isSubmittingRecover}
+                    loadingText={copy.loading}
+                  >
                     {copy.submit}
                   </SubmitBtn>
                   <p className="mt-4 text-center text-sm text-dark/46">
@@ -463,6 +575,15 @@ function SubmitBtn({
 function ErrorBanner({ message }: { message: string }) {
   return (
     <div className="flex items-start gap-2 border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700">
+      <AlertCircle size={15} className="mt-0.5 shrink-0" />
+      <span>{message}</span>
+    </div>
+  );
+}
+
+function SuccessBanner({ message }: { message: string }) {
+  return (
+    <div className="flex items-start gap-2 border border-green-200 bg-green-50 px-4 py-2.5 text-sm text-green-700">
       <AlertCircle size={15} className="mt-0.5 shrink-0" />
       <span>{message}</span>
     </div>

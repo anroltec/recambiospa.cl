@@ -7,11 +7,11 @@ import Image from "next/image";
 import {
   Building2,
   ChevronDown,
+  KeyRound,
   LogOut,
   Loader2,
   Menu,
   Phone,
-  Receipt,
   Search,
   ShieldCheck,
   ShoppingBag,
@@ -41,6 +41,7 @@ function getInitials(profile: AccountProfile): string {
 const ACCOUNT_LINKS = [
   { href: "/cuenta",         label: "Resumen",       icon: ShieldCheck },
   { href: "/cuenta/empresa", label: "Datos Empresa",  icon: Building2   },
+  { href: "/cuenta/seguridad", label: "Seguridad",   icon: KeyRound     },
   { href: "/cuenta/pedidos", label: "Pedidos",        icon: ShoppingBag },
 ];
 
@@ -124,7 +125,7 @@ export default function Header() {
   }, [router]);
 
   /* ── Account button ── */
-  const AccountBtn = () => {
+  const accountButton = (() => {
     if (authStatus === "loading") {
       return (
         <div className="flex h-8 w-8 items-center justify-center">
@@ -222,7 +223,7 @@ export default function Header() {
         )}
       </div>
     );
-  };
+  })();
 
   return (
     <header ref={headerRef} className="sticky top-0 z-50">
@@ -289,7 +290,7 @@ export default function Header() {
               <Search size={22} />
             </button>
 
-            <AccountBtn />
+            {accountButton}
 
             <Link
               href="/carrito"
