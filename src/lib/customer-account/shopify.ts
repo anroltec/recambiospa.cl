@@ -22,16 +22,20 @@ interface StorefrontGraphQLResponse<T> {
   errors?: ShopifyGraphQLError[];
 }
 
+interface ShopifyCustomerUserError {
+  code?: string;
+  field?: string[];
+  message: string;
+}
+
+interface ShopifyCustomerAccessToken {
+  accessToken: string;
+  expiresAt: string;
+}
+
 interface CustomerAccessTokenPayload {
-  customerAccessToken: {
-    accessToken: string;
-    expiresAt: string;
-  } | null;
-  customerUserErrors: {
-    code?: string;
-    field?: string[];
-    message: string;
-  }[];
+  customerAccessToken: ShopifyCustomerAccessToken | null;
+  customerUserErrors: ShopifyCustomerUserError[];
 }
 
 interface StorefrontCustomer {
@@ -60,11 +64,22 @@ export interface ShopifyCustomerSessionSeed {
   accessTokenExpiresAt: string;
 }
 
+interface StorefrontCustomerMutationPayload {
+  customer: StorefrontCustomer | null;
+  customerAccessToken: ShopifyCustomerAccessToken | null;
+  customerUserErrors: ShopifyCustomerUserError[];
+}
+
+interface StorefrontCustomerFetchOptions {
+  buyerIp?: string | null;
+}
+
 // ── Fetch helpers ─────────────────────────────────────────────────────────────
 
 async function storefrontCustomerFetch<T>(
   query: string,
-  variables?: Record<string, unknown>
+  variables?: Record<string, unknown>,
+  options: StorefrontCustomerFetchOptions = {}
 ): Promise<T> {
   const { storeDomain, storefrontAccessToken, apiVersion } =
     getShopifyStorefrontEnv();
@@ -75,6 +90,10 @@ async function storefrontCustomerFetch<T>(
 
   if (storefrontAccessToken.startsWith("shpat_")) {
     headers["Shopify-Storefront-Private-Token"] = storefrontAccessToken;
+
+    if (options.buyerIp) {
+      headers["Shopify-Storefront-Buyer-IP"] = options.buyerIp;
+    }
   } else {
     headers["X-Shopify-Storefront-Access-Token"] = storefrontAccessToken;
   }
@@ -167,6 +186,32 @@ function normalizeOptional(value?: string | null): string | null {
   return normalized ? normalized : null;
 }
 
+function createSessionSeed(
+  customer: StorefrontCustomer,
+  customerAccessToken: ShopifyCustomerAccessToken
+): ShopifyCustomerSessionSeed {
+  if (!customer.email) {
+    throw new Error(
+      "Shopify customer profile is not available for this session."
+    );
+  }
+
+  return {
+    shopifyCustomerAccessToken: customerAccessToken.accessToken,
+    shopifyCustomerId: customer.id,
+    email: customer.email,
+    accessTokenExpiresAt: customerAccessToken.expiresAt,
+  };
+}
+
+function assertStorefrontAuthMode(): void {
+  if (getCustomerAccountEnv().authMode !== "storefront") {
+    throw new Error(
+      "SHOPIFY_CUSTOMER_AUTH_MODE=customer-account-api is not implemented in this module yet."
+    );
+  }
+}
+
 // ── Customer creation ─────────────────────────────────────────────────────────
 
 interface CustomerCreatePayload {
@@ -220,11 +265,7 @@ export async function authenticateShopifyCustomer(
   email: string,
   password: string
 ): Promise<ShopifyCustomerSessionSeed> {
-  if (getCustomerAccountEnv().authMode !== "storefront") {
-    throw new Error(
-      "SHOPIFY_CUSTOMER_AUTH_MODE=customer-account-api is not implemented in this module yet."
-    );
-  }
+  assertStorefrontAuthMode();
 
   const data = await storefrontCustomerFetch<{
     customerAccessTokenCreate: CustomerAccessTokenPayload;
@@ -263,18 +304,11 @@ export async function authenticateShopifyCustomer(
     payload.customerAccessToken.accessToken
   );
 
-  if (!customer?.email) {
-    throw new Error(
-      "Shopify customer profile is not available for this session."
-    );
+  if (!customer) {
+    throw new Error("Shopify customer profile is not available for this session.");
   }
 
-  return {
-    shopifyCustomerAccessToken: payload.customerAccessToken.accessToken,
-    shopifyCustomerId: customer.id,
-    email: customer.email,
-    accessTokenExpiresAt: payload.customerAccessToken.expiresAt,
-  };
+  return createSessionSeed(customer, payload.customerAccessToken);
 }
 
 // ── Token revocation ──────────────────────────────────────────────────────────
@@ -312,6 +346,148 @@ export async function revokeShopifyCustomerAccessToken(
   if (firstError) {
     throw new Error(firstError.message);
   }
+}
+
+export async function sendShopifyCustomerPasswordReset(
+  email: string,
+  options: StorefrontCustomerFetchOptions = {}
+): Promise<ShopifyCustomerUserError[]> {
+  assertStorefrontAuthMode();
+
+  const data = await storefrontCustomerFetch<{
+    customerRecover: {
+      customerUserErrors: ShopifyCustomerUserError[];
+    };
+  }>(
+    `
+      mutation CustomerRecover($email: String!) {
+        customerRecover(email: $email) {
+          customerUserErrors {
+            code
+            field
+            message
+          }
+        }
+      }
+    `,
+    { email },
+    options
+  );
+
+  return data.customerRecover.customerUserErrors;
+}
+
+export async function resetShopifyCustomerPasswordByUrl(
+  resetUrl: string,
+  password: string
+): Promise<ShopifyCustomerSessionSeed> {
+  assertStorefrontAuthMode();
+
+  const data = await storefrontCustomerFetch<{
+    customerResetByUrl: StorefrontCustomerMutationPayload;
+  }>(
+    `
+      mutation CustomerResetByUrl($resetUrl: URL!, $password: String!) {
+        customerResetByUrl(resetUrl: $resetUrl, password: $password) {
+          customer {
+            id
+            email
+            firstName
+            lastName
+          }
+          customerAccessToken {
+            accessToken
+            expiresAt
+          }
+          customerUserErrors {
+            code
+            field
+            message
+          }
+        }
+      }
+    `,
+    { resetUrl, password }
+  );
+
+  const payload = data.customerResetByUrl;
+
+  if (payload.customerUserErrors.length) {
+    throw new Error(
+      payload.customerUserErrors[0]?.message ||
+        "Unable to reset customer password."
+    );
+  }
+
+  if (!payload.customer || !payload.customerAccessToken) {
+    throw new Error(
+      "Shopify did not return a new customer session after password reset."
+    );
+  }
+
+  return createSessionSeed(payload.customer, payload.customerAccessToken);
+}
+
+export async function updateShopifyCustomerPassword(
+  customerAccessToken: string,
+  password: string
+): Promise<ShopifyCustomerSessionSeed> {
+  assertStorefrontAuthMode();
+
+  const data = await storefrontCustomerFetch<{
+    customerUpdate: StorefrontCustomerMutationPayload;
+  }>(
+    `
+      mutation CustomerPasswordUpdate(
+        $customerAccessToken: String!
+        $customer: CustomerUpdateInput!
+      ) {
+        customerUpdate(
+          customerAccessToken: $customerAccessToken
+          customer: $customer
+        ) {
+          customer {
+            id
+            email
+            firstName
+            lastName
+          }
+          customerAccessToken {
+            accessToken
+            expiresAt
+          }
+          customerUserErrors {
+            code
+            field
+            message
+          }
+        }
+      }
+    `,
+    {
+      customerAccessToken,
+      customer: {
+        password,
+      },
+    }
+  );
+
+  const payload = data.customerUpdate;
+
+  if (payload.customerUserErrors.length) {
+    throw new Error(
+      payload.customerUserErrors[0]?.message ||
+        "Unable to update customer password."
+    );
+  }
+
+  if (!payload.customer || !payload.customerAccessToken) {
+    throw new Error(
+      "Shopify did not return a rotated session after password change."
+    );
+  }
+
+  return createSessionSeed(payload.customer, payload.customerAccessToken);
 }
 
 // ── Profile read (Shopify identity only — company data comes from Supabase) ───
