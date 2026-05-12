@@ -345,5 +345,6 @@ Implementado en el repo:
 2. validar scopes y configuracion de la app de Shopify
 3. probar con customers reales de Shopify
 4. enriquecer el webhook `orders-paid` con customer, direccion y metafields
-5. actualizar en Shopify el email "Customer account password reset" para que apunte a:
-   - `https://recambiospa.cl/cuenta/restablecer?reset_url={{ customer.reset_password_url }}`
+5. el storefront ahora intercepta links nativos de Shopify con formato `/account/reset/...`
+   - redirige server-side hacia `/cuenta/restablecer?reset_url=...`
+   - personalizar la plantilla del email sigue siendo opcional, pero ya no es requisito para que el flujo funcione
