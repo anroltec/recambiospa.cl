@@ -1,8 +1,11 @@
 import type { MetadataRoute } from "next";
 import { getCatalogData, isCatalogConnectionError } from "@/lib/catalog";
 import { brandDirectory, categoryDirectory, slugify } from "@/lib/catalog-taxonomy";
-
-const SITE_URL = "https://recambiospa.cl";
+import {
+  SITE_URL,
+  absoluteUrl,
+  getPrimaryCatalogImage,
+} from "@/lib/seo";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
@@ -12,6 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: "weekly",
       priority: 1,
+      images: [absoluteUrl("/banners/banner1-new.png"), absoluteUrl("/banners/technical-services.jpeg")],
     },
     {
       url: `${SITE_URL}/collections`,
@@ -36,6 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.6,
+      images: [absoluteUrl("/banners/service-technical-hero.jpeg")],
     },
     {
       url: `${SITE_URL}/contacto`,
@@ -76,12 +81,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })
     );
 
-    const productPages: MetadataRoute.Sitemap = products.map((product) => ({
-      url: `${SITE_URL}/producto/${product.code}`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    }));
+    const productPages: MetadataRoute.Sitemap = products.map((product) => {
+      const primaryImage = getPrimaryCatalogImage(product.images);
+
+      return {
+        url: `${SITE_URL}/producto/${product.code}`,
+        lastModified: now,
+        changeFrequency: "weekly",
+        priority: 0.8,
+        images: primaryImage ? [primaryImage] : undefined,
+      };
+    });
 
     return [...staticPages, ...categoryPages, ...brandPages, ...productPages];
   } catch (error) {

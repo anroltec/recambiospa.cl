@@ -1,11 +1,11 @@
 import type { MetadataRoute } from "next";
+import { DEFAULT_SITE_DESCRIPTION, SITE_NAME } from "@/lib/seo";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Recambio SpA - Repuestos y Accesorios para Transporte",
-    short_name: "Recambio SpA",
-    description:
-      "Importación y distribución de repuestos y accesorios para vehículos livianos y pesados. Envíos a todo Chile.",
+    name: `${SITE_NAME} - Repuestos y Accesorios para Transporte`,
+    short_name: SITE_NAME,
+    description: DEFAULT_SITE_DESCRIPTION,
     start_url: "/",
     display: "standalone",
     background_color: "#FFFFFF",

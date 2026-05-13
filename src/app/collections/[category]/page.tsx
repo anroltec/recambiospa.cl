@@ -7,6 +7,7 @@ import {
   isCatalogConnectionError,
   resolveCatalogSlug,
 } from "@/lib/catalog";
+import { SITE_NAME } from "@/lib/seo";
 
 interface Props {
   params: Promise<{ category: string }>;
@@ -71,15 +72,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
 
     const prefix = resolved.type === "category" ? "Categoria" : "Marca";
+    const canonical = `/collections/${category}`;
+    const description = `${prefix}: ${resolved.label}. Repuestos y accesorios para transporte disponibles en Recambio SpA.`;
 
     return {
-      title: `${resolved.label} | Recambio SPA`,
-      description: `${prefix}: ${resolved.label} - repuestos y accesorios para transporte.`,
+      title: `${resolved.label} | ${SITE_NAME}`,
+      description,
+      alternates: { canonical },
+      openGraph: {
+        title: `${resolved.label} | ${SITE_NAME}`,
+        description,
+        url: canonical,
+      },
     };
   } catch (error) {
     if (isCatalogConnectionError(error)) {
       return {
-        title: "Catalogo temporalmente no disponible | Recambio SPA",
+        title: `Cat\u00e1logo temporalmente no disponible | ${SITE_NAME}`,
       };
     }
 

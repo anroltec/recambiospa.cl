@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import CatalogConnectionState from "@/components/catalog/CatalogConnectionState";
 import CatalogListing from "@/components/catalog/CatalogListing";
 import { getCatalogData, isCatalogConnectionError } from "@/lib/catalog";
+import { SITE_NAME } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Catalogo de Productos | Recambio SPA",
+  title: `Cat\u00e1logo de productos | ${SITE_NAME}`,
   description:
-    "Importacion y distribucion de repuestos y accesorios para vehiculos livianos y pesados.",
+    "Explora el cat\u00e1logo de repuestos, accesorios e insumos para veh\u00edculos livianos y pesados de Recambio SpA.",
+  alternates: { canonical: "/collections" },
 };
 
 interface Props {

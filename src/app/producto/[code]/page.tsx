@@ -13,6 +13,7 @@ import {
   isCatalogConnectionError,
 } from "@/lib/catalog";
 import { getCategoryName } from "@/lib/catalog-taxonomy";
+import { SITE_NAME, getPrimaryCatalogImage } from "@/lib/seo";
 
 interface Props {
   params: Promise<{ code: string }>;
@@ -78,14 +79,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       return {};
     }
 
+    const canonical = `/producto/${product.code}`;
+    const description =
+      product.description || `${product.name}. SKU ${product.code}. Disponible para cotizaci\u00f3n en Recambio SpA.`;
+    const primaryImage = getPrimaryCatalogImage(product.images);
+
     return {
-      title: `${product.name} | Recambio SPA`,
-      description: product.description || `${product.name} - SKU ${product.code}`,
+      title: `${product.name} | ${SITE_NAME}`,
+      description,
+      alternates: { canonical },
+      openGraph: {
+        title: `${product.name} | ${SITE_NAME}`,
+        description,
+        url: canonical,
+        images: primaryImage ? [{ url: primaryImage, alt: product.name }] : undefined,
+      },
     };
   } catch (error) {
     if (isCatalogConnectionError(error)) {
       return {
-        title: "Producto temporalmente no disponible | Recambio SPA",
+        title: `Producto temporalmente no disponible | ${SITE_NAME}`,
       };
     }
 
