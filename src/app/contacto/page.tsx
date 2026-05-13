@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
+import { WHATSAPP_DISPLAY_NUMBER, WHATSAPP_URL } from "@/lib/contact";
 
 export const metadata: Metadata = {
   title: "Contacto - Cotizaciones y Consultas",
@@ -131,7 +132,7 @@ export default function ContactoPage() {
                 <input
                   type="tel"
                   className="w-full border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-primary bg-gray-50 focus:bg-white transition-colors"
-                  placeholder="+569 xxxx xxxx"
+                  placeholder="+56 9 1234 5678"
                 />
               </div>
               <div>
@@ -175,10 +176,10 @@ export default function ContactoPage() {
                 <div>
                   <p className="text-white/35 text-[10px] uppercase tracking-widest mb-1">WhatsApp</p>
                   <a
-                    href="https://wa.me/"
+                    href={WHATSAPP_URL}
                     className="text-white font-semibold hover:text-primary transition-colors"
                   >
-                    +569 xxxx xxxx
+                    {WHATSAPP_DISPLAY_NUMBER}
                   </a>
                 </div>
                 <div>
@@ -197,7 +198,7 @@ export default function ContactoPage() {
                   La forma más rápida de cotizar es por WhatsApp.
                 </p>
                 <a
-                  href="https://wa.me/"
+                  href={WHATSAPP_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2.5 bg-[#25D366] hover:bg-[#1ebe5d] text-white font-black px-5 py-3 text-xs uppercase tracking-widest transition-colors"

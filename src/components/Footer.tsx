@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { PhoneCall, Mail, MapPin } from "lucide-react";
+import { WHATSAPP_DISPLAY_NUMBER, WHATSAPP_URL } from "@/lib/contact";
 
 export default function Footer() {
   return (
@@ -26,9 +27,9 @@ export default function Footer() {
                 Importaci&oacute;n y Distribuci&oacute;n de Soluciones para Transporte.
               </p>
               <div className="space-y-2 text-sm text-steel">
-                <a href="https://wa.me/" className="flex items-center gap-2 hover:text-white transition-colors">
+                <a href={WHATSAPP_URL} className="flex items-center gap-2 hover:text-white transition-colors">
                   <PhoneCall size={14} className="text-primary" strokeWidth={1.5} />
-                  +569 xxxx xxxx
+                  {WHATSAPP_DISPLAY_NUMBER}
                 </a>
                 <p className="flex items-center gap-2">
                   <Mail size={14} className="text-primary" strokeWidth={1.5} />

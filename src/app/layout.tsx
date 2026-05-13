@@ -3,10 +3,19 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import TrackingScripts from "@/components/analytics/TrackingScripts";
 import { CartProvider } from "@/context/CartContext";
 import { hasShopifyStorefrontEnv } from "@/lib/env";
-
-const SITE_URL = "https://recambiospa.cl";
+import { WHATSAPP_DISPLAY_NUMBER } from "@/lib/contact";
+import {
+  DEFAULT_SITE_DESCRIPTION,
+  DEFAULT_SITE_TITLE,
+  DEFAULT_SOCIAL_DESCRIPTION,
+  SITE_KEYWORDS,
+  SITE_NAME,
+  SITE_URL,
+  absoluteUrl,
+} from "@/lib/seo";
 
 export const viewport = {
   width: "device-width",
@@ -16,50 +25,28 @@ export const viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  applicationName: SITE_NAME,
   title: {
-    default: "Recambio SpA - Repuestos y Accesorios para Transporte | Envíos a Todo Chile",
-    template: "%s | Recambio SpA",
+    default: DEFAULT_SITE_TITLE,
+    template: `%s | ${SITE_NAME}`,
   },
-  description:
-    "Importación y distribución de repuestos, accesorios e insumos para vehículos livianos y pesados. Marcas líderes: Braslux, Loctite, Teroson, Moura, Wurth. Envíos a todo Chile.",
-  keywords: [
-    "repuestos vehículos",
-    "accesorios transporte",
-    "repuestos camiones",
-    "iluminación LED camiones",
-    "baterías Moura",
-    "adhesivos Loctite",
-    "selladores Teroson",
-    "herramientas Wurth",
-    "repuestos buses",
-    "envíos Chile",
-    "Recambio SpA",
-  ],
-  authors: [{ name: "Recambio SpA" }],
-  creator: "Recambio SpA",
+  description: DEFAULT_SITE_DESCRIPTION,
+  keywords: SITE_KEYWORDS,
+  authors: [{ name: SITE_NAME }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
   openGraph: {
     type: "website",
     locale: "es_CL",
     url: SITE_URL,
-    siteName: "Recambio SpA",
-    title: "Recambio SpA - Repuestos y Accesorios para Transporte",
-    description:
-      "Importación y distribución de repuestos y accesorios para vehículos livianos y pesados. Envíos a todo Chile.",
-    images: [
-      {
-        url: "/logo.svg",
-        width: 240,
-        height: 80,
-        alt: "Recambio SpA Logo",
-      },
-    ],
+    siteName: SITE_NAME,
+    title: DEFAULT_SITE_TITLE,
+    description: DEFAULT_SOCIAL_DESCRIPTION,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Recambio SpA - Repuestos y Accesorios para Transporte",
-    description:
-      "Importación y distribución de repuestos y accesorios para vehículos livianos y pesados. Envíos a todo Chile.",
-    images: ["/logo.svg"],
+    title: DEFAULT_SITE_TITLE,
+    description: DEFAULT_SOCIAL_DESCRIPTION,
   },
   robots: {
     index: true,
@@ -73,7 +60,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: SITE_URL,
+    canonical: absoluteUrl("/"),
   },
 };
 
@@ -85,19 +72,20 @@ export default function RootLayout({
   const shopifyEnabled = hasShopifyStorefrontEnv();
 
   return (
-    <html lang="es">
+    <html lang="es-CL">
       <body className="min-h-screen flex flex-col">
+        <TrackingScripts />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "Organization",
-              name: "Recambio SpA",
+              "@id": `${SITE_URL}/#organization`,
+              name: SITE_NAME,
               url: SITE_URL,
-              logo: `${SITE_URL}/logo.svg`,
-              description:
-                "Importación y distribución de repuestos y accesorios para vehículos livianos y pesados.",
+              logo: absoluteUrl("/logo.svg"),
+              description: DEFAULT_SITE_DESCRIPTION,
               address: {
                 "@type": "PostalAddress",
                 addressLocality: "Santiago",
@@ -105,9 +93,11 @@ export default function RootLayout({
               },
               contactPoint: {
                 "@type": "ContactPoint",
+                telephone: WHATSAPP_DISPLAY_NUMBER,
                 email: "ventas@recambiospa.cl",
                 contactType: "sales",
-                availableLanguage: "Spanish",
+                areaServed: "CL",
+                availableLanguage: ["es-CL", "es"],
               },
             }),
           }}

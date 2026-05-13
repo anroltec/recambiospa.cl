@@ -1,9 +1,11 @@
 "use client";
 
+import { WHATSAPP_URL } from "@/lib/contact";
+
 export default function WhatsAppButton() {
   return (
     <a
-      href="https://wa.me/"
+      href={WHATSAPP_URL}
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-[calc(1.5rem+env(safe-area-inset-bottom))] right-[calc(1.5rem+env(safe-area-inset-right))] z-40 bg-[#25D366] hover:bg-[#1da851] focus:bg-[#1da851] text-white p-3.5 rounded-full shadow-lg hover:shadow-2xl transition-all hover:scale-110 focus:scale-110 focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2 animate-bounce-slow"

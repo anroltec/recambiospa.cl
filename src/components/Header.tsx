@@ -23,6 +23,7 @@ import {
 import { useCart } from "@/context/CartContext";
 import { getDropdownItems, navLinks } from "@/data/navigation";
 import LoginModal from "@/components/account/LoginModal";
+import { WHATSAPP_DISPLAY_NUMBER, WHATSAPP_URL } from "@/lib/contact";
 
 type AuthStatus = "loading" | "guest" | "authed";
 
@@ -232,11 +233,11 @@ export default function Header() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2">
           <div className="flex items-center gap-5">
             <a
-              href="https://wa.me/"
+              href={WHATSAPP_URL}
               className="flex items-center gap-1.5 transition-colors hover:text-primary-light"
             >
               <Phone size={12} />
-              <span>+569 xxxx xxxx</span>
+              <span>{WHATSAPP_DISPLAY_NUMBER}</span>
             </a>
             <span className="hidden items-center gap-1.5 text-white/70 sm:flex">
               <Truck size={12} />

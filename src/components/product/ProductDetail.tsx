@@ -8,6 +8,7 @@ import { formatPrice } from "@/lib/format";
 import { useCart } from "@/context/CartContext";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
+import { WHATSAPP_URL } from "@/lib/contact";
 
 interface ProductDetailProps {
   product: Product;
@@ -170,7 +171,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             </div>
           ) : (
             <a
-              href="https://wa.me/"
+              href={WHATSAPP_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1da851] text-white font-bold py-3 mb-6 transition-colors"

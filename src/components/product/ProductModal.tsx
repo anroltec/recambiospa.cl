@@ -10,6 +10,7 @@ import { useCart } from "@/context/CartContext";
 import Modal from "@/components/ui/Modal";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
+import { WHATSAPP_URL } from "@/lib/contact";
 
 interface ProductModalProps {
   product: Product;
@@ -148,7 +149,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
             </div>
           ) : (
             <a
-              href="https://wa.me/"
+              href={WHATSAPP_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 w-full bg-[#25D366] hover:bg-[#1da851] text-white font-bold py-3 transition-colors mb-5"
