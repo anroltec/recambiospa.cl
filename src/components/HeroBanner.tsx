@@ -32,7 +32,7 @@ export default function HeroBanner() {
   const swiperRef = useRef<SwiperType | null>(null);
 
   return (
-    <section className="relative group/hero select-none overflow-hidden">
+    <section className="relative group/hero isolate select-none overflow-hidden">
       <Swiper
         onSwiper={(swiper) => { swiperRef.current = swiper; }}
         modules={[Autoplay, Pagination]}
@@ -57,21 +57,18 @@ export default function HeroBanner() {
                 priority={i === 0}
                 sizes="100vw"
               />
-              {/* Left/right vignette */}
-              <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30 pointer-events-none" />
-              {/* Bottom gradient for pagination contrast */}
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/32 via-transparent to-black/28 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/55 pointer-events-none" />
             </Link>
           </SwiperSlide>
         ))}
       </Swiper>
 
-      {/* ── Custom arrows ───────────────────────────── */}
       <button
         onClick={() => swiperRef.current?.slidePrev()}
         aria-label="Anterior"
         className="
-          absolute left-0 top-1/2 -translate-y-1/2 z-20
+          absolute left-0 top-1/2 -translate-y-1/2 z-30
           flex items-center justify-center
           w-10 sm:w-12 h-16 sm:h-20
           bg-black/50 hover:bg-primary
@@ -89,7 +86,7 @@ export default function HeroBanner() {
         onClick={() => swiperRef.current?.slideNext()}
         aria-label="Siguiente"
         className="
-          absolute right-0 top-1/2 -translate-y-1/2 z-20
+          absolute right-0 top-1/2 -translate-y-1/2 z-30
           flex items-center justify-center
           w-10 sm:w-12 h-16 sm:h-20
           bg-black/50 hover:bg-primary
@@ -103,8 +100,7 @@ export default function HeroBanner() {
         <ChevronRight size={26} strokeWidth={2} />
       </button>
 
-      {/* ── Pagination bars ─────────────────────────── */}
-      <div className="hero-pagination absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-1.5" />
+      <div className="hero-pagination absolute bottom-3 left-1/2 z-30 flex -translate-x-1/2 gap-1.5" />
     </section>
   );
 }

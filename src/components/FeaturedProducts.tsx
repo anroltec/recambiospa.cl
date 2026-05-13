@@ -85,7 +85,7 @@ export default async function FeaturedProducts() {
             href="/collections"
             className="text-sm font-bold uppercase tracking-wider text-primary transition-colors hover:text-primary-dark"
           >
-            Ver catalogo
+            Ver cat&aacute;logo
           </Link>
         </div>
 
@@ -105,6 +105,7 @@ export default async function FeaturedProducts() {
                     alt={product.name}
                     fill
                     className="object-contain p-3"
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                   />
                 </div>
                 <div className="p-4">
