@@ -47,6 +47,7 @@ const EMPTY_FORM: CustomerCompanyProfileInput = {
   firstName: "",
   lastName: "",
   phone: "",
+  documentType: "boleta",
   rut: "",
   razonSocial: "",
   giro: "",
@@ -65,6 +66,7 @@ function toFormValues(p: CustomerCompanyProfile): CustomerCompanyProfileInput {
     firstName:          p.firstName          ?? "",
     lastName:           p.lastName           ?? "",
     phone:              p.phone              ?? "",
+    documentType:       p.documentType       ?? "boleta",
     rut:                p.rut                ?? "",
     razonSocial:        p.razonSocial        ?? "",
     giro:               p.giro               ?? "",
@@ -255,21 +257,17 @@ function DashboardView({
   const displayName = [profile.firstName, profile.lastName].filter(Boolean).join(" ") || profile.email;
 
   return (
-    <div className="space-y-6">
-      {/* Welcome banner */}
-      <div className="flex flex-col gap-4 border-b border-gray-200 pb-6 sm:flex-row sm:items-center sm:justify-between">
+    <div className="space-y-0">
+      {/* Identity header */}
+      <div className="flex flex-col gap-3 pb-6 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
-            Panel B2B
-          </p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">Panel B2B</p>
           <h1 className="mt-1 text-2xl font-black uppercase text-dark">{displayName}</h1>
           <p className="mt-0.5 text-sm text-dark/50">{profile.email}</p>
         </div>
         <span
           className={`inline-flex items-center gap-1.5 self-start rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-wider ${
-            complete
-              ? "bg-green-100 text-green-700"
-              : "bg-amber-100 text-amber-700"
+            complete ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
           }`}
         >
           <span className={`h-1.5 w-1.5 rounded-full ${complete ? "bg-green-500" : "bg-amber-500"}`} />
@@ -277,49 +275,48 @@ function DashboardView({
         </span>
       </div>
 
-      {/* Stat cards */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard
+      {/* Company info strip */}
+      <div className="grid border-t border-gray-200 sm:grid-cols-3 sm:divide-x sm:divide-gray-200">
+        <ProfileField
           label="Razón social"
-          value={profile.razonSocial || "Sin definir"}
-          sub={profile.rut ? `RUT: ${profile.rut}` : "RUT no informado"}
-          accent={!!profile.razonSocial}
+          value={profile.razonSocial}
+          sub={profile.rut ? `RUT ${profile.rut}` : "RUT no informado"}
+          fallback="Sin definir"
         />
-        <StatCard
+        <ProfileField
           label="Giro"
-          value={profile.giro || "Sin definir"}
+          value={profile.giro}
           sub="Actividad tributaria"
-          accent={!!profile.giro}
+          fallback="Sin definir"
         />
-        <StatCard
+        <ProfileField
           label="Dirección"
-          value={profile.billingCity || "Sin ciudad"}
+          value={profile.billingCity}
           sub={profile.billingAddressLine1 || "Sin dirección registrada"}
-          accent={!!profile.billingAddressLine1}
+          fallback="Sin ciudad"
         />
       </div>
 
-      {/* CTA if incomplete */}
+      {/* Incomplete CTA */}
       {!complete && (
-        <div className="flex items-center justify-between border border-amber-200 bg-amber-50 px-5 py-4">
-          <div className="flex items-center gap-3">
-            <MapPin size={18} className="shrink-0 text-amber-600" />
-            <p className="text-sm text-amber-800">
+        <Link
+          href="/cuenta/empresa"
+          className="flex items-center justify-between border-t border-amber-200 bg-amber-50 px-0 py-3 transition-colors hover:bg-amber-100"
+        >
+          <div className="flex items-center gap-2">
+            <MapPin size={14} className="shrink-0 text-amber-600" />
+            <p className="text-xs text-amber-800">
               Completa tu perfil con RUT, razón social y dirección para habilitar la facturación.
             </p>
           </div>
-          <Link
-            href="/cuenta/empresa"
-            className="ml-4 flex shrink-0 items-center gap-1 text-sm font-bold text-amber-700 hover:text-amber-900"
-          >
-            Completar
-            <ChevronRight size={15} />
-          </Link>
-        </div>
+          <span className="ml-4 flex shrink-0 items-center gap-1 text-xs font-bold text-amber-700">
+            Completar <ChevronRight size={13} />
+          </span>
+        </Link>
       )}
 
       {/* Recent orders */}
-      <div>
+      <div className="pt-8">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-sm font-bold uppercase tracking-[0.15em] text-dark/60">
             Últimos pedidos
@@ -337,18 +334,19 @@ function DashboardView({
   );
 }
 
-function StatCard({
-  label, value, sub, accent,
+function ProfileField({
+  label, value, sub, fallback,
 }: {
-  label: string; value: string; sub: string; accent: boolean;
+  label: string; value: string | null; sub: string; fallback: string;
 }) {
+  const hasValue = Boolean(value);
   return (
-    <div className={`border bg-white p-5 ${accent ? "border-gray-200" : "border-dashed border-gray-300"}`}>
+    <div className="py-5 pr-6 sm:pl-6">
       <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-dark/40">{label}</p>
-      <p className={`mt-2 truncate text-base font-black uppercase ${accent ? "text-dark" : "text-dark/30"}`}>
-        {value}
+      <p className={`mt-2 truncate text-sm font-black uppercase ${hasValue ? "text-dark" : "text-dark/25"}`}>
+        {value || fallback}
       </p>
-      <p className="mt-1 truncate text-xs text-dark/40">{sub}</p>
+      <p className="mt-0.5 truncate text-xs text-dark/40">{sub}</p>
     </div>
   );
 }
@@ -379,30 +377,68 @@ function CompanyView({
       </FormSection>
 
       {/* ── Tributario ── */}
-      <FormSection title="Datos tributarios" sub="RUT, razón social y giro para facturación electrónica.">
-        <div className="grid gap-5 sm:grid-cols-3">
-          <FormField label="RUT *"          value={formValues.rut}         onChange={(v) => onFormChange("rut", v)} />
-          <FormField label="Razón social *" value={formValues.razonSocial} onChange={(v) => onFormChange("razonSocial", v)} />
-          <FormField label="Giro *"         value={formValues.giro}        onChange={(v) => onFormChange("giro", v)} />
+      <FormSection
+        title="Datos tributarios"
+        sub="Selecciona el tipo de documento que recibirás con cada compra."
+      >
+        {/* Document type toggle */}
+        <div className="mb-6">
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-dark/60">
+            Tipo de documento
+          </p>
+          <div className="inline-flex border border-gray-300">
+            {(["boleta", "factura"] as const).map((type, i) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => onFormChange("documentType", type)}
+                className={`px-6 py-2.5 text-xs font-bold uppercase tracking-[0.15em] transition-colors ${
+                  i > 0 ? "border-l border-gray-300" : ""
+                } ${
+                  formValues.documentType === type
+                    ? "bg-dark text-white"
+                    : "text-dark/50 hover:text-dark"
+                }`}
+              >
+                {type === "boleta" ? "Boleta" : "Factura"}
+              </button>
+            ))}
+          </div>
+          {formValues.documentType === "factura" && (
+            <p className="mt-2 text-xs text-dark/40">
+              Los campos marcados con <span className="text-primary">*</span> son obligatorios para emitir facturas.
+            </p>
+          )}
         </div>
+
+        {/* Company fields — always visible, required only for factura */}
+        {formValues.documentType === "factura" && (
+          <div className="grid gap-5 sm:grid-cols-3">
+            <RutField value={formValues.rut} onChange={(v) => onFormChange("rut", v)} />
+            <FormField label="Razón social *" value={formValues.razonSocial} onChange={(v) => onFormChange("razonSocial", v)} required />
+            <FormField label="Giro *"         value={formValues.giro}        onChange={(v) => onFormChange("giro", v)}         required />
+          </div>
+        )}
       </FormSection>
 
       {/* ── Dirección ── */}
-      <FormSection title="Dirección de facturación" sub="Dirección que aparecerá en las facturas emitidas.">
-        <div className="grid gap-5 sm:grid-cols-2">
-          <FormField label="Calle y número *"     value={formValues.billingAddressLine1}  onChange={(v) => onFormChange("billingAddressLine1", v)} />
-          <FormField label="Complemento"           value={formValues.billingAddressLine2 ?? ""} onChange={(v) => onFormChange("billingAddressLine2", v)} />
-          <FormField
-            label="Comuna *"
-            value={formValues.billingComuna}
-            onChange={(v) => onFormChange("billingComuna", v)}
-            helperText="Se guarda como metafield en Shopify."
-          />
-          <FormField label="Ciudad *"             value={formValues.billingCity}          onChange={(v) => onFormChange("billingCity", v)} />
-          <RegionSelect value={formValues.billingRegion ?? ""}   onChange={(v) => onFormChange("billingRegion", v)} />
-          <FormField label="Código postal"        value={formValues.billingPostalCode ?? ""} onChange={(v) => onFormChange("billingPostalCode", v)} />
-        </div>
-      </FormSection>
+      {formValues.documentType === "factura" && (
+        <FormSection title="Dirección de facturación" sub="Dirección que aparecerá en las facturas emitidas.">
+          <div className="grid gap-5 sm:grid-cols-2">
+            <FormField label="Calle y número *"  value={formValues.billingAddressLine1}       onChange={(v) => onFormChange("billingAddressLine1", v)} required />
+            <FormField label="Complemento"        value={formValues.billingAddressLine2 ?? ""} onChange={(v) => onFormChange("billingAddressLine2", v)} />
+            <FormField
+              label="Comuna *"
+              value={formValues.billingComuna}
+              onChange={(v) => onFormChange("billingComuna", v)}
+              required
+            />
+            <FormField label="Ciudad *"          value={formValues.billingCity}               onChange={(v) => onFormChange("billingCity", v)} required />
+            <RegionSelect value={formValues.billingRegion ?? ""} onChange={(v) => onFormChange("billingRegion", v)} />
+            <FormField label="Código postal"     value={formValues.billingPostalCode ?? ""}   onChange={(v) => onFormChange("billingPostalCode", v)} />
+          </div>
+        </FormSection>
+      )}
 
       {/* ── Notas ── */}
       <FormSection title="Notas de facturación" sub="Información adicional para el equipo de facturación.">
@@ -422,7 +458,7 @@ function CompanyView({
             }`}
           >
             <AlertCircle size={15} className="shrink-0" />
-            {saved ? "Datos guardados correctamente en Shopify." : profileMessage}
+            {saved ? "Datos guardados correctamente." : profileMessage}
           </div>
         )}
         {!profileMessage && (
@@ -544,38 +580,73 @@ function OrdersBlock({
   return (
     <div className="divide-y divide-gray-100 border border-gray-200 bg-white">
       {orders.map((order) => (
-        <div
-          key={order.id}
-          className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${
-            compact ? "px-5 py-4" : "px-6 py-5"
-          }`}
-        >
-          <div className="flex items-center gap-4">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/8">
-              <Receipt size={15} className="text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-black uppercase text-dark">{order.name}</p>
-              <p className="mt-0.5 text-xs text-dark/40">
-                {order.processedAt ? formatDate(order.processedAt) : "Sin fecha"}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 pl-13 sm:pl-0">
-            <OrderBadge
-              label={getFinancialStatusLabel(order.financialStatus)}
-              tone={order.financialStatus === "PAID" ? "green" : "gray"}
-            />
-            <OrderBadge label={getFulfillmentStatusLabel(order.fulfillmentStatus)} tone="blue" />
-            <p className="ml-2 min-w-[90px] text-right text-sm font-black text-dark">
-              {formatMoney(order.totalAmount, order.currencyCode)}
-            </p>
-          </div>
-        </div>
+        <OrderRow key={order.id} order={order} compact={compact} />
       ))}
     </div>
   );
+}
+
+function OrderRow({ order, compact }: { order: CustomerOrderSummary; compact: boolean }) {
+  const isPaid = order.financialStatus === "PAID";
+  const showFulfillment = !isPaid || (order.fulfillmentStatus !== "UNFULFILLED" && order.fulfillmentStatus !== null);
+
+  const itemLabel = order.itemCount === 1
+    ? "1 producto"
+    : `${order.itemCount} productos`;
+
+  const firstItems = order.lineItems.slice(0, 2);
+  const remaining = order.itemCount - firstItems.length;
+
+  const inner = (
+    <div
+      className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${
+        compact ? "px-5 py-4" : "px-6 py-5"
+      } ${order.statusUrl ? "transition-colors hover:bg-gray-50" : ""}`}
+    >
+      <div className="flex items-start gap-4">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/8">
+          <Receipt size={15} className="text-primary" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-black uppercase text-dark">{order.name}</p>
+          <p className="mt-0.5 text-xs text-dark/40">
+            {order.processedAt ? formatDate(order.processedAt) : "Sin fecha"}
+            {order.itemCount > 0 && (
+              <span className="ml-2 text-dark/30">· {itemLabel}</span>
+            )}
+          </p>
+          {!compact && firstItems.length > 0 && (
+            <p className="mt-1 truncate text-xs text-dark/40">
+              {firstItems.map((i) => `${i.quantity}× ${i.title}`).join(" · ")}
+              {remaining > 0 && ` · +${remaining} más`}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3 pl-13 sm:pl-0">
+        <OrderBadge
+          label={getFinancialStatusLabel(order.financialStatus)}
+          tone={isPaid ? "green" : "gray"}
+        />
+        {showFulfillment && (
+          <OrderBadge label={getFulfillmentStatusLabel(order.fulfillmentStatus)} tone="blue" />
+        )}
+        <p className="ml-2 min-w-[90px] text-right text-sm font-black text-dark">
+          {formatMoney(order.totalAmount, order.currencyCode)}
+        </p>
+      </div>
+    </div>
+  );
+
+  if (order.statusUrl) {
+    return (
+      <a key={order.id} href={order.statusUrl} target="_blank" rel="noopener noreferrer">
+        {inner}
+      </a>
+    );
+  }
+  return inner;
 }
 
 function OrderBadge({ label, tone }: { label: string; tone: "green" | "gray" | "blue" }) {
@@ -592,6 +663,83 @@ function OrderBadge({ label, tone }: { label: string; tone: "green" | "gray" | "
 }
 
 /* ─────────────────────────────── Form primitives ── */
+
+// ── RUT helpers ──────────────────────────────────────────────────────────────
+
+function rutToRaw(v: string): string {
+  return v.replace(/[^0-9kK]/g, "").toUpperCase();
+}
+
+function rutToDisplay(raw: string): string {
+  if (raw.length <= 1) return raw;
+  return `${raw.slice(0, -1)}-${raw.slice(-1)}`;
+}
+
+function isValidRut(raw: string): boolean {
+  if (raw.length < 2) return false;
+  const body = raw.slice(0, -1);
+  const dv = raw.slice(-1);
+  if (!/^\d+$/.test(body) || !/^[0-9K]$/.test(dv)) return false;
+  let sum = 0;
+  let m = 2;
+  for (let i = body.length - 1; i >= 0; i--) {
+    sum += parseInt(body[i]) * m;
+    m = m === 7 ? 2 : m + 1;
+  }
+  const r = 11 - (sum % 11);
+  const expected = r === 11 ? "0" : r === 10 ? "K" : String(r);
+  return dv === expected;
+}
+
+function RutField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [error, setError] = useState<string | null>(null);
+  const raw = rutToRaw(value);
+  const displayValue = rutToDisplay(raw);
+
+  function handleChange(inputVal: string) {
+    const newRaw = rutToRaw(inputVal);
+    onChange(rutToDisplay(newRaw));
+    if (error) validate(newRaw);
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (
+      ["Backspace", "Delete", "Tab", "Escape", "Enter",
+       "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown",
+       "Home", "End"].includes(e.key)
+    ) return;
+    if (e.ctrlKey || e.metaKey) return;
+    if (/^\d$/.test(e.key) || e.key === "k" || e.key === "K") return;
+    e.preventDefault();
+  }
+
+  function validate(r: string) {
+    if (!r) { setError(null); return; }
+    setError(isValidRut(r) ? null : "RUT inválido — verifica el dígito verificador");
+  }
+
+  return (
+    <div>
+      <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.18em] text-dark/60">
+        RUT *
+      </span>
+      <input
+        type="text"
+        value={displayValue}
+        onChange={(e) => handleChange(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onBlur={() => validate(raw)}
+        placeholder="12345678-9"
+        maxLength={10}
+        required
+        className={`w-full border px-4 py-3 text-sm text-dark transition-colors focus:border-primary focus:outline-none ${
+          error ? "border-red-400" : "border-gray-300"
+        }`}
+      />
+      {error && <span className="mt-1.5 block text-xs text-red-500">{error}</span>}
+    </div>
+  );
+}
 
 const CHILE_PHONE_RE = /^[2-9]\d{8}$/;
 
@@ -672,9 +820,9 @@ function RegionSelect({ value, onChange }: { value: string; onChange: (v: string
 }
 
 function FormField({
-  label, value, onChange, helperText,
+  label, value, onChange, helperText, required = false,
 }: {
-  label: string; value: string; onChange: (v: string) => void; helperText?: string;
+  label: string; value: string; onChange: (v: string) => void; helperText?: string; required?: boolean;
 }) {
   return (
     <label className="block">
@@ -684,6 +832,7 @@ function FormField({
       <input
         type="text"
         value={value}
+        required={required}
         onChange={(e) => onChange(e.target.value)}
         className="w-full border border-gray-300 px-4 py-3 text-sm text-dark focus:border-primary focus:outline-none"
       />
