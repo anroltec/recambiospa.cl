@@ -12,6 +12,7 @@ import {
 import type {
   CustomerCompanyProfile,
   CustomerCompanyProfileInput,
+  CustomerDocumentType,
 } from "@/types/customer";
 
 export const runtime = "nodejs";
@@ -33,43 +34,43 @@ function requireNonEmptyString(value: unknown, fieldName: string): string {
   return value.trim();
 }
 
+function optionalString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
 function parseProfileInput(payload: unknown): CustomerCompanyProfileInput {
   if (!payload || typeof payload !== "object") {
     throw new Error("Invalid profile payload.");
   }
 
   const body = payload as Record<string, unknown>;
+  const documentType: CustomerDocumentType =
+    body.documentType === "factura" ? "factura" : "boleta";
+  const isFactura = documentType === "factura";
+
+  // Company fields are required only when documentType === "factura"
+  const companyField = (value: unknown, name: string) =>
+    isFactura ? requireNonEmptyString(value, name) : optionalString(value);
 
   return {
-    firstName: typeof body.firstName === "string" ? body.firstName.trim() : "",
-    lastName: typeof body.lastName === "string" ? body.lastName.trim() : "",
-    phone: typeof body.phone === "string" ? body.phone.trim() : "",
-    rut: requireNonEmptyString(body.rut, "rut"),
-    razonSocial: requireNonEmptyString(body.razonSocial, "razonSocial"),
-    giro: requireNonEmptyString(body.giro, "giro"),
-    billingAddressLine1: requireNonEmptyString(
-      body.billingAddressLine1,
-      "billingAddressLine1"
-    ),
-    billingAddressLine2:
-      typeof body.billingAddressLine2 === "string"
-        ? body.billingAddressLine2.trim()
-        : "",
-    billingComuna: requireNonEmptyString(body.billingComuna, "billingComuna"),
-    billingCity: requireNonEmptyString(body.billingCity, "billingCity"),
-    billingRegion:
-      typeof body.billingRegion === "string" ? body.billingRegion.trim() : "",
-    billingPostalCode:
-      typeof body.billingPostalCode === "string"
-        ? body.billingPostalCode.trim()
-        : "",
+    firstName: optionalString(body.firstName),
+    lastName:  optionalString(body.lastName),
+    phone:     optionalString(body.phone),
+    documentType,
+    rut:                 companyField(body.rut,                 "rut"),
+    razonSocial:         companyField(body.razonSocial,         "razonSocial"),
+    giro:                companyField(body.giro,                "giro"),
+    billingAddressLine1: companyField(body.billingAddressLine1, "billingAddressLine1"),
+    billingAddressLine2: optionalString(body.billingAddressLine2),
+    billingComuna:       companyField(body.billingComuna,       "billingComuna"),
+    billingCity:         companyField(body.billingCity,         "billingCity"),
+    billingRegion:       optionalString(body.billingRegion),
+    billingPostalCode:   optionalString(body.billingPostalCode),
     billingCountryCode:
-      typeof body.billingCountryCode === "string" &&
-      body.billingCountryCode.trim()
+      typeof body.billingCountryCode === "string" && body.billingCountryCode.trim()
         ? body.billingCountryCode.trim().toUpperCase()
         : "CL",
-    billingNotes:
-      typeof body.billingNotes === "string" ? body.billingNotes.trim() : "",
+    billingNotes: optionalString(body.billingNotes),
   };
 }
 
@@ -80,8 +81,11 @@ function mergeProfile(
 ): CustomerCompanyProfile {
   if (!supabase) return shopify; // new customer — no company data yet
 
+  const documentType = supabase.document_type ?? "boleta";
+
   const merged: CustomerCompanyProfile = {
     ...shopify,
+    documentType,
     phone: supabase.phone,
     rut: supabase.rut,
     razonSocial: supabase.razon_social,
@@ -96,14 +100,15 @@ function mergeProfile(
     billingNotes: supabase.billing_notes,
   };
 
-  // Recalculate completion status after merging
+  // Boleta: always complete. Factura: requires full company data.
   merged.profileStatus =
-    merged.rut &&
-    merged.razonSocial &&
-    merged.giro &&
-    merged.billingAddressLine1 &&
-    merged.billingComuna &&
-    merged.billingCity
+    documentType === "boleta" ||
+    (merged.rut &&
+      merged.razonSocial &&
+      merged.giro &&
+      merged.billingAddressLine1 &&
+      merged.billingComuna &&
+      merged.billingCity)
       ? "complete"
       : "draft";
 

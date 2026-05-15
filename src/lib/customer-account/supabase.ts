@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createClient } from "@supabase/supabase-js";
-import type { CustomerCompanyProfileInput } from "@/types/customer";
+import type { CustomerCompanyProfileInput, CustomerDocumentType } from "@/types/customer";
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
 
@@ -30,6 +30,7 @@ function trim(v?: string | null): string | null {
 
 export interface SupabaseCustomerRow {
   shopify_id: string;
+  document_type: CustomerDocumentType;
   phone: string | null;
   rut: string | null;
   razon_social: string | null;
@@ -46,6 +47,7 @@ export interface SupabaseCustomerRow {
 
 const SELECT_COLS = [
   "shopify_id",
+  "document_type",
   "phone",
   "rut",
   "razon_social",
@@ -90,6 +92,7 @@ export async function upsertSupabaseCustomerProfile(
 
   const row: SupabaseCustomerRow = {
     shopify_id: shopifyId,
+    document_type: input.documentType,
     phone: trim(input.phone),
     rut: input.rut ? normalizeRut(input.rut) : null,
     razon_social: trim(input.razonSocial),

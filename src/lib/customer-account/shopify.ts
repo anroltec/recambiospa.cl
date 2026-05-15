@@ -51,9 +51,13 @@ interface StorefrontOrderNode {
   processedAt: string | null;
   financialStatus: string | null;
   fulfillmentStatus: string | null;
+  statusUrl: string | null;
   totalPrice: {
     amount: string;
     currencyCode: string;
+  };
+  lineItems: {
+    edges: { node: { title: string; quantity: number } }[];
   };
 }
 
@@ -176,6 +180,7 @@ function mapCustomerIdentity(customer: StorefrontCustomer): CustomerCompanyProfi
     billingPostalCode: null,
     billingCountryCode: "CL",
     billingNotes: null,
+    documentType: "boleta",
     profileStatus: "draft",
   };
   return profile;
@@ -582,9 +587,18 @@ export async function getShopifyCustomerOrders(
                 processedAt
                 financialStatus
                 fulfillmentStatus
+                statusUrl
                 totalPrice {
                   amount
                   currencyCode
+                }
+                lineItems(first: 50) {
+                  edges {
+                    node {
+                      title
+                      quantity
+                    }
+                  }
                 }
               }
             }
@@ -614,8 +628,14 @@ export async function getShopifyCustomerOrders(
       processedAt: node.processedAt,
       financialStatus: node.financialStatus,
       fulfillmentStatus: node.fulfillmentStatus,
+      statusUrl: node.statusUrl,
       currencyCode: node.totalPrice.currencyCode,
       totalAmount: node.totalPrice.amount,
+      itemCount: node.lineItems.edges.length,
+      lineItems: node.lineItems.edges.map(({ node: item }) => ({
+        title: item.title,
+        quantity: item.quantity,
+      })),
     })
   );
 

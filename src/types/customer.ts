@@ -1,4 +1,5 @@
 export type CustomerProfileStatus = "draft" | "complete" | "verified";
+export type CustomerDocumentType = "boleta" | "factura";
 
 export interface CustomerCompanyProfile {
   shopifyCustomerId: string;
@@ -6,6 +7,7 @@ export interface CustomerCompanyProfile {
   firstName: string | null;
   lastName: string | null;
   phone: string | null;
+  documentType: CustomerDocumentType;
   rut: string | null;
   razonSocial: string | null;
   giro: string | null;
@@ -25,6 +27,7 @@ export interface CustomerCompanyProfileInput {
   firstName: string;
   lastName: string;
   phone: string;
+  documentType: CustomerDocumentType;
   rut: string;
   razonSocial: string;
   giro: string;
@@ -38,14 +41,22 @@ export interface CustomerCompanyProfileInput {
   billingNotes?: string;
 }
 
+export interface CustomerOrderLineItem {
+  title: string;
+  quantity: number;
+}
+
 export interface CustomerOrderSummary {
   id: string;
   name: string;
   processedAt: string | null;
   financialStatus: string | null;
   fulfillmentStatus: string | null;
+  statusUrl: string | null;
   currencyCode: string;
   totalAmount: string;
+  itemCount: number;
+  lineItems: CustomerOrderLineItem[];
 }
 
 export interface CustomerOrdersPage {
