@@ -186,57 +186,6 @@ export default function Home() {
       <FeaturedProducts />
       <BrandsSection />
       <TechnicalServiceSection />
-
-      <section className="py-14 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-2xl font-bold text-dark uppercase tracking-wide mb-6">
-            Repuestos y Accesorios para Transporte en Chile
-          </h2>
-          <div className="grid gap-8 text-sm leading-relaxed text-dark/70 md:grid-cols-2">
-            <div>
-              <h3 className="mb-3 text-base font-bold text-dark">
-                Distribuidor de Repuestos para Veh&iacute;culos Pesados y Livianos
-              </h3>
-              <p className="mb-3">
-                En <strong>Recambio SpA</strong>{" "}somos especialistas en la
-                importaci&oacute;n y distribuci&oacute;n de repuestos, accesorios e insumos
-                para camiones, buses, autos y camionetas. Trabajamos con las marcas
-                m&aacute;s reconocidas del mercado: <strong>Braslux</strong> en
-                iluminaci&oacute;n LED, <strong>Loctite</strong> y <strong>Teroson</strong>{" "}
-                en adhesivos y selladores, <strong>Moura</strong> en bater&iacute;as
-                de alto rendimiento, <strong>Wurth</strong> en herramientas
-                profesionales y <strong>Optibelt</strong> en correas de transmisi&oacute;n.
-              </p>
-              <p>
-                Nuestro cat&aacute;logo incluye focos LED para camiones, bater&iacute;as
-                para veh&iacute;culos pesados, amarras de carga, extintores vehiculares,
-                componentes el&eacute;ctricos, herramientas de taller y productos qu&iacute;micos
-                profesionales. Todo con env&iacute;os a lo largo de Chile.
-              </p>
-            </div>
-            <div>
-              <h3 className="mb-3 text-base font-bold text-dark">
-                Env&iacute;os a Todo Chile
-              </h3>
-              <p className="mb-3">
-                Realizamos despachos a todas las regiones del pa&iacute;s: desde Arica
-                hasta Punta Arenas. Nuestro compromiso es entregar productos de calidad
-                en el menor tiempo posible, con embalaje seguro y seguimiento de env&iacute;o.
-              </p>
-              <h3 className="mb-3 text-base font-bold text-dark">
-                Atenci&oacute;n Personalizada
-              </h3>
-              <p>
-                Nuestro equipo de ventas est&aacute; disponible para asesorarte en la
-                elecci&oacute;n del repuesto correcto para tu veh&iacute;culo. Consulta por
-                WhatsApp, email o a trav&eacute;s de nuestro formulario de contacto.
-                Cotizaciones r&aacute;pidas y precios competitivos para talleres, flotas
-                y clientes particulares.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
     </>
   );
 }

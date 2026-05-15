@@ -45,7 +45,7 @@ export default function HeroBanner() {
           <SwiperSlide key={i}>
             <Link
               href={slide.href}
-              className="block relative w-full aspect-[16/9] sm:aspect-[2/1] lg:aspect-[5/2]"
+              className="relative block h-[460px] w-full"
               aria-label={slide.alt}
               tabIndex={-1}
             >
