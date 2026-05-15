@@ -17,7 +17,6 @@ import {
   technicalServiceCoverage,
   technicalServiceHighlights,
   technicalServiceIntro,
-  technicalServiceProcess,
   technicalServiceStats,
   technicalServices,
 } from "@/data/technical-services";
@@ -159,64 +158,46 @@ export default function ServicioTecnicoPage() {
           <div className="absolute inset-0 bg-primary-dark/18" />
         </div>
 
-        <Container className="relative py-16 sm:py-20 lg:py-24">
-          <div className="grid gap-14 lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] lg:items-end">
-            <div className="max-w-3xl">
-              <div className="flex items-center gap-4">
-                <span className="h-px w-14 bg-primary" />
-                <p className="text-xs font-bold uppercase tracking-[0.34em] text-white/78">
-                  Laboratorio profesional
-                </p>
-              </div>
-
-              <p className="mt-8 text-xs font-bold uppercase tracking-[0.34em] text-primary">
-                Recambio SpA
+        <Container className="relative py-12 sm:py-14 lg:py-16">
+          <div className="max-w-3xl">
+            <div className="flex items-center gap-4">
+              <span className="h-px w-14 bg-primary" />
+              <p className="text-xs font-bold uppercase tracking-[0.34em] text-white/78">
+                Laboratorio profesional
               </p>
-              <h1 className="mt-4 text-4xl font-black uppercase leading-none tracking-tight text-white sm:text-5xl lg:text-[64px]">
-                Servicio t&eacute;cnico
-                <br />
-                electr&oacute;nico
-              </h1>
-              <p className="mt-6 max-w-2xl text-sm leading-7 text-white/78 sm:text-base">
-                Diagn&oacute;stico, reparaci&oacute;n y programaci&oacute;n especializada para
-                sistemas cr&iacute;ticos de veh&iacute;culos pesados, con foco en continuidad
-                operativa, lectura precisa de falla y respuesta t&eacute;cnica confiable.
-              </p>
-
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link
-                  href="/contacto"
-                  className="inline-flex items-center gap-2 bg-primary px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white transition-colors hover:bg-primary-light"
-                >
-                  <MessageCircle size={16} />
-                  Solicitar evaluaci&oacute;n
-                </Link>
-                <a
-                  href={WHATSAPP_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 border border-white/20 px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white transition-colors hover:bg-white/10"
-                >
-                  <PhoneCall size={16} />
-                  Hablar por WhatsApp
-                </a>
-              </div>
             </div>
 
-            <div className="grid gap-px bg-white/12 backdrop-blur-sm">
-              {technicalServiceStats.map((stat) => (
-                <div key={stat.value} className="bg-primary-dark/70 px-6 py-6">
-                  <p className="text-sm font-black uppercase tracking-[0.12em] text-primary">
-                    {stat.value}
-                  </p>
-                  <p className="mt-2 text-sm font-bold uppercase tracking-[0.16em] text-white">
-                    {stat.label}
-                  </p>
-                  <p className="mt-3 text-sm leading-7 text-white/72">
-                    {stat.description}
-                  </p>
-                </div>
-              ))}
+            <p className="mt-6 text-xs font-bold uppercase tracking-[0.34em] text-primary">
+              Recambio SpA
+            </p>
+            <h1 className="mt-4 text-4xl font-black uppercase leading-none tracking-tight text-white sm:text-5xl lg:text-[64px]">
+              Servicio t&eacute;cnico
+              <br />
+              electr&oacute;nico
+            </h1>
+            <p className="mt-6 max-w-2xl text-sm leading-7 text-white/78 sm:text-base">
+              Diagn&oacute;stico, reparaci&oacute;n y programaci&oacute;n especializada para
+              sistemas cr&iacute;ticos de veh&iacute;culos pesados, con foco en continuidad
+              operativa, lectura precisa de falla y respuesta t&eacute;cnica confiable.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/contacto"
+                className="inline-flex items-center gap-2 bg-primary px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white transition-colors hover:bg-primary-light"
+              >
+                <MessageCircle size={16} />
+                Solicitar evaluaci&oacute;n
+              </Link>
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 border border-white/20 px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white transition-colors hover:bg-white/10"
+              >
+                <PhoneCall size={16} />
+                Hablar por WhatsApp
+              </a>
             </div>
           </div>
         </Container>
@@ -275,41 +256,6 @@ export default function ServicioTecnicoPage() {
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-        </Container>
-      </section>
-
-      <section className="bg-primary-dark py-16 text-white sm:py-18">
-        <Container>
-          <div className="grid gap-12 lg:grid-cols-[minmax(260px,0.85fr)_minmax(0,1.15fr)] lg:items-start">
-            <div className="max-w-md">
-              <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary">
-                Metodolog&iacute;a de trabajo
-              </p>
-              <h2 className="mt-4 text-[30px] font-black uppercase tracking-tight sm:text-[38px]">
-                Proceso claro, criterio t&eacute;cnico y validaci&oacute;n operativa
-              </h2>
-              <p className="mt-5 text-[15px] leading-8 text-white/72">
-                Ordenamos cada intervenci&oacute;n para que el diagn&oacute;stico, la reparaci&oacute;n y
-                la configuraci&oacute;n respondan al sistema correcto y no solo al s&iacute;ntoma.
-              </p>
-            </div>
-
-            <div className="grid gap-px bg-white/10 md:grid-cols-3">
-              {technicalServiceProcess.map((step, index) => (
-                <article key={step.title} className="bg-primary-dark px-6 py-8">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-primary">
-                    Paso {index + 1}
-                  </p>
-                  <h3 className="mt-4 text-xl font-black uppercase tracking-tight text-white">
-                    {step.title}
-                  </h3>
-                  <p className="mt-4 text-sm leading-7 text-white/72">
-                    {step.description}
-                  </p>
-                </article>
-              ))}
             </div>
           </div>
         </Container>
@@ -412,13 +358,6 @@ export default function ServicioTecnicoPage() {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <Link
-                  href="/contacto"
-                  className="inline-flex items-center gap-2 bg-primary px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white transition-colors hover:bg-primary-light"
-                >
-                  <MessageCircle size={16} />
-                  Contacto
-                </Link>
                 <a
                   href={WHATSAPP_URL}
                   target="_blank"
@@ -433,7 +372,7 @@ export default function ServicioTecnicoPage() {
                   className="inline-flex items-center gap-2 border border-primary px-5 py-3 text-sm font-bold uppercase tracking-[0.14em] text-primary transition-colors hover:bg-primary hover:text-white"
                 >
                   <ArrowUpRight size={16} />
-                  Enviar detalle
+                  Contacto
                 </Link>
               </div>
             </div>
