@@ -15,6 +15,7 @@ import {
 import PageHero from "@/components/ui/PageHero";
 import ProductModal from "@/components/product/ProductModal";
 import { useCart } from "@/context/CartContext";
+import { matchesCatalogSearch } from "@/lib/catalog-search";
 import { formatPrice } from "@/lib/format";
 import { getProductListKey } from "@/lib/product";
 import type { Category, Product } from "@/types/product";
@@ -53,20 +54,10 @@ export default function CatalogListing({
   const productsPerPage = 20;
 
   const filteredProducts = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
-
     return [...products]
       .filter((product) => (selectedCategory ? product.category === selectedCategory : true))
       .filter((product) => (selectedBrand ? product.brand === selectedBrand : true))
-      .filter((product) => {
-        if (!query) return true;
-
-        return (
-          product.name.toLowerCase().includes(query) ||
-          product.code.toLowerCase().includes(query) ||
-          product.brand.toLowerCase().includes(query)
-        );
-      })
+      .filter((product) => matchesCatalogSearch(product, searchQuery))
       .sort((left, right) => {
         switch (sortBy) {
           case "name-asc":

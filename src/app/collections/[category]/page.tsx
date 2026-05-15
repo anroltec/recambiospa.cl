@@ -116,14 +116,19 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     notFound();
   }
 
+  const initialSearchQuery = readSearchParam(data.query.q);
+  const initialCategory = data.resolved.type === "category" ? data.resolved.value : "";
+  const initialBrand = data.resolved.type === "brand" ? data.resolved.value : "";
+
   return (
     <CatalogListing
+      key={`collection:${data.category}:${initialSearchQuery}:${initialCategory}:${initialBrand}`}
       products={data.products}
       categories={data.categories}
       brands={data.brands}
-      initialCategory={data.resolved.type === "category" ? data.resolved.value : ""}
-      initialBrand={data.resolved.type === "brand" ? data.resolved.value : ""}
-      initialSearchQuery={readSearchParam(data.query.q)}
+      initialCategory={initialCategory}
+      initialBrand={initialBrand}
+      initialSearchQuery={initialSearchQuery}
     />
   );
 }

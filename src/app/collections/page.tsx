@@ -59,14 +59,19 @@ export default async function CollectionsPage({ searchParams }: Props) {
     );
   }
 
+  const initialSearchQuery = readSearchParam(data.query.q);
+  const initialCategory = readSearchParam(data.query.category);
+  const initialBrand = readSearchParam(data.query.brand);
+
   return (
     <CatalogListing
+      key={`collections:${initialSearchQuery}:${initialCategory}:${initialBrand}`}
       products={data.products}
       categories={data.categories}
       brands={data.brands}
-      initialSearchQuery={readSearchParam(data.query.q)}
-      initialCategory={readSearchParam(data.query.category)}
-      initialBrand={readSearchParam(data.query.brand)}
+      initialSearchQuery={initialSearchQuery}
+      initialCategory={initialCategory}
+      initialBrand={initialBrand}
     />
   );
 }

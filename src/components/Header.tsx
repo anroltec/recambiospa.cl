@@ -20,6 +20,7 @@ import {
   User,
   X,
 } from "lucide-react";
+import HeaderSearch from "@/components/HeaderSearch";
 import { useCart } from "@/context/CartContext";
 import { getDropdownItems, navLinks } from "@/data/navigation";
 import LoginModal from "@/components/account/LoginModal";
@@ -59,7 +60,6 @@ export default function Header() {
   const [openDropdown,       setOpenDropdown]       = useState<string | null>(null);
   const [mobileDropdown,     setMobileDropdown]     = useState<string | null>(null);
   const [searchOpen,         setSearchOpen]         = useState(false);
-  const [searchQuery,        setSearchQuery]        = useState("");
   const [loginModalOpen,     setLoginModalOpen]     = useState(false);
   const [accountDropdown,    setAccountDropdown]    = useState(false);
   const [isLoggingOut,       setIsLoggingOut]       = useState(false);
@@ -102,15 +102,6 @@ export default function Header() {
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
   }, [searchOpen]);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/collections?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery("");
-      setSearchOpen(false);
-    }
-  };
 
   const handleLogout = useCallback(async () => {
     setIsLoggingOut(true);
@@ -264,23 +255,12 @@ export default function Header() {
             />
           </Link>
 
-          <form onSubmit={handleSearch} className="hidden max-w-2xl flex-1 md:flex">
-            <div className="relative w-full">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar productos, marcas, SKU..."
-                className="w-full rounded-sm border border-gray-300 px-4 py-2.5 text-sm text-dark placeholder:text-steel focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-              <button
-                type="submit"
-                className="absolute right-0 top-0 h-full bg-primary px-4 text-white transition-colors hover:bg-primary-dark"
-              >
-                <Search size={18} />
-              </button>
-            </div>
-          </form>
+          <HeaderSearch
+            wrapperClassName="hidden max-w-2xl flex-1 md:flex"
+            placeholder="Buscar productos, marcas, SKU..."
+            inputClassName="w-full rounded-sm border border-gray-300 px-4 py-2.5 pr-16 text-sm text-dark placeholder:text-steel focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            buttonClassName="absolute right-0 top-0 h-full bg-primary px-4 text-white transition-colors hover:bg-primary-dark"
+          />
 
           <div className="flex items-center gap-4">
             <button
@@ -321,23 +301,14 @@ export default function Header() {
         </div>
 
         {searchOpen && (
-          <form onSubmit={handleSearch} className="px-4 pb-3 md:hidden">
-            <div className="relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar productos..."
-                className="w-full border border-gray-300 px-4 py-2.5 text-sm focus:border-primary focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="absolute right-0 top-0 h-full bg-primary px-4 text-white"
-              >
-                <Search size={16} />
-              </button>
-            </div>
-          </form>
+          <HeaderSearch
+            wrapperClassName="px-4 pb-3 md:hidden"
+            placeholder="Buscar productos..."
+            inputClassName="w-full border border-gray-300 px-4 py-2.5 pr-14 text-sm focus:border-primary focus:outline-none"
+            buttonClassName="absolute right-0 top-0 h-full bg-primary px-4 text-white"
+            submitIconSize={16}
+            onNavigate={() => setSearchOpen(false)}
+          />
         )}
       </div>
 
@@ -354,7 +325,7 @@ export default function Header() {
               >
                 <Link
                   href={link.href}
-                  className="flex items-center gap-1.5 px-8 py-3.5 text-sm font-semibold uppercase tracking-wide text-white/90 transition-colors hover:bg-white/10 hover:text-white"
+                  className="flex h-12 items-center gap-1.5 px-8 text-sm font-semibold uppercase tracking-wide text-white/90 transition-colors hover:bg-white/10 hover:text-white"
                 >
                   {link.label}
                   {link.dropdown && <ChevronDown size={14} />}
