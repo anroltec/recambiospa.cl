@@ -83,7 +83,7 @@ export const technicalServices: TechnicalService[] = [
     focus: "PLD, MR, MR2 y MCM con foco en respuesta, estabilidad y continuidad de marcha.",
     description:
       "Atendemos unidades de control que gobiernan inyecci\u00f3n, protecciones y l\u00f3gica del motor. El trabajo considera lectura t\u00e9cnica de la falla, recuperaci\u00f3n de comunicaci\u00f3n y ajuste electr\u00f3nico para que la unidad vuelva a operar con menor riesgo de detenci\u00f3n.",
-    image: "/banners/banner2.jpg",
+    image: "/banners/technical-service-engine-modules.png",
     systems: ["PLD", "MR", "MR2", "MCM"],
   },
   {
@@ -91,7 +91,7 @@ export const technicalServices: TechnicalService[] = [
     focus: "MDM, FR, CPC, CPC-FR y CPC3 para mantener control, seguridad y coordinaci\u00f3n del veh\u00edculo.",
     description:
       "Intervenimos m\u00f3dulos asociados a gesti\u00f3n el\u00e9ctrica, funciones de cabina y comunicaci\u00f3n interna. El servicio combina reparaci\u00f3n, configuraci\u00f3n y ajuste fino para sostener un comportamiento confiable en ruta, taller o faena.",
-    image: "/banners/banner5.jpg",
+    image: "/banners/technical-service-cabin-modules.png",
     systems: ["MDM", "FR", "CPC", "CPC-FR", "CPC3"],
   },
   {
