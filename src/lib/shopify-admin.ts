@@ -25,6 +25,11 @@ interface ShopifyMailingAddress {
   phone: string | null;
 }
 
+interface ShopifyImage {
+  url: string;
+  altText: string | null;
+}
+
 export interface ShopifyOrderLineItemForSync {
   id: string;
   sku: string | null;
@@ -39,11 +44,13 @@ export interface ShopifyOrderLineItemForSync {
     id: string;
     handle: string;
     title: string;
+    featuredImage: ShopifyImage | null;
   } | null;
   variant: {
     id: string;
     sku: string | null;
     title: string;
+    image: ShopifyImage | null;
   } | null;
 }
 
@@ -122,7 +129,7 @@ function normalizeOrderId(orderId: string): string {
     : `gid://shopify/Order/${orderId}`;
 }
 
-export async function getOrderForDefontanaSync(
+async function fetchShopifyAdminOrder(
   orderId: string
 ): Promise<ShopifyOrderForDefontanaSync> {
   const data = await shopifyAdminFetch<{
@@ -253,11 +260,19 @@ export async function getOrderForDefontanaSync(
                   id
                   handle
                   title
+                  featuredImage {
+                    url
+                    altText
+                  }
                 }
                 variant {
                   id
                   sku
                   title
+                  image {
+                    url
+                    altText
+                  }
                 }
               }
             }
@@ -276,4 +291,16 @@ export async function getOrderForDefontanaSync(
     ...data.order,
     lineItems: data.order.lineItems.edges.map((edge) => edge.node),
   };
+}
+
+export async function getOrderForDefontanaSync(
+  orderId: string
+): Promise<ShopifyOrderForDefontanaSync> {
+  return fetchShopifyAdminOrder(orderId);
+}
+
+export async function getShopifyAdminOrderDetail(
+  orderId: string
+): Promise<ShopifyOrderForDefontanaSync> {
+  return fetchShopifyAdminOrder(orderId);
 }

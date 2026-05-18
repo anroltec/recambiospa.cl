@@ -13,10 +13,12 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
+import OrderDetailsModal from "@/components/account/OrderDetailsModal";
 import { formatDate } from "@/lib/format";
 import type {
   CustomerCompanyProfile,
   CustomerCompanyProfileInput,
+  CustomerOrderDetail,
   CustomerOrderSummary,
 } from "@/types/customer";
 
@@ -41,6 +43,11 @@ interface OrdersResponse {
   ok: true;
   orders: CustomerOrderSummary[];
   pageInfo: { hasNextPage: boolean; endCursor: string | null };
+}
+
+interface OrderDetailResponse {
+  ok: true;
+  order: CustomerOrderDetail;
 }
 
 const EMPTY_FORM: CustomerCompanyProfileInput = {
@@ -551,6 +558,62 @@ function OrdersBlock({
   error: string | null;
   compact?: boolean;
 }) {
+  const [selectedOrder, setSelectedOrder] = useState<CustomerOrderSummary | null>(null);
+  const [selectedOrderDetail, setSelectedOrderDetail] = useState<CustomerOrderDetail | null>(null);
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
+  const [detailVersion, setDetailVersion] = useState(0);
+  const selectedOrderId = selectedOrder?.id;
+
+  useEffect(() => {
+    if (!selectedOrderId) {
+      return;
+    }
+
+    const orderId = selectedOrderId;
+    const controller = new AbortController();
+
+    async function loadOrderDetail() {
+      setIsLoadingDetail(true);
+      setDetailError(null);
+
+      try {
+        const params = new URLSearchParams({ orderId });
+        const res = await fetch(`/api/customer/orders/detail?${params.toString()}`, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+
+        const data = (await res.json()) as OrderDetailResponse | ApiErrorResponse;
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.ok ? "" : data.error);
+        }
+
+        setSelectedOrderDetail(data.order);
+      } catch (e) {
+        if (controller.signal.aborted) {
+          return;
+        }
+
+        setSelectedOrderDetail(null);
+        setDetailError(
+          e instanceof Error ? e.message : "No fue posible cargar el detalle del pedido."
+        );
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoadingDetail(false);
+        }
+      }
+    }
+
+    void loadOrderDetail();
+
+    return () => {
+      controller.abort();
+    };
+  }, [selectedOrderId, detailVersion]);
+
   if (isLoading && !orders.length) {
     return (
       <div className="flex min-h-[160px] items-center justify-center text-sm text-dark/50">
@@ -578,15 +641,54 @@ function OrdersBlock({
   }
 
   return (
-    <div className="divide-y divide-gray-100 border border-gray-200 bg-white">
-      {orders.map((order) => (
-        <OrderRow key={order.id} order={order} compact={compact} />
-      ))}
-    </div>
+    <>
+      <div className="divide-y divide-gray-100 border border-gray-200 bg-white">
+        {orders.map((order) => (
+          <OrderRow
+            key={order.id}
+            order={order}
+            compact={compact}
+            onSelect={() => {
+              setSelectedOrder(order);
+              setSelectedOrderDetail(null);
+              setDetailError(null);
+            }}
+          />
+        ))}
+      </div>
+
+      {selectedOrder && (
+        <OrderDetailsModal
+          order={selectedOrder}
+          detail={selectedOrderDetail}
+          isLoading={isLoadingDetail}
+          error={detailError}
+          onClose={() => {
+            setSelectedOrder(null);
+            setSelectedOrderDetail(null);
+            setDetailError(null);
+            setIsLoadingDetail(false);
+          }}
+          onRetry={() => {
+            setSelectedOrderDetail(null);
+            setDetailError(null);
+            setDetailVersion((prev) => prev + 1);
+          }}
+        />
+      )}
+    </>
   );
 }
 
-function OrderRow({ order, compact }: { order: CustomerOrderSummary; compact: boolean }) {
+function OrderRow({
+  order,
+  compact,
+  onSelect,
+}: {
+  order: CustomerOrderSummary;
+  compact: boolean;
+  onSelect: () => void;
+}) {
   const isPaid = order.financialStatus === "PAID";
   const showFulfillment = !isPaid || (order.fulfillmentStatus !== "UNFULFILLED" && order.fulfillmentStatus !== null);
 
@@ -601,7 +703,7 @@ function OrderRow({ order, compact }: { order: CustomerOrderSummary; compact: bo
     <div
       className={`flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ${
         compact ? "px-5 py-4" : "px-6 py-5"
-      } ${order.statusUrl ? "transition-colors hover:bg-gray-50" : ""}`}
+      } transition-colors hover:bg-gray-50`}
     >
       <div className="flex items-start gap-4">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/8">
@@ -635,18 +737,20 @@ function OrderRow({ order, compact }: { order: CustomerOrderSummary; compact: bo
         <p className="ml-2 min-w-[90px] text-right text-sm font-black text-dark">
           {formatMoney(order.totalAmount, order.currencyCode)}
         </p>
+        <ChevronRight size={16} className="hidden text-dark/25 sm:block" />
       </div>
     </div>
   );
 
-  if (order.statusUrl) {
-    return (
-      <a key={order.id} href={order.statusUrl} target="_blank" rel="noopener noreferrer">
-        {inner}
-      </a>
-    );
-  }
-  return inner;
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className="block w-full text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+    >
+      {inner}
+    </button>
+  );
 }
 
 function OrderBadge({ label, tone }: { label: string; tone: "green" | "gray" | "blue" }) {
