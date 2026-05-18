@@ -147,7 +147,7 @@ export default function ServicioTecnicoPage() {
       <section className="relative overflow-hidden border-t-[10px] border-primary bg-primary-dark text-white">
         <div className="absolute inset-0">
           <Image
-            src="/banners/service-technical-hero.jpeg"
+            src="/banners/service-technical-hero.png"
             alt="Servicio t&eacute;cnico electr&oacute;nico para veh&iacute;culos pesados"
             fill
             className="object-cover object-center"

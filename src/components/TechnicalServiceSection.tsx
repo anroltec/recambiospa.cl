@@ -12,7 +12,7 @@ export default function TechnicalServiceSection() {
         <div className="grid gap-10 xl:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.85fr)] xl:items-center">
           <div className="relative min-h-[400px] overflow-hidden bg-primary-dark sm:min-h-[500px] lg:min-h-[600px]">
             <Image
-              src="/banners/technical-services.jpeg"
+              src="/banners/technical-services-home.png"
               alt="Servicios t&eacute;cnicos especializados de Recambio SpA"
               fill
               className="object-cover object-center"

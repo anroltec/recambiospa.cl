@@ -15,7 +15,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: "weekly",
       priority: 1,
-      images: [absoluteUrl("/banners/banner1-new.png"), absoluteUrl("/banners/technical-services.jpeg")],
+      images: [absoluteUrl("/banners/banner1-new.png"), absoluteUrl("/banners/technical-services-home.png")],
     },
     {
       url: `${SITE_URL}/collections`,
@@ -40,7 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.6,
-      images: [absoluteUrl("/banners/service-technical-hero.jpeg")],
+      images: [absoluteUrl("/banners/service-technical-hero.png")],
     },
     {
       url: `${SITE_URL}/contacto`,
