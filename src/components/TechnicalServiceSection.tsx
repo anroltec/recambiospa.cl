@@ -27,7 +27,7 @@ export default function TechnicalServiceSection() {
 
             <div className="mt-6 space-y-5 text-base leading-8 text-dark/72">
               <p>
-                En <strong>Recambio SpA</strong> entregamos soporte especializado para
+                En <strong>Recambio SpA</strong>  entregamos soporte especializado para
                 electr&oacute;nica aplicada al transporte pesado, abordando diagn&oacute;stico,
                 reparaci&oacute;n y programaci&oacute;n de sistemas cr&iacute;ticos.
               </p>
