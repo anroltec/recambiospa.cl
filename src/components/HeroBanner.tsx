@@ -62,7 +62,7 @@ export default function HeroBanner() {
                 src={slide.image}
                 alt={slide.alt}
                 fill
-                className="hidden sm:block object-cover object-center"
+                className="hidden sm:block object-cover object-[10%_center]"
                 priority={i === 0}
                 sizes="100vw"
               />
@@ -70,7 +70,7 @@ export default function HeroBanner() {
                 src={slide.imageMobile}
                 alt={slide.alt}
                 fill
-                className="block sm:hidden object-cover object-center"
+                className="block sm:hidden object-cover object-[10%_center]"
                 priority={i === 0}
                 sizes="100vw"
               />
