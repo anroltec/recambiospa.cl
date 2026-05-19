@@ -13,21 +13,25 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 const slides = [
   {
     image: "/banners/banner-precios-imperdibles.png",
+    imageMobile: "/banners/banner-mobile-precios-imperdibles.png",
     href: "/collections",
     alt: "Sección Precios Imperdibles - Comercializadora Recambio SpA",
   },
   {
     image: "/banners/banner-1.png",
+    imageMobile: "/banners/banner-mobile-loctite.png",
     href: "/collections/loctite",
     alt: "Trabador Perno Loctite 243 50ml - $24.900 + IVA",
   },
   {
     image: "/banners/banner-2.png",
+    imageMobile: "/banners/banner-mobile-foco-led.png",
     href: "/collections/iluminacion",
     alt: "Foco LED Trasero 125mm Braslux - Precio de venta $18.603 + IVA",
   },
   {
     image: "/banners/banner-3.png",
+    imageMobile: "/banners/banner-mobile-correa.png",
     href: "/collections/otros",
     alt: "Correa Aire Acondicionado Lisa 2B-76 1930mm Optibelt - $54.330 + IVA",
   },
@@ -50,7 +54,7 @@ export default function HeroBanner() {
           <SwiperSlide key={i}>
             <Link
               href={slide.href}
-              className="relative block h-[460px] w-full"
+              className="relative block h-[320px] sm:h-[460px] w-full"
               aria-label={slide.alt}
               tabIndex={-1}
             >
@@ -58,7 +62,15 @@ export default function HeroBanner() {
                 src={slide.image}
                 alt={slide.alt}
                 fill
-                className="object-cover object-center"
+                className="hidden sm:block object-cover object-center"
+                priority={i === 0}
+                sizes="100vw"
+              />
+              <Image
+                src={slide.imageMobile}
+                alt={slide.alt}
+                fill
+                className="block sm:hidden object-cover object-center"
                 priority={i === 0}
                 sizes="100vw"
               />
