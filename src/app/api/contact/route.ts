@@ -1,5 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { Resend } from "resend";
 import { createContactMessage } from "@/lib/contact-messages";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -99,6 +102,20 @@ export async function POST(request: NextRequest) {
       phone: phone || null,
       message,
       sourcePath: "/contacto",
+    });
+
+    await resend.emails.send({
+      from: "Formulario Web <no-reply@recambiospa.cl>",
+      to: "ventas@recambiospa.cl",
+      replyTo: email,
+      subject: `Nuevo mensaje de contacto — ${name}`,
+      html: `
+        <p><strong>Nombre:</strong> ${name}</p>
+        <p><strong>Correo:</strong> ${email}</p>
+        ${phone ? `<p><strong>Teléfono:</strong> ${phone}</p>` : ""}
+        <p><strong>Mensaje:</strong></p>
+        <p>${message.replace(/\n/g, "<br>")}</p>
+      `,
     });
 
     return NextResponse.json({
