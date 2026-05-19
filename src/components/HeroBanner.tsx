@@ -12,19 +12,24 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const slides = [
   {
-    image: "/banners/banner1-new.png",
-    href: "/collections/extintores",
-    alt: "Extintor PQS 6KG y productos de seguridad para transporte",
+    image: "/banners/banner-1.png",
+    href: "/collections/iluminacion",
+    alt: "Foco LED Trasero 125mm Braslux - Precio de venta $18.603 + IVA",
   },
   {
-    image: "/banners/banner2.jpg",
+    image: "/banners/banner-2.png",
+    href: "/collections/otros",
+    alt: "Correa Aire Acondicionado Lisa 2B-76 1930mm Optibelt - $54.330 + IVA",
+  },
+  {
+    image: "/banners/banner-precios-imperdibles.png",
+    href: "/collections",
+    alt: "Sección Precios Imperdibles - Comercializadora Recambio SpA",
+  },
+  {
+    image: "/banners/banner-3.png",
     href: "/collections/loctite",
-    alt: "Productos Loctite",
-  },
-  {
-    image: "/banners/banner5.jpg",
-    href: "/collections/teroson",
-    alt: "Selladores Teroson",
+    alt: "Trabador Perno Loctite 243 50ml - $24.900 + IVA",
   },
 ];
 

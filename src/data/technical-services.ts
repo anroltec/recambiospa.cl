@@ -99,7 +99,7 @@ export const technicalServices: TechnicalService[] = [
     focus: "INS 2010, 2012 y 2014 con recuperaci\u00f3n de visualizaci\u00f3n, alertas y monitoreo.",
     description:
       "Recuperamos tableros con fallas de lectura, alertas o comportamiento irregular para devolver informaci\u00f3n clara al operador. Priorizamos estabilidad de indicaciones, continuidad de monitoreo y respuesta confiable en cabina.",
-    image: "/banners/banner6.jpg",
+    image: "/banners/technical-service-tableros-ins.png",
     systems: ["INS 2010", "INS 2012", "INS 2014"],
   },
   {
@@ -107,7 +107,7 @@ export const technicalServices: TechnicalService[] = [
     focus: "Soporte para Mobitec e Iluminator orientado a visibilidad, configuraci\u00f3n de rutas y operaci\u00f3n diaria.",
     description:
       "Realizamos reparaci\u00f3n, configuraci\u00f3n e integraci\u00f3n de sistemas de informaci\u00f3n al pasajero. Corregimos problemas de visualizaci\u00f3n, parametrizaci\u00f3n de rutas y continuidad de funcionamiento en buses y transporte de pasajeros.",
-    image: "/banners/banner3.jpg",
+    image: "/banners/technical-service-itinerarios.png",
     systems: ["Mobitec", "Iluminator"],
   },
   {
@@ -115,7 +115,7 @@ export const technicalServices: TechnicalService[] = [
     focus: "Diagn\u00f3stico, integraci\u00f3n y optimizaci\u00f3n cuando la falla involucra m\u00e1s de un sistema.",
     description:
       "Cuando el problema requiere una mirada transversal, abordamos el sistema completo para ordenar diagn\u00f3stico, reparaci\u00f3n e integraci\u00f3n. El objetivo es recuperar confiabilidad electr\u00f3nica y reducir reincidencias en la operaci\u00f3n de la unidad o la flota.",
-    image: "/banners/banner1.jpg",
+    image: "/banners/technical-service-soluciones.png",
   },
 ];
 
