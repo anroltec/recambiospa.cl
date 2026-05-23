@@ -9,6 +9,7 @@ import { useCart } from "@/context/CartContext";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import { WHATSAPP_URL } from "@/lib/contact";
+import { parseDescription } from "@/lib/parseDescription";
 
 interface ProductDetailProps {
   product: Product;
@@ -118,9 +119,31 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             <p className="text-xl text-gray-400 italic mb-6">Sin compra online</p>
           )}
 
-          {product.description && (
-            <p className="text-sm text-gray-600 leading-relaxed mb-6">{product.description}</p>
-          )}
+          {product.description && (() => {
+            const { intro, fields } = parseDescription(product.description);
+            const cleanIntro = intro.toLowerCase().startsWith(product.name.toLowerCase())
+              ? intro.slice(product.name.length).trim().replace(/^[.\s,]+/, "")
+              : intro;
+            return (
+              <div className="mb-6">
+                {cleanIntro && (
+                  <p className="text-sm text-gray-600 leading-relaxed mb-3">{cleanIntro}</p>
+                )}
+                {fields.length > 0 && (
+                  <div className="divide-y divide-gray-100">
+                    {fields.map(({ key, value }) => (
+                      <div key={key} className="py-2">
+                        <span className="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">
+                          {key}
+                        </span>
+                        <span className="text-sm text-dark">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {product.inStock && product.price !== null ? (
             <div className="space-y-3 mb-6">

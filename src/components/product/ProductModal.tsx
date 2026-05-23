@@ -11,6 +11,7 @@ import Modal from "@/components/ui/Modal";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import { WHATSAPP_URL } from "@/lib/contact";
+import { parseDescription } from "@/lib/parseDescription";
 
 interface ProductModalProps {
   product: Product;
@@ -97,9 +98,28 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
             <p className="text-lg text-gray-500 italic mb-4">Sin compra online</p>
           )}
 
-          {product.description && (
-            <p className="text-sm text-gray-600 leading-relaxed mb-5">{product.description}</p>
-          )}
+          {product.description && (() => {
+            const { intro, fields } = parseDescription(product.description);
+            return (
+              <div className="mb-5">
+                {intro && (
+                  <p className="text-sm text-gray-600 leading-relaxed mb-3">{intro}</p>
+                )}
+                {fields.length > 0 && (
+                  <div className="divide-y divide-gray-100">
+                    {fields.map(({ key, value }) => (
+                      <div key={key} className="py-2">
+                        <span className="block text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-0.5">
+                          {key}
+                        </span>
+                        <span className="text-sm text-dark">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {product.inStock && product.price !== null ? (
             <div className="mb-5 space-y-3">

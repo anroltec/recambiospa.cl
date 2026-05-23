@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Check,
   ChevronDown,
@@ -13,7 +14,6 @@ import {
   X,
 } from "lucide-react";
 import PageHero from "@/components/ui/PageHero";
-import ProductModal from "@/components/product/ProductModal";
 import { useCart } from "@/context/CartContext";
 import { matchesCatalogSearch } from "@/lib/catalog-search";
 import { formatPrice } from "@/lib/format";
@@ -47,7 +47,6 @@ export default function CatalogListing({
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [expandedSections, setExpandedSections] = useState({ categories: true, brands: true });
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [justAddedCode, setJustAddedCode] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -419,10 +418,10 @@ export default function CatalogListing({
               <>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                   {paginatedProducts.map((product) => (
-                    <div
+                    <Link
                       key={getProductListKey(product)}
-                      className="bg-white border border-gray-200 group hover:shadow-lg hover:border-primary/30 transition-all duration-200 cursor-pointer"
-                      onClick={() => setSelectedProduct(product)}
+                      href={`/producto/${product.code}`}
+                      className="bg-white border border-gray-200 group hover:shadow-lg hover:border-primary/30 transition-all duration-200 block"
                     >
                       <div className="relative aspect-square bg-gray-50 overflow-hidden">
                         <Image
@@ -459,34 +458,29 @@ export default function CatalogListing({
                         ) : (
                           <p className="text-sm font-semibold text-dark/50">Sin compra online</p>
                         )}
-                        <button
-                          className="w-full mt-3 bg-primary hover:bg-primary-dark text-white text-sm font-medium py-2 transition-colors"
-                          onClick={(event) => {
-                            event.stopPropagation();
-
-                            if (product.inStock && product.price !== null) {
+                        {product.inStock && product.price !== null ? (
+                          <button
+                            className="w-full mt-3 bg-primary hover:bg-primary-dark text-white text-sm font-medium py-2 transition-colors"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
                               void handleGridAddToCart(product);
-                              return;
-                            }
-
-                            setSelectedProduct(product);
-                          }}
-                        >
-                          {product.inStock && product.price !== null
-                            ? justAddedCode === product.code
-                              ? (
-                                <span className="inline-flex items-center justify-center gap-2">
-                                  <Check size={14} />
-                                  Agregado
-                                </span>
-                              )
-                            : isInCart(product.code)
-                                ? "Agregar mas"
-                                : "Agregar al carrito"
-                            : "Sin compra online"}
-                        </button>
+                            }}
+                          >
+                            {justAddedCode === product.code ? (
+                              <span className="inline-flex items-center justify-center gap-2">
+                                <Check size={14} />
+                                Agregado
+                              </span>
+                            ) : isInCart(product.code) ? "Agregar mas" : "Agregar al carrito"}
+                          </button>
+                        ) : (
+                          <p className="w-full mt-3 text-sm font-medium py-2 text-center text-dark/50">
+                            Sin compra online
+                          </p>
+                        )}
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
 
@@ -572,9 +566,6 @@ export default function CatalogListing({
         </div>
       </div>
 
-      {selectedProduct && (
-        <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />
-      )}
     </div>
   );
 }
