@@ -39,7 +39,7 @@ export default function PricingModalButton({
             <h2 className="mt-2 text-xl font-black uppercase tracking-tight text-primary-dark sm:text-2xl">
               {title}
             </h2>
-            <p className="mt-1 text-xs text-dark/50">
+            <p className="mt-1 text-xs text-red-600">
               Valores netos sin IVA · Sujeto a evaluación técnica
             </p>
 
