@@ -108,7 +108,6 @@ export const technicalServices: TechnicalService[] = [
     description:
       "Realizamos reparaci\u00f3n, configuraci\u00f3n e integraci\u00f3n de sistemas de informaci\u00f3n al pasajero. Corregimos problemas de visualizaci\u00f3n, parametrizaci\u00f3n de rutas y continuidad de funcionamiento en buses y transporte de pasajeros.",
     image: "/banners/technical-service-itinerarios.png",
-    systems: ["Mobitec", "Iluminator"],
   },
   {
     title: "Soluciones Electr\u00f3nicas para Veh\u00edculos Pesados",
