@@ -11,6 +11,7 @@ import {
   Workflow,
 } from "lucide-react";
 import Container from "@/components/ui/Container";
+import PricingModalButton from "@/components/service/PricingModalButton";
 import { WHATSAPP_URL } from "@/lib/contact";
 import {
   technicalServiceCommitments,
@@ -19,6 +20,8 @@ import {
   technicalServiceIntro,
   technicalServiceStats,
   technicalServices,
+  servicePricesByModule,
+  type ServicePriceGroup,
 } from "@/data/technical-services";
 
 export const metadata: Metadata = {
@@ -80,6 +83,7 @@ function ServiceArticle({
   description,
   image,
   systems,
+  priceGroups,
   index,
 }: {
   title: string;
@@ -87,6 +91,7 @@ function ServiceArticle({
   description: string;
   image: string;
   systems?: string[];
+  priceGroups: ServicePriceGroup[];
   index: number;
 }) {
   const imageOrderClass = index % 2 === 0 ? "lg:order-2" : "lg:order-3";
@@ -136,6 +141,7 @@ function ServiceArticle({
             </div>
           </>
         ) : null}
+        <PricingModalButton title={title} priceGroups={priceGroups} />
       </div>
     </article>
   );
@@ -285,6 +291,7 @@ export default function ServicioTecnicoPage() {
                 description={service.description}
                 image={service.image}
                 systems={service.systems}
+                priceGroups={servicePricesByModule[service.title] ?? []}
                 index={index}
               />
             ))}

@@ -126,6 +126,142 @@ export const technicalServiceCoverage = [
   "Apoyo t\u00e9cnico para talleres, operadores y flotas que requieren continuidad operativa.",
 ];
 
+export interface ServicePriceItem {
+  code: string;
+  description: string;
+  price: number | null;
+}
+
+export interface ServicePriceGroup {
+  category: string;
+  items: ServicePriceItem[];
+}
+
+export const servicePricesByModule: Record<string, ServicePriceGroup[]> = {
+  "Módulos de Motor": [
+    {
+      category: "PLD",
+      items: [
+        { code: "REP32", description: "Diagnóstico PLD", price: 140000 },
+        { code: "REP24", description: "Reparación PLD Monofalla", price: 670000 },
+        { code: "REP43", description: "Reparación PLD Multifalla", price: 890000 },
+        { code: "DEC01", description: "Decodificación Llave CPC-FR", price: 40000 },
+        { code: "DEC02", description: "Decodificación Llave PLD", price: 40000 },
+      ],
+    },
+  ],
+  "Módulos de Cabina": [
+    {
+      category: "Módulos",
+      items: [
+        { code: "REP51", description: "Reparación Módulo Adm", price: 120000 },
+        { code: "REP33", description: "Reparación Módulo Diwa-3", price: 220000 },
+        { code: "REP59", description: "Reparación Módulo Diwa 5/6", price: 260000 },
+        { code: "REP60", description: "Reparación Módulo CPC-FR", price: 164900 },
+        { code: "REP64", description: "Reparación Módulo CPC-3 Euro 6", price: 250000 },
+      ],
+    },
+    {
+      category: "Instrumentos",
+      items: [
+        { code: "REP01", description: "Reparación Consola Multiplexor (Thoreb)", price: 35800 },
+        { code: "REP02", description: "Reparación Chapa Contacto 904/906", price: 25000 },
+        { code: "REP06", description: "Reparación Teclera Diwa 5/6", price: 55000 },
+        { code: "REP07", description: "Reparación Teclera Diwa 3", price: 44000 },
+      ],
+    },
+    {
+      category: "Puertas",
+      items: [
+        { code: "MOD04", description: "Modificación Sistema Bloqueo Puertas", price: 24500 },
+        { code: "REP10", description: "Reparación Teclera Puertas", price: 3000 },
+      ],
+    },
+    {
+      category: "Torniquetes",
+      items: [
+        { code: "MOD02", description: "Modificación Cableado Torniquete", price: 14040 },
+        { code: "MOD03", description: "Modificación Instalación Torniquete", price: 25000 },
+      ],
+    },
+  ],
+  "Tableros Electrónicos INS": [
+    {
+      category: "Tablero Instrumentos",
+      items: [
+        { code: "REP39", description: "Reparación Tablero Instrumentos 906", price: 202800 },
+        { code: "MAN01", description: "Mantención Tablero Instrumentos 906", price: 65900 },
+        { code: "REC02", description: "Recuperación Tablero 906", price: 257400 },
+        { code: "REP41", description: "Reparación Tacógrafo 906", price: 95200 },
+        { code: "INS06", description: "Instalación Kit Reacondicionamiento Tablero 915", price: 140400 },
+      ],
+    },
+    {
+      category: "Tableros INS",
+      items: [
+        { code: "REP63", description: "Reparación Tablero INS 2010", price: 380900 },
+      ],
+    },
+  ],
+  "Itinerarios y Letreros Electrónicos": [
+    {
+      category: "Itinerarios",
+      items: [
+        { code: "REP12", description: "Remanufacturación Itinerario Lateral / Trasero", price: 55880 },
+        { code: "REP44", description: "Reparación Itinerario Lateral / Trasero", price: 28960 },
+        { code: "REP15", description: "Remanufacturación Itinerario Frontal", price: 75880 },
+        { code: "REP45", description: "Reparación Itinerario Frontal", price: 28960 },
+        { code: "REP19", description: "Reparación Consola ICU 402", price: 50700 },
+        { code: "INS07", description: "Instalación Protector Antirrobo Lcu", price: 4000 },
+        { code: "INS08", description: "Instalación Kit Encendido Automático Itinerario 916", price: 22000 },
+        { code: "REP57", description: "Reparación Kit Encendido Automático Itinerario 916", price: 14000 },
+      ],
+    },
+    {
+      category: "Cámaras",
+      items: [
+        { code: "INS02", description: "Instalación Sistema Cámaras Cable Full", price: 56000 },
+        { code: "INS03", description: "Instalación Sistema Cámaras Cable Parcial", price: 36000 },
+        { code: "INS04", description: "Instalación Sistema Cámaras Full", price: 66000 },
+        { code: "INS05", description: "Instalación Sistema Cámara Parcial", price: 30960 },
+        { code: "REP26", description: "Reparación MDVR (Actia)", price: 120000 },
+        { code: "REP27", description: "Reparación DD 2TB (Actia)", price: 32400 },
+        { code: "REP58", description: "Reparación Cámaras Simple", price: 34960 },
+      ],
+    },
+  ],
+  "Soluciones Electrónicas para Vehículos Pesados": [
+    {
+      category: "Módulos Especializados",
+      items: [
+        { code: "REP61", description: "Reparación Módulo Ecas Suspensión", price: 390000 },
+        { code: "REP62", description: "Reparación Módulo de Caja D5", price: 990000 },
+        { code: "REP66", description: "Reparación Módulo Ecas E5", price: 250000 },
+        { code: "REP68", description: "Reparación Módulo ACM", price: 990000 },
+      ],
+    },
+    {
+      category: "Otras Reparaciones",
+      items: [
+        { code: "REP28", description: "Reparación Pedal Acelerador 904-906", price: 62400 },
+        { code: "SEL01", description: "Sellado Módulo Voith 936", price: 6240 },
+        { code: "INS11", description: "Instalación Bloqueo Aceleración", price: 5850 },
+        { code: "REP29", description: "Reparación Sensor Velocidad (2159)", price: 139200 },
+        { code: "REP11", description: "Reparación Sensor Contrapresion CRT", price: 19500 },
+        { code: "REP03", description: "Reparación Solenoide KL30", price: 93600 },
+        { code: "REP04", description: "Reparación Dosificadora Adblue 926", price: 76440 },
+        { code: "INS10", description: "Instalación Ventilador Conductor LO916 Auxiliar", price: 11690 },
+        { code: "REP08", description: "Reparación Wifi Bus Red", price: 56000 },
+        { code: "REP09", description: "Reparación Motor Turbina de Froster", price: 12900 },
+        { code: "REM01", description: "Remanufacturación Kit Telemetría", price: 80000 },
+        { code: "REP67", description: "Reparación Punto Estrella", price: 40000 },
+        { code: "REP70", description: "Reparación Tarjeta Estrella Euro 5", price: 45000 },
+        { code: "REP71", description: "Reparación Tarjeta Estrella Euro 6", price: 45000 },
+      ],
+    },
+  ],
+};
+
 export const technicalServiceCommitments: TechnicalServiceCommitment[] = [
   {
     title: "Intervenciones con foco operativo",
