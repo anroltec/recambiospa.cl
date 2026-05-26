@@ -220,7 +220,7 @@ export default function CatalogListing({
                 {products.length}
               </span>
             </button>
-            {categories.map((category) => (
+            {categories.filter((category) => (categoryCount[category.id] ?? 0) > 0).map((category) => (
               <button
                 key={category.id}
                 onClick={() => handleCategoryChange(selectedCategory === category.id ? "" : category.id)}
