@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 import Modal from "@/components/ui/Modal";
@@ -10,6 +10,7 @@ type Mode = "login" | "register" | "recover";
 
 interface LoginModalProps {
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
 const EMPTY_LOGIN = { email: "", password: "" };
@@ -55,9 +56,18 @@ const MODE_COPY = {
   }
 >;
 
-export default function LoginModal({ onClose }: LoginModalProps) {
+export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("login");
+
+  const handleSuccess = useCallback(() => {
+    onClose();
+    if (onSuccess) {
+      onSuccess();
+    } else {
+      router.push("/cuenta");
+    }
+  }, [onClose, onSuccess, router]);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   const [loginValues, setLoginValues] = useState(EMPTY_LOGIN);
@@ -79,13 +89,12 @@ export default function LoginModal({ onClose }: LoginModalProps) {
     fetch("/api/customer/profile", { method: "GET", cache: "no-store" })
       .then((res) => {
         if (res.ok) {
-          onClose();
-          router.push("/cuenta");
+          handleSuccess();
         }
       })
       .catch(() => {})
       .finally(() => setCheckingAuth(false));
-  }, [router, onClose]);
+  }, [handleSuccess]);
 
   function switchMode(next: Mode) {
     setMode(next);
@@ -110,8 +119,7 @@ export default function LoginModal({ onClose }: LoginModalProps) {
       if (!res.ok || !data.ok) {
         throw new Error(data.error ?? "No fue posible iniciar sesi\u00f3n.");
       }
-      onClose();
-      router.push("/cuenta");
+      handleSuccess();
     } catch (err) {
       setLoginError(
         err instanceof Error ? err.message : "No fue posible iniciar sesi\u00f3n."
@@ -146,8 +154,7 @@ export default function LoginModal({ onClose }: LoginModalProps) {
       if (!res.ok || !data.ok) {
         throw new Error(data.error ?? "No fue posible crear la cuenta.");
       }
-      onClose();
-      router.push("/cuenta");
+      handleSuccess();
     } catch (err) {
       setRegError(err instanceof Error ? err.message : "No fue posible crear la cuenta.");
     } finally {

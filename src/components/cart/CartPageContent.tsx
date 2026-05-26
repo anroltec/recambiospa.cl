@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import {
   ArrowRight,
   CreditCard,
@@ -15,6 +16,8 @@ import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/format";
 import { getProductListKey } from "@/lib/product";
 import type { Product } from "@/types/product";
+import CheckoutAuthModal from "@/components/cart/CheckoutAuthModal";
+import LoginModal from "@/components/account/LoginModal";
 
 interface SummaryRowProps {
   label: string;
@@ -56,6 +59,8 @@ export default function CartPageContent({
     removeItem,
     clearCart,
   } = useCart();
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const cartCodes = new Set(items.map((item) => item.product.code));
   const uniqueBrands = [...new Set(items.map((item) => item.product.brand))];
   const uniqueCategories = [...new Set(items.map((item) => item.product.category))];
@@ -308,15 +313,14 @@ export default function CartPageContent({
 
             <div className="mt-8 space-y-4">
               {checkoutUrl ? (
-                <a
-                  href={checkoutUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex h-11 items-center justify-center gap-2 rounded-sm bg-primary px-4 text-lg font-bold uppercase tracking-wide text-white transition-colors hover:bg-primary-light"
+                <button
+                  type="button"
+                  onClick={() => setShowCheckoutModal(true)}
+                  className="flex h-11 w-full items-center justify-center gap-2 rounded-sm bg-primary px-4 text-lg font-bold uppercase tracking-wide text-white transition-colors hover:bg-primary-light"
                 >
                   <CreditCard size={18} />
                   Comprar
-                </a>
+                </button>
               ) : (
                 <button
                   type="button"
@@ -395,6 +399,24 @@ export default function CartPageContent({
             ))}
           </div>
         </section>
+      )}
+
+      {showCheckoutModal && checkoutUrl && (
+        <CheckoutAuthModal
+          checkoutUrl={checkoutUrl}
+          onClose={() => setShowCheckoutModal(false)}
+          onShowLogin={() => setShowLoginModal(true)}
+        />
+      )}
+
+      {showLoginModal && checkoutUrl && (
+        <LoginModal
+          onClose={() => setShowLoginModal(false)}
+          onSuccess={() => {
+            setShowLoginModal(false);
+            window.open(checkoutUrl, "_blank", "noopener,noreferrer");
+          }}
+        />
       )}
     </div>
   );
