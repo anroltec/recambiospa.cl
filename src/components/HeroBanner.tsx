@@ -58,21 +58,25 @@ export default function HeroBanner() {
               aria-label={slide.alt}
               tabIndex={-1}
             >
+              {/* Desktop: visible en sm+. Cap en 2241px (resolución fuente) para evitar upscale. */}
               <Image
                 src={slide.image}
                 alt={slide.alt}
                 fill
                 className="hidden sm:block object-cover object-[10%_center]"
                 priority={i === 0}
-                sizes="100vw"
+                quality={90}
+                sizes="(max-width: 639px) 1px, (max-width: 2241px) 100vw, 2241px"
               />
+              {/* Mobile: visible solo bajo sm. Cap en 860px (resolución fuente). */}
               <Image
                 src={slide.imageMobile}
                 alt={slide.alt}
                 fill
                 className="block sm:hidden object-cover object-[10%_center]"
                 priority={i === 0}
-                sizes="100vw"
+                quality={90}
+                sizes="(max-width: 639px) 100vw, 1px"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-black/32 via-transparent to-black/28 pointer-events-none" />
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/55 pointer-events-none" />
