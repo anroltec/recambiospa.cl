@@ -5,8 +5,9 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 import Modal from "@/components/ui/Modal";
+import RecoverModal from "@/components/account/RecoverModal";
 
-type Mode = "login" | "register" | "recover";
+type Mode = "login" | "register";
 
 interface LoginModalProps {
   onClose: () => void;
@@ -21,44 +22,12 @@ const EMPTY_REGISTER = {
   password: "",
   confirm: "",
 };
-const EMPTY_RECOVER = { email: "" };
-
-const MODE_COPY = {
-  login: {
-    title: "Acceder",
-    submit: "Entrar",
-    loading: "Entrando...",
-    switchPrompt: "\u00bfSin cuenta todav\u00eda?",
-    switchCta: "Crear una",
-  },
-  register: {
-    title: "Crear cuenta",
-    submit: "Crear cuenta",
-    loading: "Creando cuenta...",
-    switchPrompt: "\u00bfYa tienes acceso?",
-    switchCta: "Entrar",
-  },
-  recover: {
-    title: "Recuperar acceso",
-    submit: "Enviar enlace",
-    loading: "Enviando enlace...",
-    switchPrompt: "\u00bfYa recuerdas tu contrase\u00f1a?",
-    switchCta: "Volver a entrar",
-  },
-} satisfies Record<
-  Mode,
-  {
-    title: string;
-    submit: string;
-    loading: string;
-    switchPrompt: string;
-    switchCta: string;
-  }
->;
 
 export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("login");
+  const [showRecover, setShowRecover] = useState(false);
+  const [recoverEmail, setRecoverEmail] = useState("");
 
   const handleSuccess = useCallback(() => {
     onClose();
@@ -68,6 +37,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
       router.push("/cuenta");
     }
   }, [onClose, onSuccess, router]);
+
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   const [loginValues, setLoginValues] = useState(EMPTY_LOGIN);
@@ -80,17 +50,10 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
   const [regError, setRegError] = useState<string | null>(null);
   const [isSubmittingReg, setIsSubmittingReg] = useState(false);
 
-  const [recoverValues, setRecoverValues] = useState(EMPTY_RECOVER);
-  const [recoverError, setRecoverError] = useState<string | null>(null);
-  const [recoverMessage, setRecoverMessage] = useState<string | null>(null);
-  const [isSubmittingRecover, setIsSubmittingRecover] = useState(false);
-
   useEffect(() => {
     fetch("/api/customer/profile", { method: "GET", cache: "no-store" })
       .then((res) => {
-        if (res.ok) {
-          handleSuccess();
-        }
+        if (res.ok) handleSuccess();
       })
       .catch(() => {})
       .finally(() => setCheckingAuth(false));
@@ -100,8 +63,6 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
     setMode(next);
     setLoginError(null);
     setRegError(null);
-    setRecoverError(null);
-    setRecoverMessage(null);
   }
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
@@ -117,13 +78,11 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
       });
       const data = (await res.json()) as { ok: boolean; error?: string };
       if (!res.ok || !data.ok) {
-        throw new Error(data.error ?? "No fue posible iniciar sesi\u00f3n.");
+        throw new Error(data.error ?? "No fue posible iniciar sesión.");
       }
       handleSuccess();
     } catch (err) {
-      setLoginError(
-        err instanceof Error ? err.message : "No fue posible iniciar sesi\u00f3n."
-      );
+      setLoginError(err instanceof Error ? err.message : "No fue posible iniciar sesión.");
     } finally {
       setIsSubmittingLogin(false);
     }
@@ -132,7 +91,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
   async function handleRegister(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (regValues.password !== regValues.confirm) {
-      setRegError("Las contrase\u00f1as no coinciden.");
+      setRegError("Las contraseñas no coinciden.");
       return;
     }
 
@@ -162,41 +121,6 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
     }
   }
 
-  async function handleRecover(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setIsSubmittingRecover(true);
-    setRecoverError(null);
-    setRecoverMessage(null);
-
-    try {
-      const res = await fetch("/api/customer/auth/recover", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: recoverValues.email }),
-      });
-      const data = (await res.json()) as {
-        ok: boolean;
-        error?: string;
-        message?: string;
-      };
-      if (!res.ok || !data.ok) {
-        throw new Error(data.error ?? "No fue posible iniciar la recuperacion.");
-      }
-      setRecoverMessage(
-        data.message ??
-          "Si existe una cuenta con ese correo, enviamos un enlace para restablecer la contrasena."
-      );
-    } catch (err) {
-      setRecoverError(
-        err instanceof Error
-          ? err.message
-          : "No fue posible iniciar la recuperacion."
-      );
-    } finally {
-      setIsSubmittingRecover(false);
-    }
-  }
-
   if (checkingAuth) {
     return (
       <Modal onClose={onClose} maxWidth="max-w-sm">
@@ -207,279 +131,237 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
     );
   }
 
-  const copy = MODE_COPY[mode];
-
   return (
-    <Modal
-      onClose={onClose}
-      maxWidth="max-w-[1080px]"
-      panelClassName="max-h-[94vh] overflow-hidden"
-      closeButtonClassName="top-5 right-5 h-11 w-11 rounded-none border-[#e7dfd4] bg-white/94 shadow-none hover:bg-[#f3eee7]"
-    >
-      <div className="overflow-hidden bg-[#10151b]">
-        <div className="grid min-h-[600px] lg:min-h-[560px] lg:grid-cols-[360px_minmax(0,1fr)]">
-          <aside className="relative min-h-[220px] overflow-hidden border-b border-black/10 bg-[#10151b] lg:min-h-[560px] lg:border-b-0 lg:border-r">
-            <div className="absolute -inset-px bg-[#10151b] bg-[url('/banners/banner2.jpg')] bg-cover bg-no-repeat [background-position:78%_center]" />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,14,18,0.08)_0%,rgba(10,14,18,0.58)_68%,rgba(10,14,18,0.92)_100%)]" />
-            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,14,18,0.82)_0%,rgba(10,14,18,0.52)_54%,rgba(10,14,18,0.14)_100%)]" />
-            <div className="absolute left-0 top-0 h-full w-1 bg-primary" />
-
-            <div className="relative flex h-full items-end p-5 sm:p-6 lg:p-8">
-              <div className="border border-white/16 bg-black/25 px-4 py-4 backdrop-blur-[2px]">
-                <Image
-                  src="/logo.svg"
-                  alt="Recambio SpA"
-                  width={170}
-                  height={58}
-                  className="h-auto w-[136px] sm:w-[160px]"
-                />
-                <p className="mt-3 text-[10px] font-medium uppercase tracking-[0.2em] text-white/58">
-                  Acceso clientes
-                </p>
-              </div>
-            </div>
-          </aside>
-
-          <div className="flex flex-1 flex-col bg-white px-6 py-5 sm:px-8 sm:py-6 lg:px-10 lg:py-7">
-            <div className="flex items-center justify-between gap-4">
-              <div className="inline-flex border border-[#e6ddd1] bg-[#f5f0e8]">
-                <TabBtn active={mode === "login"} onClick={() => switchMode("login")}>
-                  Entrar
-                </TabBtn>
-                <TabBtn active={mode === "register"} onClick={() => switchMode("register")}>
-                  Crear cuenta
-                </TabBtn>
-                <TabBtn active={mode === "recover"} onClick={() => switchMode("recover")}>
-                  Recuperar
-                </TabBtn>
-              </div>
-              <div className="hidden h-px w-16 bg-dark/10 sm:block" />
-            </div>
-
-            <div className="mt-8 lg:mt-10">
-              <h3 className="text-3xl font-black tracking-tight text-dark sm:text-[2.15rem]">
-                {copy.title}
-              </h3>
-            </div>
-
-            {mode === "login" ? (
-              <form
-                onSubmit={(e) => void handleLogin(e)}
-                className="mt-7 flex flex-1 flex-col justify-between"
-              >
-                <div className="space-y-5">
-                  <Field label="Correo">
-                    <Input
-                      type="email"
-                      value={loginValues.email}
-                      onChange={(e) => setLoginValues((v) => ({ ...v, email: e.target.value }))}
-                      placeholder="cliente@empresa.cl"
-                      autoComplete="email"
-                      required
-                    />
-                  </Field>
-
-                  <Field label={"Contrase\u00f1a"}>
-                    <div className="relative">
-                      <Input
-                        type={showLoginPw ? "text" : "password"}
-                        value={loginValues.password}
-                        onChange={(e) =>
-                          setLoginValues((v) => ({ ...v, password: e.target.value }))
-                        }
-                        placeholder={"Ingresa tu contrase\u00f1a"}
-                        autoComplete="current-password"
-                        required
-                        className="pr-14"
-                      />
-                      <PwToggle
-                        show={showLoginPw}
-                        onToggle={() => setShowLoginPw((value) => !value)}
-                      />
-                    </div>
-                    <div className="mt-2 flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setRecoverValues({ email: loginValues.email });
-                          switchMode("recover");
-                        }}
-                        className="text-xs font-semibold uppercase tracking-[0.12em] text-primary transition-colors hover:text-primary-light"
-                      >
-                        Olvide mi contrasena
-                      </button>
-                    </div>
-                  </Field>
-
-                  {loginError ? <ErrorBanner message={loginError} /> : null}
-                </div>
-
-                <div className="mt-7">
-                  <SubmitBtn loading={isSubmittingLogin} loadingText={copy.loading}>
-                    {copy.submit}
-                  </SubmitBtn>
-                  <p className="mt-4 text-center text-sm text-dark/46">
-                    {copy.switchPrompt}{" "}
-                    <button
-                      type="button"
-                      onClick={() => switchMode("register")}
-                      className="font-semibold text-primary transition-colors hover:text-primary-light"
-                    >
-                      {copy.switchCta}
-                    </button>
+    <>
+      <Modal
+        onClose={onClose}
+        maxWidth="max-w-[1080px]"
+        panelClassName="max-h-[94vh] overflow-hidden"
+        closeButtonClassName="top-5 right-5 h-11 w-11 rounded-none border-[#e7dfd4] bg-white/94 shadow-none hover:bg-[#f3eee7]"
+      >
+        <div className="overflow-hidden bg-[#10151b]">
+          <div className="grid min-h-[600px] lg:min-h-[560px] lg:grid-cols-[360px_minmax(0,1fr)]">
+            {/* Sidebar imagen */}
+            <aside className="relative min-h-[220px] overflow-hidden border-b border-black/10 bg-[#10151b] lg:min-h-[560px] lg:border-b-0 lg:border-r">
+              <div className="absolute -inset-px bg-[#10151b] bg-[url('/banners/banner2.jpg')] bg-cover bg-no-repeat [background-position:78%_center]" />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,14,18,0.08)_0%,rgba(10,14,18,0.58)_68%,rgba(10,14,18,0.92)_100%)]" />
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,14,18,0.82)_0%,rgba(10,14,18,0.52)_54%,rgba(10,14,18,0.14)_100%)]" />
+              <div className="absolute left-0 top-0 h-full w-1 bg-primary" />
+              <div className="relative flex h-full items-end p-5 sm:p-6 lg:p-8">
+                <div className="border border-white/16 bg-black/25 px-4 py-4 backdrop-blur-[2px]">
+                  <Image
+                    src="/logo.svg"
+                    alt="Recambio SpA"
+                    width={170}
+                    height={58}
+                    className="h-auto w-[136px] sm:w-[160px]"
+                  />
+                  <p className="mt-3 text-[10px] font-medium uppercase tracking-[0.2em] text-white/58">
+                    Acceso clientes
                   </p>
                 </div>
-              </form>
-            ) : mode === "register" ? (
-              <form
-                onSubmit={(e) => void handleRegister(e)}
-                className="mt-7 flex flex-1 flex-col justify-between"
-              >
-                <div className="space-y-5">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label="Nombre">
+              </div>
+            </aside>
+
+            {/* Contenido */}
+            <div className="flex flex-1 flex-col bg-white px-6 py-5 sm:px-8 sm:py-6 lg:px-10 lg:py-7">
+              <div className="flex items-center justify-between gap-4">
+                <div className="inline-flex border border-[#e6ddd1] bg-[#f5f0e8]">
+                  <TabBtn active={mode === "login"} onClick={() => switchMode("login")}>
+                    Entrar
+                  </TabBtn>
+                  <TabBtn active={mode === "register"} onClick={() => switchMode("register")}>
+                    Crear cuenta
+                  </TabBtn>
+                </div>
+                <div className="hidden h-px w-16 bg-dark/10 sm:block" />
+              </div>
+
+              <div className="mt-8 lg:mt-10">
+                <h3 className="text-3xl font-black tracking-tight text-dark sm:text-[2.15rem]">
+                  {mode === "login" ? "Acceder" : "Crear cuenta"}
+                </h3>
+              </div>
+
+              {mode === "login" ? (
+                <form
+                  onSubmit={(e) => void handleLogin(e)}
+                  className="mt-7 flex flex-1 flex-col justify-between"
+                >
+                  <div className="space-y-5">
+                    <Field label="Correo">
                       <Input
-                        type="text"
-                        value={regValues.firstName}
-                        onChange={(e) =>
-                          setRegValues((v) => ({ ...v, firstName: e.target.value }))
-                        }
-                        placeholder="Juan"
-                        autoComplete="given-name"
+                        type="email"
+                        value={loginValues.email}
+                        onChange={(e) => setLoginValues((v) => ({ ...v, email: e.target.value }))}
+                        placeholder="cliente@empresa.cl"
+                        autoComplete="email"
+                        required
                       />
                     </Field>
-                    <Field label="Apellido">
-                      <Input
-                        type="text"
-                        value={regValues.lastName}
-                        onChange={(e) =>
-                          setRegValues((v) => ({ ...v, lastName: e.target.value }))
-                        }
-                        placeholder={"P\u00e9rez"}
-                        autoComplete="family-name"
-                      />
-                    </Field>
-                  </div>
 
-                  <Field label="Correo">
-                    <Input
-                      type="email"
-                      value={regValues.email}
-                      onChange={(e) => setRegValues((v) => ({ ...v, email: e.target.value }))}
-                      placeholder="cliente@empresa.cl"
-                      autoComplete="email"
-                      required
-                    />
-                  </Field>
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label={"Contrase\u00f1a"}>
+                    <Field label="Contraseña">
                       <div className="relative">
                         <Input
-                          type={showRegPw ? "text" : "password"}
-                          value={regValues.password}
+                          type={showLoginPw ? "text" : "password"}
+                          value={loginValues.password}
                           onChange={(e) =>
-                            setRegValues((v) => ({ ...v, password: e.target.value }))
+                            setLoginValues((v) => ({ ...v, password: e.target.value }))
                           }
-                          placeholder={"Crea una contrase\u00f1a"}
-                          autoComplete="new-password"
+                          placeholder="Ingresa tu contraseña"
+                          autoComplete="current-password"
                           required
-                          minLength={5}
                           className="pr-14"
                         />
                         <PwToggle
-                          show={showRegPw}
-                          onToggle={() => setShowRegPw((value) => !value)}
+                          show={showLoginPw}
+                          onToggle={() => setShowLoginPw((v) => !v)}
                         />
                       </div>
-                      <HelperText>{"M\u00ednimo 5 caracteres."}</HelperText>
+                      <div className="mt-2 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRecoverEmail(loginValues.email);
+                            setShowRecover(true);
+                          }}
+                          className="text-xs font-semibold uppercase tracking-[0.12em] text-primary transition-colors hover:text-primary-light"
+                        >
+                          ¿Olvidé mi contraseña?
+                        </button>
+                      </div>
                     </Field>
 
-                    <Field label={"Confirmar contrase\u00f1a"}>
+                    {loginError ? <ErrorBanner message={loginError} /> : null}
+                  </div>
+
+                  <div className="mt-7">
+                    <SubmitBtn loading={isSubmittingLogin} loadingText="Entrando...">
+                      Entrar
+                    </SubmitBtn>
+                    <p className="mt-4 text-center text-sm text-dark/46">
+                      ¿Sin cuenta todavía?{" "}
+                      <button
+                        type="button"
+                        onClick={() => switchMode("register")}
+                        className="font-semibold text-primary transition-colors hover:text-primary-light"
+                      >
+                        Crear una
+                      </button>
+                    </p>
+                  </div>
+                </form>
+              ) : (
+                <form
+                  onSubmit={(e) => void handleRegister(e)}
+                  className="mt-7 flex flex-1 flex-col justify-between"
+                >
+                  <div className="space-y-5">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <Field label="Nombre">
+                        <Input
+                          type="text"
+                          value={regValues.firstName}
+                          onChange={(e) =>
+                            setRegValues((v) => ({ ...v, firstName: e.target.value }))
+                          }
+                          placeholder="Juan"
+                          autoComplete="given-name"
+                        />
+                      </Field>
+                      <Field label="Apellido">
+                        <Input
+                          type="text"
+                          value={regValues.lastName}
+                          onChange={(e) =>
+                            setRegValues((v) => ({ ...v, lastName: e.target.value }))
+                          }
+                          placeholder="Pérez"
+                          autoComplete="family-name"
+                        />
+                      </Field>
+                    </div>
+
+                    <Field label="Correo">
                       <Input
-                        type={showRegPw ? "text" : "password"}
-                        value={regValues.confirm}
-                        onChange={(e) =>
-                          setRegValues((v) => ({ ...v, confirm: e.target.value }))
-                        }
-                        placeholder={"Repite tu contrase\u00f1a"}
-                        autoComplete="new-password"
+                        type="email"
+                        value={regValues.email}
+                        onChange={(e) => setRegValues((v) => ({ ...v, email: e.target.value }))}
+                        placeholder="cliente@empresa.cl"
+                        autoComplete="email"
                         required
                       />
                     </Field>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <Field label="Contraseña">
+                        <div className="relative">
+                          <Input
+                            type={showRegPw ? "text" : "password"}
+                            value={regValues.password}
+                            onChange={(e) =>
+                              setRegValues((v) => ({ ...v, password: e.target.value }))
+                            }
+                            placeholder="Crea una contraseña"
+                            autoComplete="new-password"
+                            required
+                            minLength={5}
+                            className="pr-14"
+                          />
+                          <PwToggle
+                            show={showRegPw}
+                            onToggle={() => setShowRegPw((v) => !v)}
+                          />
+                        </div>
+                        <HelperText>Mínimo 5 caracteres.</HelperText>
+                      </Field>
+
+                      <Field label="Confirmar contraseña">
+                        <Input
+                          type={showRegPw ? "text" : "password"}
+                          value={regValues.confirm}
+                          onChange={(e) =>
+                            setRegValues((v) => ({ ...v, confirm: e.target.value }))
+                          }
+                          placeholder="Repite tu contraseña"
+                          autoComplete="new-password"
+                          required
+                        />
+                      </Field>
+                    </div>
+
+                    {regError ? <ErrorBanner message={regError} /> : null}
                   </div>
 
-                  {regError ? <ErrorBanner message={regError} /> : null}
-                </div>
-
-                <div className="mt-7">
-                  <SubmitBtn loading={isSubmittingReg} loadingText={copy.loading}>
-                    {copy.submit}
-                  </SubmitBtn>
-                  <p className="mt-4 text-center text-sm text-dark/46">
-                    {copy.switchPrompt}{" "}
-                    <button
-                      type="button"
-                      onClick={() => switchMode("login")}
-                      className="font-semibold text-primary transition-colors hover:text-primary-light"
-                    >
-                      {copy.switchCta}
-                    </button>
-                  </p>
-                </div>
-              </form>
-            ) : (
-              <form
-                onSubmit={(e) => void handleRecover(e)}
-                className="mt-7 flex flex-1 flex-col justify-between"
-              >
-                <div className="space-y-5">
-                  <p className="max-w-xl text-sm leading-6 text-dark/56">
-                    Ingresa el correo del cliente y enviaremos un enlace para
-                    restablecer la contrasena en una pantalla segura del sitio.
-                  </p>
-
-                  <Field label="Correo">
-                    <Input
-                      type="email"
-                      value={recoverValues.email}
-                      onChange={(e) =>
-                        setRecoverValues((v) => ({ ...v, email: e.target.value }))
-                      }
-                      placeholder="cliente@empresa.cl"
-                      autoComplete="email"
-                      required
-                    />
-                  </Field>
-
-                  {recoverError ? <ErrorBanner message={recoverError} /> : null}
-                  {recoverMessage ? <SuccessBanner message={recoverMessage} /> : null}
-                </div>
-
-                <div className="mt-7">
-                  <SubmitBtn
-                    loading={isSubmittingRecover}
-                    loadingText={copy.loading}
-                  >
-                    {copy.submit}
-                  </SubmitBtn>
-                  <p className="mt-4 text-center text-sm text-dark/46">
-                    {copy.switchPrompt}{" "}
-                    <button
-                      type="button"
-                      onClick={() => switchMode("login")}
-                      className="font-semibold text-primary transition-colors hover:text-primary-light"
-                    >
-                      {copy.switchCta}
-                    </button>
-                  </p>
-                </div>
-              </form>
-            )}
+                  <div className="mt-7">
+                    <SubmitBtn loading={isSubmittingReg} loadingText="Creando cuenta...">
+                      Crear cuenta
+                    </SubmitBtn>
+                    <p className="mt-4 text-center text-sm text-dark/46">
+                      ¿Ya tienes acceso?{" "}
+                      <button
+                        type="button"
+                        onClick={() => switchMode("login")}
+                        className="font-semibold text-primary transition-colors hover:text-primary-light"
+                      >
+                        Entrar
+                      </button>
+                    </p>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </Modal>
+      </Modal>
+
+      {showRecover && (
+        <RecoverModal
+          initialEmail={recoverEmail}
+          onClose={() => setShowRecover(false)}
+        />
+      )}
+    </>
   );
 }
 
@@ -506,13 +388,7 @@ function TabBtn({
   );
 }
 
-function Field({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
       <span className="mb-2 block text-[13px] font-medium text-dark/70">{label}</span>
@@ -521,10 +397,7 @@ function Field({
   );
 }
 
-function Input({
-  className = "",
-  ...props
-}: React.InputHTMLAttributes<HTMLInputElement>) {
+function Input({ className = "", ...props }: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       className={`w-full border border-[#e5ddd2] bg-[#f6f2eb] px-4 py-3 text-[15px] text-dark transition-colors placeholder:text-dark/34 focus:border-primary focus:bg-white focus:outline-none ${className}`}
@@ -542,9 +415,7 @@ function PwToggle({ show, onToggle }: { show: boolean; onToggle: () => void }) {
     <button
       type="button"
       onClick={onToggle}
-      aria-label={
-        show ? "Ocultar contrase\u00f1a" : "Mostrar contrase\u00f1a"
-      }
+      aria-label={show ? "Ocultar contraseña" : "Mostrar contraseña"}
       className="absolute right-4 top-1/2 -translate-y-1/2 text-dark/30 transition-colors hover:text-dark/60"
     >
       {show ? <EyeOff size={17} /> : <Eye size={17} />}
@@ -582,15 +453,6 @@ function SubmitBtn({
 function ErrorBanner({ message }: { message: string }) {
   return (
     <div className="flex items-start gap-2 border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700">
-      <AlertCircle size={15} className="mt-0.5 shrink-0" />
-      <span>{message}</span>
-    </div>
-  );
-}
-
-function SuccessBanner({ message }: { message: string }) {
-  return (
-    <div className="flex items-start gap-2 border border-green-200 bg-green-50 px-4 py-2.5 text-sm text-green-700">
       <AlertCircle size={15} className="mt-0.5 shrink-0" />
       <span>{message}</span>
     </div>
