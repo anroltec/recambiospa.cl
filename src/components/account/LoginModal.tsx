@@ -143,7 +143,7 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
           <div className="grid min-h-[600px] lg:min-h-[560px] lg:grid-cols-[360px_minmax(0,1fr)]">
             {/* Sidebar imagen */}
             <aside className="relative min-h-[220px] overflow-hidden border-b border-black/10 bg-[#10151b] lg:min-h-[560px] lg:border-b-0 lg:border-r">
-              <div className="absolute -inset-px bg-[#10151b] bg-[url('/banners/banner2.jpg')] bg-cover bg-no-repeat [background-position:78%_center]" />
+              <div className="absolute -inset-px bg-[#10151b] bg-[url('/banners/login-sidebar.jpg')] bg-cover bg-no-repeat [background-position:60%_center]" />
               <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(10,14,18,0.08)_0%,rgba(10,14,18,0.58)_68%,rgba(10,14,18,0.92)_100%)]" />
               <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(10,14,18,0.82)_0%,rgba(10,14,18,0.52)_54%,rgba(10,14,18,0.14)_100%)]" />
               <div className="absolute left-0 top-0 h-full w-1 bg-primary" />
