@@ -61,6 +61,7 @@ export default function CartPageContent({
   } = useCart();
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showMinimumError, setShowMinimumError] = useState(false);
   const cartCodes = new Set(items.map((item) => item.product.code));
   const uniqueBrands = [...new Set(items.map((item) => item.product.brand))];
   const uniqueCategories = [...new Set(items.map((item) => item.product.category))];
@@ -76,6 +77,8 @@ export default function CartPageContent({
   const estimatedIva = Math.round(totalPrice * 0.19);
   const totalWithIva = totalPrice + estimatedIva;
   const hasUnpricedItems = items.some((item) => item.product.price === null);
+  const MINIMUM_PURCHASE = 30_000;
+  const belowMinimum = totalWithIva < MINIMUM_PURCHASE && items.length > 0;
   const cartCountLabel = isHydratingCart
     ? "Cargando carrito..."
     : `${totalQuantity} producto(s) en el carro`;
@@ -313,14 +316,29 @@ export default function CartPageContent({
 
             <div className="mt-8 space-y-4">
               {checkoutUrl ? (
-                <button
-                  type="button"
-                  onClick={() => setShowCheckoutModal(true)}
-                  className="flex h-11 w-full items-center justify-center gap-2 rounded-sm bg-primary px-4 text-lg font-bold uppercase tracking-wide text-white transition-colors hover:bg-primary-light"
-                >
-                  <CreditCard size={18} />
-                  Comprar
-                </button>
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (belowMinimum) {
+                        setShowMinimumError(true);
+                      } else {
+                        setShowMinimumError(false);
+                        setShowCheckoutModal(true);
+                      }
+                    }}
+                    className="flex h-11 w-full items-center justify-center gap-2 rounded-sm bg-primary px-4 text-lg font-bold uppercase tracking-wide text-white transition-colors hover:bg-primary-light"
+                  >
+                    <CreditCard size={18} />
+                    Comprar
+                  </button>
+                  {showMinimumError && belowMinimum && (
+                    <p className="mt-2 text-center text-sm font-medium text-red-600">
+                      El mínimo de compra es de {formatPrice(MINIMUM_PURCHASE)}. Agrega más
+                      productos para continuar.
+                    </p>
+                  )}
+                </div>
               ) : (
                 <button
                   type="button"
