@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
 import type { Swiper as SwiperType } from "swiper";
@@ -40,14 +40,22 @@ const slides = [
 export default function HeroBanner() {
   const swiperRef = useRef<SwiperType | null>(null);
 
+  useEffect(() => {
+    const onResize = () => swiperRef.current?.update();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   return (
-    <section className="relative group/hero isolate select-none overflow-hidden">
+    <section className="relative w-full group/hero isolate select-none overflow-hidden">
       <Swiper
         onSwiper={(swiper) => { swiperRef.current = swiper; }}
         modules={[Autoplay, Pagination]}
         autoplay={{ delay: 5000, disableOnInteraction: false }}
         pagination={{ clickable: true, el: ".hero-pagination" }}
         loop
+        observer
+        observeParents
         className="w-full"
       >
         {slides.map((slide, i) => (
