@@ -1,5 +1,7 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
+
 import type { CartApiResponse, CartLineItem } from "@/types/cart";
 import type { Category, Product } from "@/types/product";
 import {
@@ -25,7 +27,9 @@ import {
 } from "@/lib/shopify";
 
 const SHOPIFY_DEBUG_ENABLED = process.env.SHOPIFY_DEBUG === "1";
-const CATALOG_CACHE_TTL_MS = 60_000;
+
+/** Tag para invalidación on-demand vía revalidateTag() en webhooks de Shopify. */
+export const SHOPIFY_PRODUCTS_CACHE_TAG = "shopify-products";
 
 export interface CatalogData {
   products: Product[];
@@ -41,6 +45,10 @@ export class CatalogConnectionError extends Error {
 }
 
 let hasLoggedShopifyConnectionError = false;
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
 function parseNumber(value: string): number | null {
   const parsed = Number(value);
@@ -201,98 +209,57 @@ function getErrorMessage(error: unknown): string {
   return "Unknown Shopify storefront error.";
 }
 
-let cachedShopifyProducts: ShopifyProduct[] | null = null;
-let cachedShopifyProductsExpiresAt = 0;
-let shopifyProductsPromise: Promise<ShopifyProduct[]> | null = null;
-let cachedCatalogData: CatalogData | null = null;
-let cachedCatalogDataExpiresAt = 0;
-let catalogDataPromise: Promise<CatalogData> | null = null;
-
-async function loadAllShopifyProducts(): Promise<ShopifyProduct[]> {
-  const allProducts: ShopifyProduct[] = [];
-  let after: string | null | undefined = null;
-
-  while (true) {
-    const page = await getProductsPage(100, after);
-    allProducts.push(...page.products);
-
-    if (!page.pageInfo.hasNextPage || !page.pageInfo.endCursor) {
-      break;
-    }
-
-    after = page.pageInfo.endCursor;
-  }
-
-  return allProducts;
-}
-
-async function getAllShopifyProducts(): Promise<ShopifyProduct[]> {
-  if (cachedShopifyProducts && cachedShopifyProductsExpiresAt > Date.now()) {
-    return cachedShopifyProducts;
-  }
-
-  if (!shopifyProductsPromise) {
-    shopifyProductsPromise = loadAllShopifyProducts();
-  }
-
-  try {
-    const products = await shopifyProductsPromise;
-    cachedShopifyProducts = products;
-    cachedShopifyProductsExpiresAt = Date.now() + CATALOG_CACHE_TTL_MS;
-    return products;
-  } catch (error) {
-    if (cachedShopifyProducts) {
-      return cachedShopifyProducts;
-    }
-
-    shopifyProductsPromise = null;
-    throw error;
-  } finally {
-    shopifyProductsPromise = null;
-  }
-}
-
 export function isCatalogConnectionError(error: unknown): error is CatalogConnectionError {
   return error instanceof CatalogConnectionError;
 }
 
-async function loadCatalogData(): Promise<CatalogData> {
-  if (!hasShopifyStorefrontEnv()) {
-    return getLocalCatalogData();
-  }
+/**
+ * Carga el catálogo completo paginando Shopify y transforma los productos.
+ *
+ * Usamos unstable_cache (integrado con el sistema ISR de Next.js) en lugar de
+ * un caché en memoria artesanal. Esto garantiza que:
+ *  - La revalidación ISR de las páginas de producto individual SIEMPRE obtiene
+ *    datos frescos de Shopify (el caché en módulo anterior bloqueaba ISR).
+ *  - Se puede invalidar al instante desde webhooks con revalidateTag().
+ *  - No hay relojes de caché independientes que se desincronicen.
+ */
+const _loadCatalogData = unstable_cache(
+  async (): Promise<CatalogData> => {
+    if (!hasShopifyStorefrontEnv()) {
+      return getLocalCatalogData();
+    }
 
-  const products = (await getAllShopifyProducts()).map(mapShopifyProductToProduct);
-  const brands = [...new Set(products.map((product) => product.brand))].sort(
-    (left, right) => left.localeCompare(right)
-  );
+    const allShopifyProducts: ShopifyProduct[] = [];
+    let after: string | null | undefined = null;
 
-  return {
-    products,
-    categories: categoryDirectory,
-    brands,
-  };
-}
+    while (true) {
+      const page = await getProductsPage(100, after);
+      allShopifyProducts.push(...page.products);
+
+      if (!page.pageInfo.hasNextPage || !page.pageInfo.endCursor) {
+        break;
+      }
+
+      after = page.pageInfo.endCursor;
+    }
+
+    const products = allShopifyProducts.map(mapShopifyProductToProduct);
+    const brands = [...new Set(products.map((product) => product.brand))].sort(
+      (left, right) => left.localeCompare(right)
+    );
+
+    return { products, categories: categoryDirectory, brands };
+  },
+  [SHOPIFY_PRODUCTS_CACHE_TAG],
+  { revalidate: 60, tags: [SHOPIFY_PRODUCTS_CACHE_TAG] }
+);
 
 export async function getCatalogData(): Promise<CatalogData> {
-  if (cachedCatalogData && cachedCatalogDataExpiresAt > Date.now()) {
-    return cachedCatalogData;
-  }
-
-  if (!catalogDataPromise) {
-    catalogDataPromise = loadCatalogData();
-  }
-
   try {
-    const data = await catalogDataPromise;
-    cachedCatalogData = data;
-    cachedCatalogDataExpiresAt = Date.now() + CATALOG_CACHE_TTL_MS;
+    const data = await _loadCatalogData();
     hasLoggedShopifyConnectionError = false;
     return data;
   } catch (error) {
-    if (cachedCatalogData) {
-      return cachedCatalogData;
-    }
-
     if (!hasLoggedShopifyConnectionError) {
       hasLoggedShopifyConnectionError = true;
       console.warn(
@@ -301,8 +268,6 @@ export async function getCatalogData(): Promise<CatalogData> {
     }
 
     throw new CatalogConnectionError();
-  } finally {
-    catalogDataPromise = null;
   }
 }
 
