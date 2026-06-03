@@ -47,7 +47,7 @@ export default function HeroBanner() {
   }, []);
 
   return (
-    <section className="relative w-full group/hero isolate select-none overflow-hidden">
+    <section className="relative mx-auto w-full max-w-[1600px] group/hero isolate select-none overflow-hidden">
       <Swiper
         onSwiper={(swiper) => { swiperRef.current = swiper; }}
         modules={[Autoplay, Pagination]}
@@ -62,7 +62,7 @@ export default function HeroBanner() {
           <SwiperSlide key={i}>
             <Link
               href={slide.href}
-              className="relative block h-[320px] sm:h-[460px] w-full"
+              className="relative block h-[320px] sm:h-[31.3vw] sm:max-h-[501px] w-full"
               aria-label={slide.alt}
               tabIndex={-1}
             >
