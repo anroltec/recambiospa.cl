@@ -456,7 +456,7 @@ export default function CatalogListing({
                             <p className="text-xs text-steel">+ IVA</p>
                           </div>
                         ) : (
-                          <p className="text-sm font-semibold text-dark/50">Sin compra online</p>
+                          <p className="text-sm font-semibold text-dark/50">Sin stock</p>
                         )}
                         {product.inStock && product.price !== null ? (
                           <button
