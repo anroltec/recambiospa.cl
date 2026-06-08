@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { formatPrice } from "@/lib/format";
+import { getMinimumCartQuantity, getProductMinimumPurchaseText } from "@/lib/minimumPurchase";
 import { getProductListKey } from "@/lib/product";
 import type { Product } from "@/types/product";
 import CheckoutAuthModal from "@/components/cart/CheckoutAuthModal";
@@ -160,6 +161,8 @@ export default function CartPageContent({
                   item.product.price !== null
                     ? formatPrice(item.product.price * item.quantity)
                     : "Por confirmar";
+                const minimumCartQuantity = getMinimumCartQuantity(item.product);
+                const minimumPurchaseText = getProductMinimumPurchaseText(item.product);
 
                 return (
                   <article
@@ -210,6 +213,11 @@ export default function CartPageContent({
                             Precio sujeto a confirmacion
                           </p>
                         ) : null}
+                        {minimumPurchaseText ? (
+                          <p className="mt-2 text-[10px] font-bold uppercase tracking-[0.14em] text-primary-dark md:text-xs md:tracking-[0.18em]">
+                            {minimumPurchaseText}
+                          </p>
+                        ) : null}
                       </div>
 
                       <div className="mt-auto flex flex-col gap-3 border-t border-black/8 pt-3 md:mt-0 md:items-end md:border-t-0 md:pt-0">
@@ -239,7 +247,7 @@ export default function CartPageContent({
                               onClick={() => {
                                 void updateQuantity(item.product.code, item.quantity - 1);
                               }}
-                              disabled={item.quantity <= 1}
+                              disabled={item.quantity <= minimumCartQuantity}
                               className="flex h-8 w-8 items-center justify-center bg-white text-dark transition-colors hover:bg-[#faf8f4] disabled:cursor-not-allowed disabled:opacity-30 md:h-10 md:w-10"
                               aria-label="Reducir cantidad"
                             >

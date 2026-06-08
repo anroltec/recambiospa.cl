@@ -11,6 +11,7 @@ import Modal from "@/components/ui/Modal";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import { WHATSAPP_URL } from "@/lib/contact";
+import { getMinimumCartQuantity, getProductMinimumPurchaseText } from "@/lib/minimumPurchase";
 import { parseDescription } from "@/lib/parseDescription";
 
 interface ProductModalProps {
@@ -20,14 +21,17 @@ interface ProductModalProps {
 
 export default function ProductModal({ product, onClose }: ProductModalProps) {
   const [selectedImage, setSelectedImage] = useState(0);
-  const [quantity, setQuantity] = useState(1);
-  const [justAdded, setJustAdded] = useState(false);
-  const [isAdding, setIsAdding] = useState(false);
+  const minimumCartQuantity = getMinimumCartQuantity(product);
   const { addItem, isInCart } = useCart();
   const inCart = isInCart(product.code);
+  const minimumSelectableQuantity = inCart ? 1 : minimumCartQuantity;
+  const [quantity, setQuantity] = useState(minimumSelectableQuantity);
+  const [justAdded, setJustAdded] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const minimumPurchaseText = getProductMinimumPurchaseText(product);
 
   function adjustQuantity(delta: number) {
-    setQuantity((current) => Math.max(1, current + delta));
+    setQuantity((current) => Math.max(minimumSelectableQuantity, current + delta));
   }
 
   async function handleAddToCart() {
@@ -128,7 +132,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
                 <div className="flex items-center border border-gray-300">
                   <button
                     onClick={() => adjustQuantity(-1)}
-                    disabled={quantity <= 1 || isAdding}
+                    disabled={quantity <= minimumSelectableQuantity || isAdding}
                     className="px-3 py-2 text-dark hover:bg-light disabled:opacity-30 transition-colors"
                     aria-label="Reducir cantidad"
                   >
@@ -145,6 +149,11 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
                   </button>
                 </div>
               </div>
+              {minimumPurchaseText ? (
+                <p className="text-xs font-semibold uppercase tracking-wide text-primary-dark">
+                  {minimumPurchaseText}
+                </p>
+              ) : null}
 
               <Button
                 onClick={() => {

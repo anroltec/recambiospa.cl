@@ -13,6 +13,10 @@ import {
 } from "react";
 import type { CartApiResponse, CartLineItem } from "@/types/cart";
 import type { Product } from "@/types/product";
+import {
+  getCartAddQuantity,
+  normalizeCartLineQuantity,
+} from "@/lib/minimumPurchase";
 
 interface CartContextValue {
   items: CartLineItem[];
@@ -85,16 +89,21 @@ function saveLocalItems(items: CartLineItem[]) {
 
 function upsertLocalItem(items: CartLineItem[], product: Product, quantity: number): CartLineItem[] {
   const existing = items.find((item) => item.product.code === product.code);
+  const addQuantity = getCartAddQuantity(product, quantity, Boolean(existing));
 
   if (!existing) {
-    return [...items, { lineId: product.code, product, quantity }];
+    return [...items, { lineId: product.code, product, quantity: addQuantity }];
   }
 
   return items.map((item) =>
     item.product.code === product.code
-      ? { ...item, quantity: item.quantity + quantity }
+      ? { ...item, quantity: item.quantity + addQuantity }
       : item
   );
+}
+
+function getExistingCartLine(items: CartLineItem[], product: Product): CartLineItem | null {
+  return items.find((item) => item.product.code === product.code) ?? null;
 }
 
 async function readJson<T>(response: Response): Promise<T> {
@@ -386,11 +395,13 @@ export function CartProvider({
 
       return runMutation(async () => {
         const existingCartId = cartIdRef.current;
+        const line = getExistingCartLine(remoteCart.items, product);
+        const addQuantity = getCartAddQuantity(product, quantity, Boolean(line));
 
         try {
           try {
             const cartId = await ensureRemoteCart();
-            const updatedCart = await addRemoteLine(cartId, product.variantId!, quantity);
+            const updatedCart = await addRemoteLine(cartId, product.variantId!, addQuantity);
             syncRemoteCart(updatedCart);
             return;
           } catch (error) {
@@ -402,7 +413,7 @@ export function CartProvider({
             setStoredValue(SHOPIFY_CART_KEY, null);
 
             const cartId = await ensureRemoteCart();
-            const updatedCart = await addRemoteLine(cartId, product.variantId!, quantity);
+            const updatedCart = await addRemoteLine(cartId, product.variantId!, addQuantity);
             syncRemoteCart(updatedCart);
 
             if (error instanceof Error) {
@@ -416,12 +427,13 @@ export function CartProvider({
           );
           setRemoteUnavailable(true);
           syncRemoteCart(null);
-          syncLocalCart(upsertLocalItem(loadLocalItems(), product, quantity));
+          syncLocalCart(upsertLocalItem(loadLocalItems(), product, addQuantity));
         }
       });
     },
     [
       ensureRemoteCart,
+      remoteCart.items,
       runMutation,
       shopifyEnabled,
       syncLocalCart,
@@ -474,7 +486,9 @@ export function CartProvider({
 
           syncLocalCart(
             currentItems.map((item) =>
-              item.product.code === code ? { ...item, quantity } : item
+              item.product.code === code
+                ? { ...item, quantity: normalizeCartLineQuantity(item.product, quantity) }
+                : item
             )
           );
         });
@@ -494,7 +508,11 @@ export function CartProvider({
           return;
         }
 
-        const updatedCart = await updateRemoteLine(cartId, line.lineId, quantity);
+        const updatedCart = await updateRemoteLine(
+          cartId,
+          line.lineId,
+          normalizeCartLineQuantity(line.product, quantity)
+        );
         syncRemoteCart(updatedCart);
       });
     },
