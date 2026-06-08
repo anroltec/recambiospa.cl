@@ -476,7 +476,7 @@ export default function CatalogListing({
                           </button>
                         ) : (
                           <p className="w-full mt-3 text-sm font-medium py-2 text-center text-dark/50">
-                            Sin compra online
+                            Sin stock
                           </p>
                         )}
                       </div>
