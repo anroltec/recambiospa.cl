@@ -55,7 +55,7 @@ export default function ProductCard({ product, onClick }: ProductCardProps) {
             <span className="text-[10px] text-gray-400">+ IVA</span>
           </div>
         ) : (
-          <p className="mt-2 text-xs text-gray-400 italic">Sin compra online</p>
+          <p className="mt-2 text-xs text-gray-400 italic">Sin stock</p>
         )}
       </div>
     </div>
