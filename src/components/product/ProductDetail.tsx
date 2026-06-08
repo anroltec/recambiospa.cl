@@ -116,7 +116,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               </p>
             </>
           ) : (
-            <p className="text-xl text-gray-400 italic mb-6">Sin compra online</p>
+            <p className="text-xl text-gray-400 italic mb-6">Sin stock</p>
           )}
 
           {product.description && (() => {
