@@ -18,6 +18,12 @@ const slides = [
     alt: "Sección Precios Imperdibles - Comercializadora Recambio SpA",
   },
   {
+    image: "/banners/banner-bateria-volvo.png",
+    imageMobile: "/banners/banner-mobile-bateria-volvo.png",
+    href: "/collections/baterias",
+    alt: "Batería Arranque Volvo 520 35A Alternativa - Precio de venta $85.910 + IVA",
+  },
+  {
     image: "/banners/banner-1.png",
     imageMobile: "/banners/banner-mobile-loctite.png",
     href: "/collections/loctite",
