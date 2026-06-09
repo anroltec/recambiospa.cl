@@ -51,7 +51,7 @@ export default function MarcasPage() {
                   className="object-contain max-h-16 w-auto"
                 />
               </div>
-              <h3 className="font-bold text-dark text-center mb-1 group-hover:text-primary transition-colors">
+              <h3 className="font-bold text-dark text-center mb-1 uppercase group-hover:text-primary transition-colors">
                 {brand.name}
               </h3>
               <p className="text-sm text-dark/60 text-center leading-relaxed">
