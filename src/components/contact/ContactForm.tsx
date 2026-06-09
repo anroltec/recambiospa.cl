@@ -156,7 +156,7 @@ export default function ContactForm() {
             name="phone"
             label="Telefono"
             type="tel"
-            placeholder="+56 9 1234 5678"
+            placeholder="+569 1234 5678"
             autoComplete="tel"
             value={values.phone}
             onChange={(event) => updateField("phone", event.target.value)}
