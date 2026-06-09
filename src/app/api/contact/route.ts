@@ -101,17 +101,16 @@ export async function POST(request: NextRequest) {
       sourcePath: "/contacto",
     });
 
-    await fetch("https://connect.mailerlite.com/api/emails", {
+    const emailRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Authorization": `Bearer ${process.env.MAILERLITE_API_KEY}`,
+        "Authorization": `Bearer ${process.env.RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: { email: "no-reply@recambiospa.cl", name: "Formulario Web Recambio" },
-        to: [{ email: "ventas@recambiospa.cl" }],
-        reply_to: { email },
+        from: "Formulario Web Recambio <no-reply@recambiospa.cl>",
+        to: ["ventas@recambiospa.cl"],
+        reply_to: email,
         subject: `Nuevo mensaje de contacto — ${name}`,
         html: `
           <p><strong>Nombre:</strong> ${name}</p>
@@ -122,6 +121,11 @@ export async function POST(request: NextRequest) {
         `,
       }),
     });
+
+    if (!emailRes.ok) {
+      const body = await emailRes.text();
+      console.error("[contact] Resend error", emailRes.status, body);
+    }
 
     return NextResponse.json({
       ok: true,
