@@ -123,7 +123,7 @@ export default function Home() {
                 Recambio SpA
               </p>
               <h1 className="mt-4 max-w-4xl text-4xl font-black uppercase tracking-tight text-primary-dark sm:text-5xl lg:text-[4.45rem] lg:leading-[0.92]">
-                Repuestos y accesorios para transporte en todo Chile
+                Repuestos, accesorios y equipamiento para flotas en todo Chile
               </h1>
               <div className="mt-6 h-px w-20 bg-primary/30" />
               <p className="mt-6 max-w-3xl text-base leading-8 text-dark/66">
