@@ -196,7 +196,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 ) : (
                   <span className="flex items-center justify-center gap-2">
                     <ShoppingCart size={18} />
-                    {isAdding ? "Agregando..." : inCart ? "Agregar mas" : "Agregar al carrito"}
+                    {isAdding ? "Agregando..." : inCart ? "Agregar más" : "Agregar al carrito"}
                   </span>
                 )}
               </Button>
@@ -216,7 +216,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           {Object.keys(product.specs).length > 0 && (
             <div>
               <h2 className="text-sm font-bold uppercase tracking-wider text-dark mb-3 pb-2 border-b border-gray-200">
-                Ficha tecnica
+                Ficha técnica
               </h2>
               <table className="w-full text-sm">
                 <tbody>

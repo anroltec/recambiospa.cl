@@ -95,13 +95,13 @@ export default function ChangePasswordPanel() {
       }
 
       if (!response.ok || !data.ok) {
-        throw new Error(data.error ?? "No fue posible actualizar la contrasena.");
+        throw new Error(data.error ?? "No fue posible actualizar la contraseña.");
       }
 
       setFormValues(EMPTY_FORM);
       setFeedback({
         tone: "success",
-        message: "Contrasena actualizada. La sesion sigue abierta con el nuevo token.",
+        message: "Contraseña actualizada. La sesión sigue abierta con el nuevo token.",
       });
     } catch (error) {
       setFeedback({
@@ -109,7 +109,7 @@ export default function ChangePasswordPanel() {
         message:
           error instanceof Error
             ? error.message
-            : "No fue posible actualizar la contrasena.",
+            : "No fue posible actualizar la contraseña.",
       });
     } finally {
       setIsSubmitting(false);
@@ -125,7 +125,7 @@ export default function ChangePasswordPanel() {
       <div className="flex min-h-[48vh] items-center justify-center">
         <div className="flex items-center gap-3 text-sm text-dark/55">
           <Loader2 size={18} className="animate-spin text-primary" />
-          Verificando sesion...
+          Verificando sesión...
         </div>
       </div>
     );
@@ -144,11 +144,11 @@ export default function ChangePasswordPanel() {
                 Seguridad
               </p>
               <h1 className="mt-1 text-2xl font-black uppercase text-dark">
-                Cambiar contrasena
+                Cambiar contraseña
               </h1>
               <p className="mt-2 max-w-xl text-sm text-dark/55">
-                Usa tu contrasena actual para confirmar la identidad y Shopify
-                rotara la sesion con un nuevo customer access token.
+                Usa tu contraseña actual para confirmar la identidad y Shopify
+                rotará la sesión con un nuevo customer access token.
               </p>
               {accountEmail ? (
                 <p className="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-dark/35">
@@ -162,7 +162,7 @@ export default function ChangePasswordPanel() {
         <form onSubmit={(event) => void handleSubmit(event)} className="space-y-0">
           <div className="grid gap-5 px-6 py-6">
             <PasswordField
-              label="Contrasena actual"
+              label="Contraseña actual"
               value={formValues.currentPassword}
               onChange={(value) => updateField("currentPassword", value)}
               show={showCurrent}
@@ -170,16 +170,16 @@ export default function ChangePasswordPanel() {
               autoComplete="current-password"
             />
             <PasswordField
-              label="Nueva contrasena"
+              label="Nueva contraseña"
               value={formValues.newPassword}
               onChange={(value) => updateField("newPassword", value)}
               show={showNew}
               onToggle={() => setShowNew((value) => !value)}
               autoComplete="new-password"
-              helperText="Minimo 5 caracteres."
+              helperText="Mínimo 5 caracteres."
             />
             <PasswordField
-              label="Confirmar nueva contrasena"
+              label="Confirmar nueva contraseña"
               value={formValues.confirmPassword}
               onChange={(value) => updateField("confirmPassword", value)}
               show={showConfirm}
@@ -194,8 +194,8 @@ export default function ChangePasswordPanel() {
                 <FeedbackBanner tone={feedback.tone} message={feedback.message} />
               ) : (
                 <p className="text-dark/48">
-                  Si cambias la contrasena, Shopify invalida los tokens anteriores
-                  y la sesion local se actualiza automaticamente.
+                  Si cambias la contraseña, Shopify invalida los tokens anteriores
+                  y la sesión local se actualiza automáticamente.
                 </p>
               )}
             </div>
@@ -212,7 +212,7 @@ export default function ChangePasswordPanel() {
                   Actualizando...
                 </>
               ) : (
-                "Actualizar contrasena"
+                "Actualizar contraseña"
               )}
             </Button>
           </div>
@@ -256,7 +256,7 @@ function PasswordField({
         <button
           type="button"
           onClick={onToggle}
-          aria-label={show ? "Ocultar contrasena" : "Mostrar contrasena"}
+          aria-label={show ? "Ocultar contraseña" : "Mostrar contraseña"}
           className="absolute right-4 top-1/2 -translate-y-1/2 text-dark/30 transition-colors hover:text-dark/60"
         >
           {show ? <EyeOff size={17} /> : <Eye size={17} />}

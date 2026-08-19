@@ -19,7 +19,7 @@ export default function CatalogConnectionState({
   breadcrumbs,
   retryHref,
   title = "No pudimos cargar los productos",
-  description = "La conexion con Shopify no esta disponible en este momento. Reintenta en unos minutos o contactanos si necesitas ayuda con una referencia.",
+  description = "La conexión con Shopify no está disponible en este momento. Reintenta en unos minutos o contáctanos si necesitas ayuda con una referencia.",
 }: CatalogConnectionStateProps) {
   return (
     <div className="bg-light min-h-screen">
@@ -28,7 +28,7 @@ export default function CatalogConnectionState({
         eyebrow={
           <>
             <AlertTriangle size={12} />
-            Conexion no disponible
+            Conexión no disponible
           </>
         }
         title={title}
@@ -44,10 +44,10 @@ export default function CatalogConnectionState({
               </div>
               <div>
                 <h2 className="text-xl font-black uppercase tracking-tight text-dark">
-                  Shopify no respondio a tiempo
+                  Shopify no respondió a tiempo
                 </h2>
                 <p className="mt-3 max-w-2xl text-sm leading-relaxed text-dark/65">
-                  El sitio sigue operativo, pero no fue posible recuperar el catalogo remoto.
+                  El sitio sigue operativo, pero no fue posible recuperar el catálogo remoto.
                   Puedes volver a intentar la carga o escribirnos para cotizar la pieza que
                   necesitas.
                 </p>

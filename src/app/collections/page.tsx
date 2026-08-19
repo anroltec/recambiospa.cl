@@ -52,7 +52,7 @@ export default async function CollectionsPage({ searchParams }: Props) {
       <CatalogConnectionState
         breadcrumbs={[
           { label: "Inicio", href: "/" },
-          { label: "Catalogo" },
+          { label: "Catálogo" },
         ]}
         retryHref="/collections"
       />

@@ -71,7 +71,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       return {};
     }
 
-    const prefix = resolved.type === "category" ? "Categoria" : "Marca";
+    const prefix = resolved.type === "category" ? "Categoría" : "Marca";
     const canonical = `/collections/${category}`;
     const description = `${prefix}: ${resolved.label}. Repuestos y accesorios para transporte disponibles en Recambio SpA.`;
 
@@ -104,7 +104,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       <CatalogConnectionState
         breadcrumbs={[
           { label: "Inicio", href: "/" },
-          { label: "Catalogo", href: "/collections" },
+          { label: "Catálogo", href: "/collections" },
           { label: data.category },
         ]}
         retryHref={`/collections/${data.category}`}

@@ -105,12 +105,12 @@ export default function CatalogListing({
   const breadcrumbItems = currentContextLabel
     ? [
         { label: "Inicio", href: "/" },
-        { label: "Catalogo", href: "/collections" },
+        { label: "Catálogo", href: "/collections" },
         { label: currentContextLabel },
       ]
     : [
         { label: "Inicio", href: "/" },
-        { label: "Catalogo" },
+        { label: "Catálogo" },
       ];
 
   const handleCategoryChange = useCallback((value: string) => {
@@ -158,7 +158,7 @@ export default function CatalogListing({
         <div className="relative">
           <input
             type="text"
-            placeholder="Buscar en catalogo..."
+            placeholder="Buscar en catálogo..."
             value={searchQuery}
             onChange={(event) => handleSearchChange(event.target.value)}
             className="w-full border border-gray-300 rounded-sm px-3 py-2 pr-8 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
@@ -177,7 +177,7 @@ export default function CatalogListing({
           }
           className="w-full flex items-center justify-between px-4 py-3 text-sm font-bold text-dark uppercase tracking-wide hover:bg-light transition-colors"
         >
-          Categorias
+          Categorías
           <ChevronDown
             size={16}
             className={`transition-transform ${expandedSections.categories ? "rotate-180" : ""}`}
@@ -308,10 +308,10 @@ export default function CatalogListing({
         eyebrow={
           <>
             <LayoutGrid size={12} />
-            {products.length} referencias en catalogo
+            {products.length} referencias en catálogo
           </>
         }
-        title={currentContextLabel || "Catalogo de Productos"}
+        title={currentContextLabel || "Catálogo de Productos"}
         description={
           <>
             {filteredProducts.length} producto{filteredProducts.length !== 1 ? "s" : ""} encontrado
@@ -438,7 +438,7 @@ export default function CatalogListing({
                         )}
                         {product.price === null && (
                           <span className="absolute top-2 left-2 bg-primary text-white text-xs font-bold px-1.5 py-0.5 uppercase">
-                            Catalogo
+                            Catálogo
                           </span>
                         )}
                       </div>
@@ -472,7 +472,7 @@ export default function CatalogListing({
                                 <Check size={14} />
                                 Agregado
                               </span>
-                            ) : isInCart(product.code) ? "Agregar mas" : "Agregar al carrito"}
+                            ) : isInCart(product.code) ? "Agregar más" : "Agregar al carrito"}
                           </button>
                         ) : (
                           <p className="w-full mt-3 text-sm font-medium py-2 text-center text-dark/50">
@@ -555,7 +555,7 @@ export default function CatalogListing({
                 <Search size={48} className="mx-auto text-steel/50 mb-4" />
                 <h3 className="text-lg font-semibold text-dark mb-2">No se encontraron productos</h3>
                 <p className="text-sm text-steel mb-4">
-                  Intenta ajustar los filtros o la busqueda
+                  Intenta ajustar los filtros o la búsqueda
                 </p>
                 <button onClick={clearFilters} className="text-sm text-primary font-semibold hover:underline">
                   Limpiar todos los filtros

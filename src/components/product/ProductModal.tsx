@@ -171,7 +171,7 @@ export default function ProductModal({ product, onClose }: ProductModalProps) {
                 ) : (
                   <span className="flex items-center justify-center gap-2">
                     <ShoppingCart size={16} />
-                    {isAdding ? "Agregando..." : inCart ? "Agregar mas" : "Agregar al carrito"}
+                    {isAdding ? "Agregando..." : inCart ? "Agregar más" : "Agregar al carrito"}
                   </span>
                 )}
               </Button>

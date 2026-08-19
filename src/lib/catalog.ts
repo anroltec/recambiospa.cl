@@ -38,7 +38,7 @@ export interface CatalogData {
 }
 
 export class CatalogConnectionError extends Error {
-  constructor(message = "No pudimos conectar con Shopify para cargar el catalogo.") {
+  constructor(message = "No pudimos conectar con Shopify para cargar el catálogo.") {
     super(message);
     this.name = "CatalogConnectionError";
   }

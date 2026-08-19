@@ -36,15 +36,15 @@ function validateContactPayload(payload: ContactPayload) {
   }
 
   if (!email || !isValidEmail(email)) {
-    fieldErrors.email = "Ingresa un correo valido.";
+    fieldErrors.email = "Ingresa un correo válido.";
   }
 
   if (phone && phone.length > 32) {
-    fieldErrors.phone = "El telefono es demasiado largo.";
+    fieldErrors.phone = "El teléfono es demasiado largo.";
   }
 
   if (message.length < 10) {
-    fieldErrors.message = "Cuentanos un poco mas sobre tu consulta.";
+    fieldErrors.message = "Cuéntanos un poco más sobre tu consulta.";
   } else if (message.length > 2000) {
     fieldErrors.message = "El mensaje es demasiado largo.";
   }
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     payload = (await request.json()) as ContactPayload;
   } catch {
     return NextResponse.json(
-      { ok: false, error: "Solicitud invalida." },
+      { ok: false, error: "Solicitud inválida." },
       { status: 400 }
     );
   }

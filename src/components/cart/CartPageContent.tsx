@@ -92,8 +92,8 @@ export default function CartPageContent({
             No pudimos cargar sugeridos
           </p>
           <p className="mt-2">
-            Shopify no esta respondiendo en este momento. Puedes seguir usando el carrito, pero las
-            recomendaciones del catalogo podrian no aparecer hasta que se restablezca la conexion.
+            Shopify no está respondiendo en este momento. Puedes seguir usando el carrito, pero las
+            recomendaciones del catálogo podrían no aparecer hasta que se restablezca la conexión.
           </p>
         </section>
       )}
@@ -107,8 +107,8 @@ export default function CartPageContent({
                 {items.length > 0
                   ? "Revisa cantidades y subtotales antes de continuar."
                     : isHydratingCart
-                    ? "Estamos recuperando la seleccion guardada."
-                    : "Aqui veras las referencias agregadas, sus cantidades y el resumen del pedido."}
+                    ? "Estamos recuperando la selección guardada."
+                    : "Aquí verás las referencias agregadas, sus cantidades y el resumen del pedido."}
               </p>
             </div>
             {items.length > 0 ? (
@@ -135,10 +135,10 @@ export default function CartPageContent({
                 </div>
                 <div className="space-y-2">
                   <h2 className="text-2xl font-black uppercase tracking-tight text-primary-dark">
-                    {isHydratingCart ? "Recuperando tu carrito" : "Tu carrito todavia esta vacio"}
+                    {isHydratingCart ? "Recuperando tu carrito" : "Tu carrito todavía está vacío"}
                   </h2>
                   <p className="text-sm leading-relaxed text-dark/60">
-                    Agrega productos desde el catalogo y el resumen lateral se actualizara al
+                    Agrega productos desde el catálogo y el resumen lateral se actualizará al
                     instante para comprar.
                   </p>
                 </div>
@@ -146,7 +146,7 @@ export default function CartPageContent({
                   href="/collections"
                   className="inline-flex items-center gap-2 rounded-sm bg-primary px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white transition-colors hover:bg-primary-light"
                 >
-                  Explorar catalogo
+                  Explorar catálogo
                   <ArrowRight size={15} />
                 </Link>
               </div>
@@ -210,7 +210,7 @@ export default function CartPageContent({
                         ) : null}
                         {item.product.price === null ? (
                           <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#b07d00] md:text-xs md:tracking-[0.18em]">
-                            Precio sujeto a confirmacion
+                            Precio sujeto a confirmación
                           </p>
                         ) : null}
                         {minimumPurchaseText ? (
@@ -381,7 +381,7 @@ export default function CartPageContent({
               </h2>
             </div>
             <p className="max-w-xl text-sm leading-relaxed text-dark/55">
-              Seleccion rapida relacionada con las marcas o categorias que ya estas mirando.
+              Selección rápida relacionada con las marcas o categorías que ya estás mirando.
             </p>
           </div>
 

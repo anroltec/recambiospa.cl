@@ -288,7 +288,7 @@ export default function OrderDetailsModal({
                   </p>
                 </div>
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-dark/45">
-                  {detail.lineItems.length} lineas cargadas
+                  {detail.lineItems.length} líneas cargadas
                 </p>
               </div>
 
@@ -330,7 +330,7 @@ export default function OrderDetailsModal({
 
                     <div className="text-left sm:text-right">
                       <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary-dark/45">
-                        Total linea
+                        Total línea
                       </p>
                       <p className="mt-1 text-lg font-black text-dark">
                         {formatMoney(item.linePriceAmount, item.currencyCode)}
@@ -353,7 +353,7 @@ export default function OrderDetailsModal({
                       className="xl:flex-1"
                     />
                     <SummaryMetric
-                      label="Envio"
+                      label="Envío"
                       value={formatMoney(detail.shippingAmount, detail.currencyCode)}
                       className="xl:flex-1"
                     />
@@ -373,7 +373,7 @@ export default function OrderDetailsModal({
                     {detail.shippingMethodTitle && (
                       <div className="border border-black/8 bg-[#fcfaf6] px-4 py-3 xl:flex-[1.5]">
                         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary-dark/45">
-                          Metodo de envio
+                          Método de envío
                         </p>
                         <p className="mt-2 text-sm font-semibold text-dark">
                           {detail.shippingMethodTitle}
@@ -392,13 +392,13 @@ export default function OrderDetailsModal({
                     <p>{detail.email ?? "Sin correo registrado"}</p>
                     <div className="flex items-center gap-2">
                       <Phone size={14} className="text-primary-dark/45" />
-                      <span>{detail.phone ?? "Sin telefono registrado"}</span>
+                      <span>{detail.phone ?? "Sin teléfono registrado"}</span>
                     </div>
                   </div>
                 </DetailCard>
 
                 <DetailCard
-                  title="Direccion de envio"
+                  title="Dirección de envío"
                   icon={<MapPin size={16} className="text-primary" />}
                   className="h-full"
                 >
@@ -406,7 +406,7 @@ export default function OrderDetailsModal({
                 </DetailCard>
 
                 <DetailCard
-                  title="Direccion de facturacion"
+                  title="Dirección de facturación"
                   icon={<MapPin size={16} className="text-primary" />}
                   className="h-full"
                 >
@@ -441,7 +441,7 @@ function AddressBlock({ address }: { address: CustomerOrderAddress | null }) {
   const lines = getAddressLines(address);
 
   if (!lines.length) {
-    return <p className="text-sm text-dark/45">Sin informacion registrada.</p>;
+    return <p className="text-sm text-dark/45">Sin información registrada.</p>;
   }
 
   return (

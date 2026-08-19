@@ -17,7 +17,7 @@ export default function CuentaEmpresaPage() {
           { label: "Datos Empresa" },
         ]}
         title="Datos Empresa"
-        description="Administra RUT, razon social, giro y direccion de facturacion desde tu cuenta de cliente."
+        description="Administra RUT, razón social, giro y dirección de facturación desde tu cuenta de cliente."
       />
       <AccountPanel view="company" />
     </div>

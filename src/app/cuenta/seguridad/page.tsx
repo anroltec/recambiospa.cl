@@ -17,7 +17,7 @@ export default function CuentaSeguridadPage() {
           { label: "Seguridad" },
         ]}
         title="Seguridad"
-        description="Actualiza la contrasena del cliente autenticado sin salir de la sesion actual."
+        description="Actualiza la contraseña del cliente autenticado sin salir de la sesión actual."
       />
       <ChangePasswordPanel />
     </div>

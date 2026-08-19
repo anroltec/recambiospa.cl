@@ -114,12 +114,12 @@ export default async function ProductPage({ params }: Props) {
       <CatalogConnectionState
         breadcrumbs={[
           { label: "Inicio", href: "/" },
-          { label: "Catalogo", href: "/collections" },
+          { label: "Catálogo", href: "/collections" },
           { label: data.code },
         ]}
         retryHref={`/producto/${data.code}`}
         title="No pudimos cargar este producto"
-        description="La ficha del producto depende de Shopify y la conexion no esta disponible en este momento. Reintenta en unos minutos o contactanos para validar la referencia."
+        description="La ficha del producto depende de Shopify y la conexión no está disponible en este momento. Reintenta en unos minutos o contáctanos para validar la referencia."
       />
     );
   }
@@ -138,7 +138,7 @@ export default async function ProductPage({ params }: Props) {
             </Link>
             <ChevronRight size={12} />
             <Link href="/collections" className="hover:text-primary transition-colors">
-              Catalogo
+              Catálogo
             </Link>
             <ChevronRight size={12} />
             <Link

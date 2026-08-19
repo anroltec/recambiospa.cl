@@ -238,7 +238,7 @@ export const servicePricesByModule: Record<string, ServicePriceGroup[]> = {
         { code: "REP28", description: "Reparación Pedal Acelerador 904-906", price: 62400 },
         { code: "SEL01", description: "Sellado Módulo Voith 936", price: 6240 },
         { code: "REP29", description: "Reparación Sensor Velocidad (2159)", price: 139200 },
-        { code: "REP11", description: "Reparación Sensor Contrapresion CRT", price: 19500 },
+        { code: "REP11", description: "Reparación Sensor Contrapresión CRT", price: 19500 },
         { code: "REP03", description: "Reparación Solenoide KL30", price: 93600 },
         { code: "REP04", description: "Reparación Dosificadora Adblue 926", price: 76440 },
         { code: "REP08", description: "Reparación Wifi Bus Red", price: 56000 },

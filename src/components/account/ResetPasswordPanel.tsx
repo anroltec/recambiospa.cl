@@ -36,7 +36,7 @@ export default function ResetPasswordPanel({
 
     try {
       if (!resetUrl) {
-        throw new Error("El enlace de recuperacion no contiene reset_url.");
+        throw new Error("El enlace de recuperación no contiene reset_url.");
       }
 
       const response = await fetch("/api/customer/auth/reset", {
@@ -55,7 +55,7 @@ export default function ResetPasswordPanel({
       };
 
       if (!response.ok || !data.ok) {
-        throw new Error(data.error ?? "No fue posible restablecer la contrasena.");
+        throw new Error(data.error ?? "No fue posible restablecer la contraseña.");
       }
 
       router.replace("/cuenta");
@@ -63,7 +63,7 @@ export default function ResetPasswordPanel({
       setFeedback(
         error instanceof Error
           ? error.message
-          : "No fue posible restablecer la contrasena."
+          : "No fue posible restablecer la contraseña."
       );
     } finally {
       setIsSubmitting(false);
@@ -84,13 +84,13 @@ export default function ResetPasswordPanel({
             </span>
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
-                Recuperacion
+                Recuperación
               </p>
               <h1 className="mt-1 text-2xl font-black uppercase text-dark">
-                Restablecer contrasena
+                Restablecer contraseña
               </h1>
               <p className="mt-2 max-w-xl text-sm text-dark/55">
-                Define una nueva contrasena usando el enlace enviado por Shopify
+                Define una nueva contraseña usando el enlace enviado por Shopify
                 al correo del cliente.
               </p>
             </div>
@@ -99,20 +99,20 @@ export default function ResetPasswordPanel({
 
         {!resetUrl ? (
           <div className="px-6 py-6">
-            <FeedbackBanner message="El enlace es invalido o incompleto. Revisa el correo de recuperacion y vuelve a intentarlo." />
+            <FeedbackBanner message="El enlace es inválido o incompleto. Revisa el correo de recuperación y vuelve a intentarlo." />
           </div>
         ) : (
           <form onSubmit={(event) => void handleSubmit(event)} className="space-y-0">
             <div className="grid gap-5 px-6 py-6">
               <PasswordField
-                label="Nueva contrasena"
+                label="Nueva contraseña"
                 value={formValues.password}
                 onChange={(value) => updateField("password", value)}
                 show={showPassword}
                 onToggle={() => setShowPassword((value) => !value)}
               />
               <PasswordField
-                label="Confirmar nueva contrasena"
+                label="Confirmar nueva contraseña"
                 value={formValues.confirmPassword}
                 onChange={(value) => updateField("confirmPassword", value)}
                 show={showConfirmPassword}
@@ -127,7 +127,7 @@ export default function ResetPasswordPanel({
                 ) : (
                   <p className="text-dark/48">
                     Al completar el reset, el cliente queda autenticado con la
-                    nueva contrasena y redirigido a su cuenta.
+                    nueva contraseña y redirigido a su cuenta.
                   </p>
                 )}
               </div>
@@ -144,7 +144,7 @@ export default function ResetPasswordPanel({
                     Restableciendo...
                   </>
                 ) : (
-                  "Guardar nueva contrasena"
+                  "Guardar nueva contraseña"
                 )}
               </Button>
             </div>
@@ -185,14 +185,14 @@ function PasswordField({
         <button
           type="button"
           onClick={onToggle}
-          aria-label={show ? "Ocultar contrasena" : "Mostrar contrasena"}
+          aria-label={show ? "Ocultar contraseña" : "Mostrar contraseña"}
           className="absolute right-4 top-1/2 -translate-y-1/2 text-dark/30 transition-colors hover:text-dark/60"
         >
           {show ? <EyeOff size={17} /> : <Eye size={17} />}
         </button>
       </div>
       <span className="mt-1.5 block text-xs text-dark/40">
-        Minimo 5 caracteres.
+        Mínimo 5 caracteres.
       </span>
     </label>
   );

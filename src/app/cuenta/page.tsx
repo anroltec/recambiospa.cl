@@ -16,7 +16,7 @@ export default function CuentaPage() {
           { label: "Mi Cuenta" },
         ]}
         title="Mi Cuenta"
-        description="Accede con tu cuenta de cliente para revisar pedidos y mantener al dia los datos de empresa y facturacion."
+        description="Accede con tu cuenta de cliente para revisar pedidos y mantener al día los datos de empresa y facturación."
       />
       <AccountPanel view="dashboard" />
     </div>

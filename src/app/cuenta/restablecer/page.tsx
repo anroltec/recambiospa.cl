@@ -3,7 +3,7 @@ import ResetPasswordPanel from "@/components/account/ResetPasswordPanel";
 import PageHero from "@/components/ui/PageHero";
 
 export const metadata: Metadata = {
-  title: "Restablecer Contrasena",
+  title: "Restablecer Contraseña",
   robots: { index: false, follow: false },
 };
 
@@ -37,10 +37,10 @@ export default async function CuentaRestablecerPage({
       <PageHero
         breadcrumbs={[
           { label: "Inicio", href: "/" },
-          { label: "Restablecer contrasena" },
+          { label: "Restablecer contraseña" },
         ]}
-        title="Restablecer Contrasena"
-        description="Ingresa una nueva contrasena desde el enlace de recuperacion enviado por Shopify."
+        title="Restablecer Contraseña"
+        description="Ingresa una nueva contraseña desde el enlace de recuperación enviado por Shopify."
       />
       <ResetPasswordPanel resetUrl={resetUrl} />
     </div>

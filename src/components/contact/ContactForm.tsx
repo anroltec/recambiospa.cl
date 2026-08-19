@@ -154,7 +154,7 @@ export default function ContactForm() {
           <Field
             id="phone"
             name="phone"
-            label="Telefono"
+            label="Teléfono"
             type="tel"
             placeholder="+569 1234 5678"
             autoComplete="tel"
@@ -183,7 +183,7 @@ export default function ContactForm() {
               aria-invalid={fieldErrors.message ? "true" : "false"}
               aria-describedby={fieldErrors.message ? "message-error" : undefined}
               className="w-full resize-none border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm transition-colors focus:border-primary focus:bg-white focus:outline-none"
-              placeholder="Nombre o codigo del producto que necesitas..."
+              placeholder="Nombre o código del producto que necesitas..."
             />
             {fieldErrors.message ? (
               <p id="message-error" className="mt-1.5 text-xs text-red-600">
