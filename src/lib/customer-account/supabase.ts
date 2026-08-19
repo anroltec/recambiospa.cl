@@ -2,6 +2,7 @@ import "server-only";
 
 import { createClient } from "@supabase/supabase-js";
 import type { CustomerCompanyProfileInput, CustomerDocumentType } from "@/types/customer";
+import { CUSTOMER_PROFILE_STORAGE_TIMEOUT_MS } from "@/lib/customer-account/profile-data";
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
 
@@ -73,6 +74,7 @@ export async function getSupabaseCustomerProfile(
     .from("customer_profiles")
     .select(SELECT_COLS)
     .eq("shopify_id", shopifyId)
+    .abortSignal(AbortSignal.timeout(CUSTOMER_PROFILE_STORAGE_TIMEOUT_MS))
     .maybeSingle();
 
   if (error) {
@@ -109,7 +111,8 @@ export async function upsertSupabaseCustomerProfile(
 
   const { error } = await supabase
     .from("customer_profiles")
-    .upsert(row, { onConflict: "shopify_id" });
+    .upsert(row, { onConflict: "shopify_id" })
+    .abortSignal(AbortSignal.timeout(CUSTOMER_PROFILE_STORAGE_TIMEOUT_MS));
 
   if (error) {
     throw new Error(`Supabase write error: ${error.message}`);

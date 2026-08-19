@@ -68,10 +68,14 @@ export default function Header() {
 
   /* ── Check auth on mount ── */
   useEffect(() => {
-    fetch("/api/customer/profile", { method: "GET", cache: "no-store" })
+    fetch("/api/customer/auth/status", { method: "GET", cache: "no-store" })
       .then(async (res) => {
-        if (res.ok) {
-          const data = (await res.json()) as { ok: boolean; profile: AccountProfile };
+        const data = (await res.json()) as {
+          ok: boolean;
+          authenticated: boolean;
+          profile?: AccountProfile;
+        };
+        if (res.ok && data.ok && data.authenticated && data.profile) {
           setAccountProfile(data.profile);
           setAuthStatus("authed");
         } else {

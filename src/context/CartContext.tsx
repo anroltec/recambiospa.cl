@@ -125,7 +125,7 @@ async function fetchExistingCart(cartId: string): Promise<CartApiResponse | null
     throw new Error(payload.error || "Unable to load Shopify cart.");
   }
 
-  const payload = await readJson<{ cart: CartApiResponse }>(response);
+  const payload = await readJson<{ cart: CartApiResponse | null }>(response);
   return payload.cart;
 }
 

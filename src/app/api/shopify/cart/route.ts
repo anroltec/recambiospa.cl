@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { serializeShopifyCart } from "@/lib/catalog";
 import { createCart, getCart } from "@/lib/shopify";
+import { createCartLookupResponse } from "@/lib/shopify/cart-response";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -40,13 +41,10 @@ export async function GET(request: NextRequest) {
     const cart = await getCart(cartId, { buyerIp: getBuyerIp(request) });
 
     if (!cart) {
-      return Response.json(
-        { ok: false, error: "Shopify cart not found." },
-        { status: 404 }
-      );
+      return createCartLookupResponse(null);
     }
 
-    return Response.json({ ok: true, cart: serializeShopifyCart(cart) });
+    return createCartLookupResponse(serializeShopifyCart(cart));
   } catch (error) {
     return Response.json(
       {

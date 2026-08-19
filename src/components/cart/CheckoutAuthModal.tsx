@@ -18,9 +18,13 @@ export default function CheckoutAuthModal({
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    fetch("/api/customer/profile")
-      .then((res) => {
-        if (res.ok) {
+    fetch("/api/customer/auth/status", { cache: "no-store" })
+      .then(async (res) => {
+        const data = (await res.json()) as {
+          ok: boolean;
+          authenticated: boolean;
+        };
+        if (res.ok && data.ok && data.authenticated) {
           // Already logged in — go straight to checkout
           window.open(checkoutUrl, "_blank", "noopener,noreferrer");
           onClose();

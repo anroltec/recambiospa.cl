@@ -51,9 +51,13 @@ export default function LoginModal({ onClose, onSuccess }: LoginModalProps) {
   const [isSubmittingReg, setIsSubmittingReg] = useState(false);
 
   useEffect(() => {
-    fetch("/api/customer/profile", { method: "GET", cache: "no-store" })
-      .then((res) => {
-        if (res.ok) handleSuccess();
+    fetch("/api/customer/auth/status", { method: "GET", cache: "no-store" })
+      .then(async (res) => {
+        const data = (await res.json()) as {
+          ok: boolean;
+          authenticated: boolean;
+        };
+        if (res.ok && data.ok && data.authenticated) handleSuccess();
       })
       .catch(() => {})
       .finally(() => setCheckingAuth(false));

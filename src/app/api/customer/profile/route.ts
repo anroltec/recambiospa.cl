@@ -7,10 +7,12 @@ import {
 import {
   getSupabaseCustomerProfile,
   upsertSupabaseCustomerProfile,
-  type SupabaseCustomerRow,
 } from "@/lib/customer-account/supabase";
+import {
+  resolveCustomerProfile,
+  settleCustomerProfileUpdates,
+} from "@/lib/customer-account/profile-data";
 import type {
-  CustomerCompanyProfile,
   CustomerCompanyProfileInput,
   CustomerDocumentType,
 } from "@/types/customer";
@@ -74,45 +76,18 @@ function parseProfileInput(payload: unknown): CustomerCompanyProfileInput {
   };
 }
 
-/** Merge Shopify identity skeleton + Supabase company row into a full profile. */
-function mergeProfile(
-  shopify: CustomerCompanyProfile,
-  supabase: SupabaseCustomerRow | null
-): CustomerCompanyProfile {
-  if (!supabase) return shopify; // new customer — no company data yet
+function logProfileStorageError(operation: "read" | "write", error: unknown) {
+  console.error(`[customer-profile] Supabase ${operation} failed`, error);
+}
 
-  const documentType = supabase.document_type ?? "boleta";
-
-  const merged: CustomerCompanyProfile = {
-    ...shopify,
-    documentType,
-    phone: supabase.phone,
-    rut: supabase.rut,
-    razonSocial: supabase.razon_social,
-    giro: supabase.giro,
-    billingAddressLine1: supabase.billing_address_line1,
-    billingAddressLine2: supabase.billing_address_line2,
-    billingComuna: supabase.billing_comuna,
-    billingCity: supabase.billing_city,
-    billingRegion: supabase.billing_region,
-    billingPostalCode: supabase.billing_postal_code,
-    billingCountryCode: supabase.billing_country_code ?? "CL",
-    billingNotes: supabase.billing_notes,
-  };
-
-  // Boleta: always complete. Factura: requires full company data.
-  merged.profileStatus =
-    documentType === "boleta" ||
-    (merged.rut &&
-      merged.razonSocial &&
-      merged.giro &&
-      merged.billingAddressLine1 &&
-      merged.billingComuna &&
-      merged.billingCity)
-      ? "complete"
-      : "draft";
-
-  return merged;
+function profileStorageUnavailable() {
+  return NextResponse.json(
+    {
+      ok: false,
+      error: "Customer profile storage is temporarily unavailable.",
+    },
+    { status: 503 }
+  );
 }
 
 // ── GET /api/customer/profile ─────────────────────────────────────────────────
@@ -125,14 +100,22 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Fetch identity (Shopify) and company data (Supabase) in parallel
-    const [shopifyProfile, supabaseRow] = await Promise.all([
-      getShopifyCustomerProfile(session.shopifyCustomerAccessToken),
-      getSupabaseCustomerProfile(session.shopifyCustomerId),
-    ]);
+    const result = await resolveCustomerProfile({
+      shopifyProfile: getShopifyCustomerProfile(
+        session.shopifyCustomerAccessToken
+      ),
+      supabaseProfile: getSupabaseCustomerProfile(session.shopifyCustomerId),
+    });
 
-    const profile = mergeProfile(shopifyProfile, supabaseRow);
-    return NextResponse.json({ ok: true, profile });
+    if (!result.profileStorageAvailable) {
+      logProfileStorageError("read", result.storageError);
+    }
+
+    return NextResponse.json({
+      ok: true,
+      profile: result.profile,
+      profileStorageAvailable: result.profileStorageAvailable,
+    });
   } catch (error) {
     return NextResponse.json(
       {
@@ -170,20 +153,45 @@ export async function PUT(request: NextRequest) {
   try {
     const input = parseProfileInput(payload);
 
-    // Update identity in Shopify and company data in Supabase in parallel
-    await Promise.all([
-      updateShopifyCustomerProfile(session.shopifyCustomerAccessToken, input),
-      upsertSupabaseCustomerProfile(session.shopifyCustomerId, input),
-    ]);
+    const updateResult = await settleCustomerProfileUpdates({
+      shopifyUpdate: updateShopifyCustomerProfile(
+        session.shopifyCustomerAccessToken,
+        input
+      ),
+      supabaseUpdate: upsertSupabaseCustomerProfile(
+        session.shopifyCustomerId,
+        input
+      ),
+    });
 
-    // Re-fetch both sources in parallel and return merged result
-    const [shopifyProfile, supabaseRow] = await Promise.all([
-      getShopifyCustomerProfile(session.shopifyCustomerAccessToken),
-      getSupabaseCustomerProfile(session.shopifyCustomerId),
-    ]);
+    if (!updateResult.profileStorageAvailable) {
+      if (updateResult.shopifyError) {
+        console.error(
+          "[customer-profile] Shopify write failed alongside Supabase",
+          updateResult.shopifyError
+        );
+      }
+      logProfileStorageError("write", updateResult.storageError);
+      return profileStorageUnavailable();
+    }
 
-    const profile = mergeProfile(shopifyProfile, supabaseRow);
-    return NextResponse.json({ ok: true, profile });
+    const result = await resolveCustomerProfile({
+      shopifyProfile: getShopifyCustomerProfile(
+        session.shopifyCustomerAccessToken
+      ),
+      supabaseProfile: getSupabaseCustomerProfile(session.shopifyCustomerId),
+    });
+
+    if (!result.profileStorageAvailable) {
+      logProfileStorageError("read", result.storageError);
+      return profileStorageUnavailable();
+    }
+
+    return NextResponse.json({
+      ok: true,
+      profile: result.profile,
+      profileStorageAvailable: true,
+    });
   } catch (error) {
     const message =
       error instanceof Error
